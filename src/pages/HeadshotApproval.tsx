@@ -149,37 +149,54 @@ const HeadshotApproval = () => {
           <TabsContent value={activeTab} className="mt-4">
             <div className="bg-card rounded-lg border">
               {filteredCandidates.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Candidate</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Submitted At</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCandidates.map((candidate) => (
-                      <TableRow key={candidate.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">{candidate.name}</TableCell>
-                        <TableCell className="text-muted-foreground">{candidate.email}</TableCell>
-                        <TableCell>
-                          {new Date(candidate.submittedAt).toLocaleString()}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(candidate.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            onClick={() => setSelectedCandidate(candidate)}
-                          >
-                            {candidate.status === "pending" ? "Review" : "View"}
-                          </Button>
-                        </TableCell>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Candidate</TableHead>
+                        <TableHead>Contact</TableHead>
+                        <TableHead>Submitted At</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredCandidates.map((candidate) => (
+                        <TableRow key={candidate.id} className="hover:bg-muted/50">
+                          <TableCell>
+                            <div className="font-medium">{candidate.name}</div>
+                            <div className="text-xs text-muted-foreground">ID: {candidate.id}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">{candidate.email}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              {new Date(candidate.submittedAt).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric' 
+                              })}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(candidate.submittedAt).toLocaleTimeString('en-US', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(candidate.status)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              onClick={() => setSelectedCandidate(candidate)}
+                            >
+                              {candidate.status === "pending" ? "Review" : "View"}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
               ) : (
                 <div className="text-center py-12">
                   <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
