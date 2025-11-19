@@ -129,9 +129,12 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <Trash2 className="w-4 h-4" />
                     </Button>
-                    {schedule.status === "unpublished" && (
-                      <Button size="sm">Publish</Button>
-                    )}
+                    <Button 
+                      size="sm"
+                      disabled={schedule.status === "published"}
+                    >
+                      Publish
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
