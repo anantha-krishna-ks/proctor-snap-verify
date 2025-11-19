@@ -5,6 +5,7 @@ import { Candidate } from "@/types/assessment";
 import { ImageComparisonModal } from "@/components/ImageComparisonModal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -13,18 +14,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, UserCheck, Clock } from "lucide-react";
+import { ArrowLeft, UserCheck, Clock, CheckCircle2, XCircle } from "lucide-react";
 
 const HeadshotApproval = () => {
   const { scheduleId } = useParams();
   const navigate = useNavigate();
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [candidateList, setCandidateList] = useState(candidates);
+  const [activeTab, setActiveTab] = useState<string>("all");
 
   const schedule = schedules.find((s) => s.id === scheduleId);
-  const pendingCandidates = candidateList.filter(
-    (c) => c.scheduleId === scheduleId && c.status === "pending"
-  );
+  
+  const scheduleCandidates = candidateList.filter((c) => c.scheduleId === scheduleId);
+  const pendingCandidates = scheduleCandidates.filter((c) => c.status === "pending");
+  const approvedCandidates = scheduleCandidates.filter((c) => c.status === "approved");
+  const rejectedCandidates = scheduleCandidates.filter((c) => c.status === "rejected");
+
+  const getFilteredCandidates = () => {
+    switch (activeTab) {
+      case "pending":
+        return pendingCandidates;
+      case "approved":
+        return approvedCandidates;
+      case "rejected":
+        return rejectedCandidates;
+      default:
+        return scheduleCandidates;
+    }
+  };
+
+  const filteredCandidates = getFilteredCandidates();
 
   const handleApprove = (candidateId: string) => {
     setCandidateList((prev) =>
@@ -52,6 +71,32 @@ const HeadshotApproval = () => {
     );
   }
 
+  const getStatusBadge = (status: Candidate["status"]) => {
+    switch (status) {
+      case "approved":
+        return (
+          <Badge variant="outline" className="bg-success/10 text-success border-success/20">
+            <CheckCircle2 className="w-3 h-3 mr-1" />
+            Approved
+          </Badge>
+        );
+      case "rejected":
+        return (
+          <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/20">
+            <XCircle className="w-3 h-3 mr-1" />
+            Rejected
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">
+            <Clock className="w-3 h-3 mr-1" />
+            Pending
+          </Badge>
+        );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
@@ -66,63 +111,87 @@ const HeadshotApproval = () => {
                 <p className="text-sm text-muted-foreground">{schedule.scheduleName}</p>
               </div>
             </div>
-            <Badge variant="outline" className="text-base px-4 py-2">
-              <UserCheck className="w-4 h-4 mr-2" />
-              {pendingCandidates.length} Pending
-            </Badge>
+            <div className="flex items-center gap-4">
+              <Badge variant="outline" className="text-sm px-3 py-1">
+                <UserCheck className="w-4 h-4 mr-1.5" />
+                {pendingCandidates.length} Pending
+              </Badge>
+              <Badge variant="outline" className="text-sm px-3 py-1 bg-success/10 border-success/20">
+                <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                {approvedCandidates.length} Approved
+              </Badge>
+              <Badge variant="outline" className="text-sm px-3 py-1 bg-destructive/10 border-destructive/20">
+                <XCircle className="w-4 h-4 mr-1.5" />
+                {rejectedCandidates.length} Rejected
+              </Badge>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-6 py-8">
-        <div className="bg-card rounded-lg border">
-          {pendingCandidates.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Candidate</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Submitted At</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pendingCandidates.map((candidate) => (
-                  <TableRow key={candidate.id} className="cursor-pointer hover:bg-muted/50">
-                    <TableCell className="font-medium">{candidate.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{candidate.email}</TableCell>
-                    <TableCell>
-                      {new Date(candidate.submittedAt).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="bg-warning/10 text-warning border-warning/20">
-                        <Clock className="w-3 h-3 mr-1" />
-                        Pending
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        onClick={() => setSelectedCandidate(candidate)}
-                      >
-                        Review
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="text-center py-12">
-              <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">All approvals complete</h3>
-              <p className="text-muted-foreground">
-                There are no pending headshot approvals for this schedule
-              </p>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="all">
+              All ({scheduleCandidates.length})
+            </TabsTrigger>
+            <TabsTrigger value="pending">
+              Yet to Approve ({pendingCandidates.length})
+            </TabsTrigger>
+            <TabsTrigger value="approved">
+              Approved ({approvedCandidates.length})
+            </TabsTrigger>
+            <TabsTrigger value="rejected">
+              Rejected ({rejectedCandidates.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="mt-4">
+            <div className="bg-card rounded-lg border">
+              {filteredCandidates.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Candidate</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Submitted At</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredCandidates.map((candidate) => (
+                      <TableRow key={candidate.id} className="hover:bg-muted/50">
+                        <TableCell className="font-medium">{candidate.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{candidate.email}</TableCell>
+                        <TableCell>
+                          {new Date(candidate.submittedAt).toLocaleString()}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(candidate.status)}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            onClick={() => setSelectedCandidate(candidate)}
+                          >
+                            {candidate.status === "pending" ? "Review" : "View"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="text-center py-12">
+                  <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">No candidates found</h3>
+                  <p className="text-muted-foreground">
+                    There are no candidates in this category
+                  </p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </TabsContent>
+        </Tabs>
       </main>
 
       <ImageComparisonModal
