@@ -1,0 +1,89 @@
+import { DashboardStats, RecentActivity, User } from "@/types/admin";
+
+export const dashboardStats: DashboardStats = {
+  totalUsers: 248,
+  totalAdmins: 8,
+  totalAuthors: 45,
+  totalProctors: 32,
+  totalTestAuthors: 28,
+  totalItems: 1547,
+  totalTests: 89,
+  successfulTestsTaken: 3421,
+  activeAssessments: 12,
+  pendingApprovals: 47,
+};
+
+export const recentActivities: RecentActivity[] = [
+  {
+    id: "1",
+    type: "test_created",
+    description: "New test 'Advanced Mathematics' created",
+    timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    user: "Sarah Johnson",
+  },
+  {
+    id: "2",
+    type: "user_created",
+    description: "New proctor account created for John Smith",
+    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    user: "Admin User",
+  },
+  {
+    id: "3",
+    type: "assessment_completed",
+    description: "Assessment 'Physics Fundamentals' completed by 23 candidates",
+    timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+    user: "System",
+  },
+  {
+    id: "4",
+    type: "item_created",
+    description: "15 new items added to Item Bank",
+    timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
+    user: "Mike Chen",
+  },
+  {
+    id: "5",
+    type: "approval_pending",
+    description: "12 headshot approvals pending review",
+    timestamp: new Date(Date.now() - 1000 * 60 * 240).toISOString(),
+    user: "System",
+  },
+  {
+    id: "6",
+    type: "test_created",
+    description: "New test 'Programming Basics' created",
+    timestamp: new Date(Date.now() - 1000 * 60 * 300).toISOString(),
+    user: "Emily Rodriguez",
+  },
+];
+
+export const mockUsers: User[] = [
+  {
+    id: "1",
+    name: "John Doe",
+    email: "john.doe@example.com",
+    role: "admin",
+    organization: "Acme Corp",
+    status: "active",
+    createdAt: "2024-01-15",
+  },
+  {
+    id: "2",
+    name: "Sarah Johnson",
+    email: "sarah.j@example.com",
+    role: "test_author",
+    organization: "Acme Corp",
+    status: "active",
+    createdAt: "2024-02-20",
+  },
+  {
+    id: "3",
+    name: "Mike Chen",
+    email: "mike.chen@example.com",
+    role: "author",
+    organization: "TechEd Inc",
+    status: "active",
+    createdAt: "2024-03-10",
+  },
+];

@@ -7,7 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ScheduleHeaderProps {
   selectedAssessment: string;
@@ -24,11 +25,22 @@ export const ScheduleHeader = ({
   onSearchChange,
   userName = "Manjunath T",
 }: ScheduleHeaderProps) => {
+  const navigate = useNavigate();
+  
   return (
     <header className="border-b bg-card">
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/admin")}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
                 <div className="text-white font-bold text-sm">S</div>
