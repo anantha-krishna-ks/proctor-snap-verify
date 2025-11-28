@@ -105,20 +105,38 @@ const MarkerEvaluation = () => {
     navigate("/marker");
   };
 
+  const saveCurrentQuestion = () => {
+    const score = scores[currentQuestion.id];
+    const comment = comments[currentQuestion.id];
+    
+    if (score !== undefined && score !== null) {
+      toast.success(`Question ${currentQuestionIndex + 1} saved`, {
+        description: `Score: ${score}/${currentQuestion.maxScore}`,
+      });
+      return true;
+    }
+    return false;
+  };
+
   const handlePreviousQuestion = () => {
     if (!isFirstQuestion) {
+      saveCurrentQuestion();
       setCurrentQuestionIndex(prev => prev - 1);
     }
   };
 
   const handleNextQuestion = () => {
     if (!isLastQuestion) {
+      saveCurrentQuestion();
       setCurrentQuestionIndex(prev => prev + 1);
     }
   };
 
   const handleJumpToQuestion = (index: number) => {
-    setCurrentQuestionIndex(index);
+    if (index !== currentQuestionIndex) {
+      saveCurrentQuestion();
+      setCurrentQuestionIndex(index);
+    }
   };
 
   const isQuestionScored = (questionId: string) => {
