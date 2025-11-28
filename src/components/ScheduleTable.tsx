@@ -241,35 +241,6 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                             <div className="font-medium">{schedule.notAttempted}</div>
                           </div>
                         </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm font-semibold">
-                            <UserCheck className="w-4 h-4 text-accent" />
-                            MARKER ASSIGNMENTS
-                          </div>
-                          <div className="pl-6 space-y-1 text-sm">
-                            <div className="text-muted-foreground">
-                              Assigned Markers
-                            </div>
-                            <div className="font-medium">
-                              {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 ? (
-                                <button
-                                  onClick={() =>
-                                    setAssignmentsSlider({
-                                      open: true,
-                                      schedule: schedule,
-                                    })
-                                  }
-                                  className="text-primary hover:text-primary/80 underline"
-                                >
-                                  {schedule.assignedMarkers.length}
-                                </button>
-                              ) : (
-                                "0"
-                              )}
-                            </div>
-                          </div>
-                        </div>
                       </div>
 
                       <div className="flex items-center gap-2 mt-4">
