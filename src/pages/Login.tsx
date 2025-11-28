@@ -119,8 +119,18 @@ const Login = () => {
               Sign In
             </Button>
 
-            <div className="text-xs text-center text-muted-foreground pt-4">
-              Mock Login - Any email/password works for testing
+            <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-2">
+              <div className="text-xs font-semibold text-foreground">Quick Test Credentials:</div>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <div><span className="font-medium">Email:</span> Any email (e.g., test@example.com)</div>
+                <div><span className="font-medium">Password:</span> Any password (e.g., password123)</div>
+                <div className="pt-2 font-medium text-foreground">Test as:</div>
+                <div className="pl-2 space-y-0.5">
+                  <div>• <span className="font-medium">Marker</span> - Evaluate candidates</div>
+                  <div>• <span className="font-medium">Admin</span> - Full system access</div>
+                  <div>• <span className="font-medium">Proctor</span> - Monitor assessments</div>
+                </div>
+              </div>
             </div>
           </form>
         </CardContent>
