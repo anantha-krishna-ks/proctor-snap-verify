@@ -252,21 +252,7 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                               Assigned Markers
                             </div>
                             <div className="font-medium">
-                              {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 ? (
-                                <button
-                                  onClick={() =>
-                                    setAssignmentsSlider({
-                                      open: true,
-                                      schedule: schedule,
-                                    })
-                                  }
-                                  className="text-primary hover:text-primary/80 underline"
-                                >
-                                  {schedule.assignedMarkers.length}
-                                </button>
-                              ) : (
-                                "0"
-                              )}
+                              {schedule.assignedMarkers?.length || 0}
                             </div>
                             <div className="text-muted-foreground mt-2">
                               Assigned Candidates
