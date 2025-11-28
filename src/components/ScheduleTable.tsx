@@ -252,12 +252,6 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                               Assigned Markers
                             </div>
                             <div className="font-medium">
-                              {schedule.assignedMarkers?.length || 0}
-                            </div>
-                            <div className="text-muted-foreground mt-2">
-                              Assigned Candidates
-                            </div>
-                            <div className="font-medium">
                               {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 ? (
                                 <button
                                   onClick={() =>
@@ -268,10 +262,7 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                                   }
                                   className="text-primary hover:text-primary/80 underline"
                                 >
-                                  {schedule.assignedMarkers.reduce(
-                                    (sum, m) => sum + m.assignedCandidates,
-                                    0
-                                  )}
+                                  {schedule.assignedMarkers.length}
                                 </button>
                               ) : (
                                 "0"
