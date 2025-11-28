@@ -78,8 +78,6 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
             <TableHead className="font-semibold">SCHEDULE TYPE</TableHead>
             <TableHead className="font-semibold">NO OF ASSESSMENTS</TableHead>
             <TableHead className="font-semibold">STATUS</TableHead>
-            <TableHead className="font-semibold">ASSIGNED MARKERS</TableHead>
-            <TableHead className="font-semibold">ASSIGNED CANDIDATES</TableHead>
             <TableHead className="font-semibold">PENDING APPROVALS</TableHead>
             <TableHead className="text-right font-semibold">ACTIONS</TableHead>
           </TableRow>
@@ -121,43 +119,6 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                     {schedule.status === "published" ? "Published" : "Unpublished"}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-center">
-                  {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 ? (
-                    <button
-                      onClick={() =>
-                        setAssignmentsSlider({
-                          open: true,
-                          schedule: schedule,
-                        })
-                      }
-                      className="font-medium text-primary hover:text-primary/80 underline"
-                    >
-                      {schedule.assignedMarkers.length}
-                    </button>
-                  ) : (
-                    <span className="text-muted-foreground">0</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-center">
-                  {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 ? (
-                    <button
-                      onClick={() =>
-                        setAssignmentsSlider({
-                          open: true,
-                          schedule: schedule,
-                        })
-                      }
-                      className="font-medium text-primary hover:text-primary/80 underline"
-                    >
-                      {schedule.assignedMarkers.reduce(
-                        (sum, m) => sum + m.assignedCandidates,
-                        0
-                      )}
-                    </button>
-                  ) : (
-                    <span className="text-muted-foreground">0</span>
-                  )}
-                </TableCell>
                 <TableCell>
                   {schedule.pendingApprovals > 0 ? (
                     <button
@@ -191,14 +152,14 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
               
               {expandedRows.has(schedule.id) && (
                 <TableRow className="bg-muted/30 hover:bg-muted/30">
-                  <TableCell colSpan={9} className="p-6">
+                  <TableCell colSpan={7} className="p-6">
                     <div className="space-y-4">
                       <div className="text-sm text-muted-foreground">
                         <span className="font-medium">Assessment Name:</span>{" "}
                         <span className="text-foreground">{schedule.assessmentName}</span>
                       </div>
                       
-                      <div className="grid grid-cols-4 gap-6">
+                      <div className="grid grid-cols-5 gap-6">
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm font-semibold">
                             <Users className="w-4 h-4 text-accent" />
@@ -278,6 +239,58 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                               Not Attempted
                             </div>
                             <div className="font-medium">{schedule.notAttempted}</div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm font-semibold">
+                            <UserCheck className="w-4 h-4 text-accent" />
+                            MARKER ASSIGNMENTS
+                          </div>
+                          <div className="pl-6 space-y-1 text-sm">
+                            <div className="text-muted-foreground">
+                              Assigned Markers
+                            </div>
+                            <div className="font-medium">
+                              {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 ? (
+                                <button
+                                  onClick={() =>
+                                    setAssignmentsSlider({
+                                      open: true,
+                                      schedule: schedule,
+                                    })
+                                  }
+                                  className="text-primary hover:text-primary/80 underline"
+                                >
+                                  {schedule.assignedMarkers.length}
+                                </button>
+                              ) : (
+                                "0"
+                              )}
+                            </div>
+                            <div className="text-muted-foreground mt-2">
+                              Assigned Candidates
+                            </div>
+                            <div className="font-medium">
+                              {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 ? (
+                                <button
+                                  onClick={() =>
+                                    setAssignmentsSlider({
+                                      open: true,
+                                      schedule: schedule,
+                                    })
+                                  }
+                                  className="text-primary hover:text-primary/80 underline"
+                                >
+                                  {schedule.assignedMarkers.reduce(
+                                    (sum, m) => sum + m.assignedCandidates,
+                                    0
+                                  )}
+                                </button>
+                              ) : (
+                                "0"
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
