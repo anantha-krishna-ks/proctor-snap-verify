@@ -268,6 +268,29 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                                 "0"
                               )}
                             </div>
+                            <div className="text-muted-foreground mt-2">
+                              Assigned Candidates
+                            </div>
+                            <div className="font-medium">
+                              {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 ? (
+                                <button
+                                  onClick={() =>
+                                    setAssignmentsSlider({
+                                      open: true,
+                                      schedule: schedule,
+                                    })
+                                  }
+                                  className="text-primary hover:text-primary/80 underline"
+                                >
+                                  {schedule.assignedMarkers.reduce(
+                                    (sum, m) => sum + m.assignedCandidates,
+                                    0
+                                  )}
+                                </button>
+                              ) : (
+                                "0"
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
