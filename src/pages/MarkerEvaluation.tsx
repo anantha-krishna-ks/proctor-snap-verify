@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, CheckCircle, User, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Save, CheckCircle, User, Calendar, Clock, ChevronLeft, ChevronRight, List } from "lucide-react";
 import { toast } from "sonner";
 import { CandidateEvaluation, Question } from "@/types/assessment";
 import { IdentityVerificationModal } from "@/components/IdentityVerificationModal";
@@ -115,6 +115,14 @@ const MarkerEvaluation = () => {
     if (!isLastQuestion) {
       setCurrentQuestionIndex(prev => prev + 1);
     }
+  };
+
+  const handleJumpToQuestion = (index: number) => {
+    setCurrentQuestionIndex(index);
+  };
+
+  const isQuestionScored = (questionId: string) => {
+    return scores[questionId] !== undefined && scores[questionId] !== null && scores[questionId] !== 0;
   };
 
   return (
@@ -334,8 +342,45 @@ const MarkerEvaluation = () => {
             </Tabs>
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-4">
             <Card className="sticky top-24">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <List className="h-4 w-4" />
+                  Question Navigator
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="grid grid-cols-5 gap-2">
+                  {evaluation.questions.map((question, index) => (
+                    <button
+                      key={question.id}
+                      onClick={() => handleJumpToQuestion(index)}
+                      className={`
+                        relative h-12 rounded-md border-2 transition-all
+                        flex items-center justify-center font-semibold text-sm
+                        ${currentQuestionIndex === index 
+                          ? 'border-primary bg-primary text-primary-foreground' 
+                          : isQuestionScored(question.id)
+                          ? 'border-green-500 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900'
+                          : 'border-muted bg-background hover:bg-muted'
+                        }
+                      `}
+                    >
+                      {index + 1}
+                      {isQuestionScored(question.id) && currentQuestionIndex !== index && (
+                        <CheckCircle className="absolute -top-1 -right-1 h-4 w-4 text-green-600 dark:text-green-400 bg-background rounded-full" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Click on a question number to jump to it. Green indicates scored questions.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="sticky top-[280px]">
               <CardHeader>
                 <CardTitle className="text-base">Evaluation Summary</CardTitle>
               </CardHeader>
@@ -343,7 +388,7 @@ const MarkerEvaluation = () => {
                 <div>
                   <h4 className="text-sm font-medium mb-2">Questions Scored</h4>
                   <div className="text-2xl font-bold">
-                    {Object.keys(scores).length} / {evaluation.questions.length}
+                    {Object.keys(scores).filter(key => isQuestionScored(key)).length} / {evaluation.questions.length}
                   </div>
                 </div>
                 <Separator />
@@ -360,12 +405,24 @@ const MarkerEvaluation = () => {
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">Score Breakdown</h4>
                   {evaluation.questions.map((question, index) => (
-                    <div key={question.id} className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Q{index + 1}</span>
+                    <button
+                      key={question.id}
+                      onClick={() => handleJumpToQuestion(index)}
+                      className={`
+                        flex justify-between text-sm w-full p-2 rounded hover:bg-muted transition-colors
+                        ${currentQuestionIndex === index ? 'bg-muted' : ''}
+                      `}
+                    >
+                      <span className="text-muted-foreground flex items-center gap-2">
+                        Q{index + 1}
+                        {isQuestionScored(question.id) && (
+                          <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-400" />
+                        )}
+                      </span>
                       <span className="font-medium">
                         {scores[question.id] || 0} / {question.maxScore}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </CardContent>
