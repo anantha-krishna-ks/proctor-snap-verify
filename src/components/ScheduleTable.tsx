@@ -14,7 +14,7 @@ import {
 import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, AlertCircle, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { MarkerAssignmentDialog } from "@/components/MarkerAssignmentDialog";
+import { BulkMarkerAssignment } from "@/components/BulkMarkerAssignment";
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -251,9 +251,34 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                           }
                         >
                           <UserCheck className="w-4 h-4 mr-2" />
-                          Assign Marker
+                          Assign Markers
                         </Button>
+                        {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 && (
+                          <Badge variant="secondary" className="ml-2">
+                            {schedule.assignedMarkers.length} marker(s) •{" "}
+                            {schedule.assignedMarkers.reduce((sum, m) => sum + m.assignedCandidates, 0)} candidates
+                          </Badge>
+                        )}
                       </div>
+
+                      {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 && (
+                        <div className="mt-4 p-3 bg-muted/30 rounded-md space-y-2">
+                          <div className="text-xs font-semibold text-foreground">Assigned Markers:</div>
+                          <div className="grid grid-cols-2 gap-2">
+                            {schedule.assignedMarkers.map((marker) => (
+                              <div
+                                key={marker.markerId}
+                                className="flex items-center justify-between text-xs p-2 bg-background rounded border"
+                              >
+                                <span className="font-medium">{marker.markerName}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {marker.assignedCandidates}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -264,7 +289,7 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
       </Table>
 
       {markerAssignmentDialog && (
-        <MarkerAssignmentDialog
+        <BulkMarkerAssignment
           open={markerAssignmentDialog.open}
           onClose={() => setMarkerAssignmentDialog(null)}
           scheduleId={markerAssignmentDialog.scheduleId}
