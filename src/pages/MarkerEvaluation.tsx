@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, CheckCircle, User, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, Save, CheckCircle, User, Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { CandidateEvaluation, Question } from "@/types/assessment";
 import { IdentityVerificationModal } from "@/components/IdentityVerificationModal";
@@ -75,6 +75,11 @@ const MarkerEvaluation = () => {
   const [scores, setScores] = useState<Record<string, number>>({});
   const [comments, setComments] = useState<Record<string, string>>({});
   const [showImageModal, setShowImageModal] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+  const currentQuestion = evaluation.questions[currentQuestionIndex];
+  const isFirstQuestion = currentQuestionIndex === 0;
+  const isLastQuestion = currentQuestionIndex === evaluation.questions.length - 1;
 
   const handleScoreChange = (questionId: string, score: number) => {
     setScores((prev) => ({ ...prev, [questionId]: score }));
@@ -98,6 +103,18 @@ const MarkerEvaluation = () => {
     const totalScore = calculateTotalScore();
     toast.success(`Evaluation submitted. Total Score: ${totalScore}/${totalMaxScore}`);
     navigate("/marker");
+  };
+
+  const handlePreviousQuestion = () => {
+    if (!isFirstQuestion) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
+
+  const handleNextQuestion = () => {
+    if (!isLastQuestion) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    }
   };
 
   return (
@@ -202,61 +219,104 @@ const MarkerEvaluation = () => {
               </TabsList>
               
               <TabsContent value="questions" className="space-y-4 mt-4">
-                {evaluation.questions.map((question, index) => (
-                  <Card key={question.id}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="outline">Question {index + 1}</Badge>
-                            <Badge>{question.questionType.replace("_", " ")}</Badge>
-                          </div>
-                          <CardTitle className="text-base">{question.questionText}</CardTitle>
+                <div className="flex items-center justify-between mb-4">
+                  <Badge variant="secondary" className="text-sm">
+                    Question {currentQuestionIndex + 1} of {evaluation.questions.length}
+                  </Badge>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePreviousQuestion}
+                      disabled={isFirstQuestion}
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNextQuestion}
+                      disabled={isLastQuestion}
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline">Question {currentQuestionIndex + 1}</Badge>
+                          <Badge>{currentQuestion.questionType.replace("_", " ")}</Badge>
                         </div>
-                        <span className="text-sm font-medium text-muted-foreground">
-                          Max: {question.maxScore} pts
-                        </span>
+                        <CardTitle className="text-base">{currentQuestion.questionText}</CardTitle>
                       </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        Max: {currentQuestion.maxScore} pts
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium mb-2 block">Candidate's Answer</Label>
+                      <div className="p-4 bg-muted rounded-md whitespace-pre-wrap text-sm">
+                        {currentQuestion.candidateAnswer}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4">
                       <div>
-                        <Label className="text-sm font-medium mb-2 block">Candidate's Answer</Label>
-                        <div className="p-4 bg-muted rounded-md whitespace-pre-wrap text-sm">
-                          {question.candidateAnswer}
-                        </div>
+                        <Label htmlFor={`score-${currentQuestion.id}`}>
+                          Score (0-{currentQuestion.maxScore})
+                        </Label>
+                        <Input
+                          id={`score-${currentQuestion.id}`}
+                          type="number"
+                          min="0"
+                          max={currentQuestion.maxScore}
+                          value={scores[currentQuestion.id] || ""}
+                          onChange={(e) => handleScoreChange(currentQuestion.id, Number(e.target.value))}
+                          placeholder="Enter score"
+                        />
                       </div>
-                      
-                      <div className="grid grid-cols-1 gap-4">
-                        <div>
-                          <Label htmlFor={`score-${question.id}`}>
-                            Score (0-{question.maxScore})
-                          </Label>
-                          <Input
-                            id={`score-${question.id}`}
-                            type="number"
-                            min="0"
-                            max={question.maxScore}
-                            value={scores[question.id] || ""}
-                            onChange={(e) => handleScoreChange(question.id, Number(e.target.value))}
-                            placeholder="Enter score"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`comment-${question.id}`}>
-                            Feedback/Comments
-                          </Label>
-                          <Textarea
-                            id={`comment-${question.id}`}
-                            value={comments[question.id] || ""}
-                            onChange={(e) => handleCommentChange(question.id, e.target.value)}
-                            placeholder="Provide feedback for the candidate..."
-                            rows={3}
-                          />
-                        </div>
+                      <div>
+                        <Label htmlFor={`comment-${currentQuestion.id}`}>
+                          Feedback/Comments
+                        </Label>
+                        <Textarea
+                          id={`comment-${currentQuestion.id}`}
+                          value={comments[currentQuestion.id] || ""}
+                          onChange={(e) => handleCommentChange(currentQuestion.id, e.target.value)}
+                          placeholder="Provide feedback for the candidate..."
+                          rows={3}
+                        />
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="flex items-center justify-between mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={handlePreviousQuestion}
+                    disabled={isFirstQuestion}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-2" />
+                    Previous Question
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleNextQuestion}
+                    disabled={isLastQuestion}
+                  >
+                    Next Question
+                    <ChevronRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
               </TabsContent>
 
               <TabsContent value="rubric">
