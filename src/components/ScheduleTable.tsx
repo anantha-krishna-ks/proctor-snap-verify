@@ -11,9 +11,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, AlertCircle } from "lucide-react";
+import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, AlertCircle, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { MarkerAssignmentDialog } from "@/components/MarkerAssignmentDialog";
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -23,6 +24,11 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
   const navigate = useNavigate();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+  const [markerAssignmentDialog, setMarkerAssignmentDialog] = useState<{
+    open: boolean;
+    scheduleId: string;
+    scheduleName: string;
+  } | null>(null);
 
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);
@@ -231,6 +237,23 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                           </div>
                         </div>
                       </div>
+
+                      <div className="flex items-center gap-2 mt-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setMarkerAssignmentDialog({
+                              open: true,
+                              scheduleId: schedule.id,
+                              scheduleName: schedule.scheduleName,
+                            })
+                          }
+                        >
+                          <UserCheck className="w-4 h-4 mr-2" />
+                          Assign Marker
+                        </Button>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -239,6 +262,15 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
           ))}
         </TableBody>
       </Table>
+
+      {markerAssignmentDialog && (
+        <MarkerAssignmentDialog
+          open={markerAssignmentDialog.open}
+          onClose={() => setMarkerAssignmentDialog(null)}
+          scheduleId={markerAssignmentDialog.scheduleId}
+          scheduleName={markerAssignmentDialog.scheduleName}
+        />
+      )}
     </div>
   );
 };

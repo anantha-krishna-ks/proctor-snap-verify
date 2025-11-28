@@ -6,6 +6,7 @@ export const dashboardStats: DashboardStats = {
   totalAuthors: 45,
   totalProctors: 32,
   totalTestAuthors: 28,
+  totalMarkers: 36,
   totalItems: 1547,
   totalTests: 89,
   successfulTestsTaken: 3421,
