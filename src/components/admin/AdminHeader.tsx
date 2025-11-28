@@ -6,7 +6,8 @@ import {
   FolderOpen, 
   Database, 
   FileStack, 
-  Calendar 
+  Calendar,
+  UserCheck
 } from "lucide-react";
 
 export const AdminHeader = () => {
@@ -44,6 +45,9 @@ export const AdminHeader = () => {
           </AdminNavButton>
           <AdminNavButton to="/scheduling" icon={Calendar}>
             Scheduling
+          </AdminNavButton>
+          <AdminNavButton to="/marker" icon={UserCheck}>
+            Marker Dashboard
           </AdminNavButton>
         </nav>
       </div>
