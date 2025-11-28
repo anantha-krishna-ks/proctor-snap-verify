@@ -15,6 +15,7 @@ import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, Alert
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { BulkMarkerAssignment } from "@/components/BulkMarkerAssignment";
+import { MarkerAssignmentsSlider } from "@/components/MarkerAssignmentsSlider";
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -28,6 +29,10 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
     open: boolean;
     scheduleId: string;
     scheduleName: string;
+  } | null>(null);
+  const [assignmentsSlider, setAssignmentsSlider] = useState<{
+    open: boolean;
+    schedule: Schedule;
   } | null>(null);
 
   const toggleRow = (id: string) => {
@@ -73,6 +78,8 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
             <TableHead className="font-semibold">SCHEDULE TYPE</TableHead>
             <TableHead className="font-semibold">NO OF ASSESSMENTS</TableHead>
             <TableHead className="font-semibold">STATUS</TableHead>
+            <TableHead className="font-semibold">ASSIGNED MARKERS</TableHead>
+            <TableHead className="font-semibold">ASSIGNED CANDIDATES</TableHead>
             <TableHead className="font-semibold">PENDING APPROVALS</TableHead>
             <TableHead className="text-right font-semibold">ACTIONS</TableHead>
           </TableRow>
@@ -114,6 +121,43 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                     {schedule.status === "published" ? "Published" : "Unpublished"}
                   </Badge>
                 </TableCell>
+                <TableCell className="text-center">
+                  {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 ? (
+                    <button
+                      onClick={() =>
+                        setAssignmentsSlider({
+                          open: true,
+                          schedule: schedule,
+                        })
+                      }
+                      className="font-medium text-primary hover:text-primary/80 underline"
+                    >
+                      {schedule.assignedMarkers.length}
+                    </button>
+                  ) : (
+                    <span className="text-muted-foreground">0</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-center">
+                  {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 ? (
+                    <button
+                      onClick={() =>
+                        setAssignmentsSlider({
+                          open: true,
+                          schedule: schedule,
+                        })
+                      }
+                      className="font-medium text-primary hover:text-primary/80 underline"
+                    >
+                      {schedule.assignedMarkers.reduce(
+                        (sum, m) => sum + m.assignedCandidates,
+                        0
+                      )}
+                    </button>
+                  ) : (
+                    <span className="text-muted-foreground">0</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   {schedule.pendingApprovals > 0 ? (
                     <button
@@ -147,7 +191,7 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
               
               {expandedRows.has(schedule.id) && (
                 <TableRow className="bg-muted/30 hover:bg-muted/30">
-                  <TableCell colSpan={7} className="p-6">
+                  <TableCell colSpan={9} className="p-6">
                     <div className="space-y-4">
                       <div className="text-sm text-muted-foreground">
                         <span className="font-medium">Assessment Name:</span>{" "}
@@ -294,6 +338,14 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
           onClose={() => setMarkerAssignmentDialog(null)}
           scheduleId={markerAssignmentDialog.scheduleId}
           scheduleName={markerAssignmentDialog.scheduleName}
+        />
+      )}
+
+      {assignmentsSlider && (
+        <MarkerAssignmentsSlider
+          open={assignmentsSlider.open}
+          onClose={() => setAssignmentsSlider(null)}
+          schedule={assignmentsSlider.schedule}
         />
       )}
     </div>
