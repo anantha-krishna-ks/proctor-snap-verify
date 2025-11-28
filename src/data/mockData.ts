@@ -13,6 +13,10 @@ export const schedules: Schedule[] = [
     attempted: 32,
     notAttempted: 13,
     pendingApprovals: 8,
+    assignedMarkers: [
+      { markerId: "m1", markerName: "Dr. Sarah Wilson", assignedCandidates: 15 },
+      { markerId: "m2", markerName: "Prof. Michael Brown", assignedCandidates: 17 },
+    ],
   },
   {
     id: "2",
@@ -26,6 +30,9 @@ export const schedules: Schedule[] = [
     attempted: 25,
     notAttempted: 3,
     pendingApprovals: 12,
+    assignedMarkers: [
+      { markerId: "m3", markerName: "Dr. Emily Chen", assignedCandidates: 25 },
+    ],
   },
   {
     id: "3",
