@@ -9,9 +9,19 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, User, CheckCircle2, XCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, User, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
 
 interface MarkerAssignmentsSliderProps {
   open: boolean;
@@ -25,6 +35,9 @@ export const MarkerAssignmentsSlider = ({
   schedule,
 }: MarkerAssignmentsSliderProps) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(new Set());
+  const [reassignToMarker, setReassignToMarker] = useState<string>("");
+  const { toast } = useToast();
 
   // Get candidates for this schedule
   const scheduleCandidates = candidates.filter(
@@ -47,6 +60,56 @@ export const MarkerAssignmentsSlider = ({
       ),
     }))
     .filter((group) => group.candidates.length > 0 || searchQuery === "");
+
+  const handleToggleCandidate = (candidateId: string) => {
+    const newSelected = new Set(selectedCandidates);
+    if (newSelected.has(candidateId)) {
+      newSelected.delete(candidateId);
+    } else {
+      newSelected.add(candidateId);
+    }
+    setSelectedCandidates(newSelected);
+  };
+
+  const handleReassign = () => {
+    if (selectedCandidates.size === 0) {
+      toast({
+        title: "No candidates selected",
+        description: "Please select at least one candidate to reassign.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!reassignToMarker) {
+      toast({
+        title: "No marker selected",
+        description: "Please select a marker to reassign candidates to.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const markerName = schedule.assignedMarkers?.find(
+      (m) => m.markerId === reassignToMarker
+    )?.markerName;
+
+    toast({
+      title: "Candidates reassigned",
+      description: `Successfully reassigned ${selectedCandidates.size} candidate(s) to ${markerName}`,
+    });
+
+    setSelectedCandidates(new Set());
+    setReassignToMarker("");
+  };
+
+  const handleSelectAll = () => {
+    if (selectedCandidates.size === scheduleCandidates.length) {
+      setSelectedCandidates(new Set());
+    } else {
+      setSelectedCandidates(new Set(scheduleCandidates.map((c) => c.id)));
+    }
+  };
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
@@ -77,18 +140,63 @@ export const MarkerAssignmentsSlider = ({
             </div>
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search candidates..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search candidates..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {selectedCandidates.size > 0 && (
+              <div className="flex items-center gap-2 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                <div className="flex-1">
+                  <div className="text-sm font-medium">
+                    {selectedCandidates.size} candidate(s) selected
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Choose a marker to reassign them
+                  </div>
+                </div>
+                <Select value={reassignToMarker} onValueChange={setReassignToMarker}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select marker" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {schedule.assignedMarkers?.map((marker) => (
+                      <SelectItem key={marker.markerId} value={marker.markerId}>
+                        {marker.markerName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={handleReassign} size="sm" className="gap-2">
+                  <RefreshCw className="w-4 h-4" />
+                  Reassign
+                </Button>
+              </div>
+            )}
           </div>
 
-          <ScrollArea className="h-[calc(100vh-280px)]">
+          <ScrollArea className="h-[calc(100vh-340px)]">
             <div className="space-y-6 pr-4">
+              <div className="flex items-center justify-between px-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectAll}
+                >
+                  {selectedCandidates.size === scheduleCandidates.length
+                    ? "Deselect All"
+                    : "Select All"}
+                </Button>
+                <div className="text-sm text-muted-foreground">
+                  {scheduleCandidates.length} total candidate(s)
+                </div>
+              </div>
               {filteredMarkerGroups.map((group) => (
                 <div
                   key={group.markerId}
@@ -115,6 +223,10 @@ export const MarkerAssignmentsSlider = ({
                         key={candidate.id}
                         className="flex items-center gap-3 p-3 bg-muted/30 rounded-md hover:bg-muted/50 transition-colors"
                       >
+                        <Checkbox
+                          checked={selectedCandidates.has(candidate.id)}
+                          onCheckedChange={() => handleToggleCandidate(candidate.id)}
+                        />
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={candidate.profileImageUrl} />
                           <AvatarFallback>
