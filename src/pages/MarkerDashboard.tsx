@@ -11,8 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, ClipboardList, CheckCircle2, Clock, ArrowLeft } from "lucide-react";
+import { Search, ClipboardList, CheckCircle2, Clock, ArrowLeft, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface AssignedCandidate {
   id: string;
@@ -65,6 +66,14 @@ const MarkerDashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
+  const handleLogout = () => {
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("isAuthenticated");
+    toast.success("Logged out successfully");
+    navigate("/login");
+  };
+
   const filteredCandidates = mockAssignedCandidates.filter((candidate) =>
     candidate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     candidate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -112,6 +121,10 @@ const MarkerDashboard = () => {
                 </p>
               </div>
             </div>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
           </div>
         </div>
       </header>
