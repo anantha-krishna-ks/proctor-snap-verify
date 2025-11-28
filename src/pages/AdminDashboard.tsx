@@ -12,7 +12,8 @@ import {
   FileText, 
   CheckCircle2, 
   Activity,
-  Clock
+  Clock,
+  UserCheck
 } from "lucide-react";
 
 const AdminDashboard = () => {
@@ -24,7 +25,7 @@ const AdminDashboard = () => {
         {/* User Statistics */}
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-4 text-foreground">User Statistics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <StatCard
               title="Total Users"
               value={dashboardStats.totalUsers}
@@ -54,6 +55,12 @@ const AdminDashboard = () => {
               value={dashboardStats.totalTestAuthors}
               icon={FileEdit}
               description="Assessment creators"
+            />
+            <StatCard
+              title="Markers"
+              value={dashboardStats.totalMarkers}
+              icon={UserCheck}
+              description="Evaluators"
             />
           </div>
         </section>

@@ -65,6 +65,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
     submittedAt: "2025-01-15T10:30:00",
     status: "approved",
+    testCompleted: true,
   },
   {
     id: "2",
@@ -75,6 +76,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
     submittedAt: "2025-01-15T11:15:00",
     status: "pending",
+    testCompleted: true,
   },
   {
     id: "3",
@@ -85,6 +87,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop",
     submittedAt: "2025-01-15T14:20:00",
     status: "rejected",
+    testCompleted: true,
   },
   {
     id: "4",
@@ -95,6 +98,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop",
     submittedAt: "2025-01-15T16:45:00",
     status: "approved",
+    testCompleted: true,
   },
   {
     id: "5",
@@ -105,6 +109,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=400&fit=crop",
     submittedAt: "2025-01-15T13:30:00",
     status: "pending",
+    testCompleted: true,
   },
   {
     id: "6",
@@ -115,6 +120,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&h=400&fit=crop",
     submittedAt: "2025-01-15T15:20:00",
     status: "approved",
+    testCompleted: true,
   },
   {
     id: "7",
@@ -125,6 +131,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop",
     submittedAt: "2025-01-15T12:10:00",
     status: "rejected",
+    testCompleted: true,
   },
   {
     id: "8",
@@ -135,6 +142,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1507081323647-4d250478b919?w=400&h=400&fit=crop",
     submittedAt: "2025-01-15T09:30:00",
     status: "pending",
+    testCompleted: true,
   },
   {
     id: "9",
@@ -145,6 +153,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&h=400&fit=crop",
     submittedAt: "2025-01-18T09:45:00",
     status: "approved",
+    testCompleted: true,
   },
   {
     id: "10",
@@ -155,6 +164,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1521119989659-a83eee488004?w=400&h=400&fit=crop",
     submittedAt: "2025-01-18T10:20:00",
     status: "pending",
+    testCompleted: true,
   },
   {
     id: "11",
@@ -165,6 +175,7 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=400&h=400&fit=crop",
     submittedAt: "2025-01-18T11:15:00",
     status: "rejected",
+    testCompleted: true,
   },
   {
     id: "12",
@@ -175,5 +186,6 @@ export const candidates: Candidate[] = [
     testImageUrl: "https://images.unsplash.com/photo-1531891437562-4301cf35b7e4?w=400&h=400&fit=crop",
     submittedAt: "2025-01-18T14:30:00",
     status: "approved",
+    testCompleted: true,
   },
 ];

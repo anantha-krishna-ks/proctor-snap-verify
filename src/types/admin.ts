@@ -4,6 +4,7 @@ export interface DashboardStats {
   totalAuthors: number;
   totalProctors: number;
   totalTestAuthors: number;
+  totalMarkers: number;
   totalItems: number;
   totalTests: number;
   successfulTestsTaken: number;
@@ -23,7 +24,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "author" | "proctor" | "test_author" | "maker";
+  role: "admin" | "author" | "proctor" | "test_author" | "marker";
   organization: string;
   status: "active" | "inactive";
   createdAt: string;
