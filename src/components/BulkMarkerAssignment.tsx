@@ -131,7 +131,7 @@ export const BulkMarkerAssignment = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh]">
+      <DialogContent className="max-w-5xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Bulk Marker Assignment</DialogTitle>
           <DialogDescription>
@@ -139,197 +139,199 @@ export const BulkMarkerAssignment = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="markers" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="markers">
-              <UserCheck className="mr-2 h-4 w-4" />
-              Select Markers
-            </TabsTrigger>
-            <TabsTrigger value="distribute">
-              <Zap className="mr-2 h-4 w-4" />
-              Auto-Distribute
-            </TabsTrigger>
-            <TabsTrigger value="summary">
-              <CheckCircle2 className="mr-2 h-4 w-4" />
-              Summary
-            </TabsTrigger>
-          </TabsList>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Tabs defaultValue="markers" className="w-full flex-1 flex flex-col overflow-hidden">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="markers">
+                <UserCheck className="mr-2 h-4 w-4" />
+                Select Markers
+              </TabsTrigger>
+              <TabsTrigger value="distribute">
+                <Zap className="mr-2 h-4 w-4" />
+                Auto-Distribute
+              </TabsTrigger>
+              <TabsTrigger value="summary">
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Summary
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="markers" className="space-y-4">
-            <div className="space-y-2">
-              <Label>Search Markers</Label>
-              <div className="relative">
-                <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name or email..."
-                  value={markerSearch}
-                  onChange={(e) => setMarkerSearch(e.target.value)}
-                  className="pl-8"
-                />
+            <TabsContent value="markers" className="space-y-4 flex-1 flex flex-col overflow-hidden">
+              <div className="space-y-2">
+                <Label>Search Markers</Label>
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name or email..."
+                    value={markerSearch}
+                    onChange={(e) => setMarkerSearch(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
               </div>
-            </div>
 
-            <ScrollArea className="h-96 border rounded-md p-4">
-              <div className="space-y-3">
-                {filteredMarkers.map((marker) => (
-                  <Card
-                    key={marker.id}
-                    className={selectedMarkers.includes(marker.id) ? "border-primary" : ""}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          checked={selectedMarkers.includes(marker.id)}
-                          onCheckedChange={() => handleToggleMarker(marker.id)}
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-medium">{marker.name}</div>
-                              <div className="text-sm text-muted-foreground">
-                                {marker.email}
+              <ScrollArea className="flex-1 border rounded-md p-4">
+                <div className="space-y-3">
+                  {filteredMarkers.map((marker) => (
+                    <Card
+                      key={marker.id}
+                      className={selectedMarkers.includes(marker.id) ? "border-primary" : ""}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start space-x-3">
+                          <Checkbox
+                            checked={selectedMarkers.includes(marker.id)}
+                            onCheckedChange={() => handleToggleMarker(marker.id)}
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">{marker.name}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {marker.email}
+                                </div>
                               </div>
-                            </div>
-                            <div className="text-right">
-                              <Badge variant="secondary">
-                                {marker.assignedCount} current
-                              </Badge>
-                              {selectedMarkers.includes(marker.id) && (
-                                <Badge className="ml-2">
-                                  +{getMarkerAssignmentCount(marker.id)} new
+                              <div className="text-right">
+                                <Badge variant="secondary">
+                                  {marker.assignedCount} current
                                 </Badge>
-                              )}
+                                {selectedMarkers.includes(marker.id) && (
+                                  <Badge className="ml-2">
+                                    +{getMarkerAssignmentCount(marker.id)} new
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
+
+              <div className="flex items-center justify-between pt-2">
+                <div className="text-sm text-muted-foreground">
+                  {selectedMarkers.length} marker(s) selected
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="distribute" className="space-y-4 flex-1 flex flex-col overflow-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Auto-Distribution</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="text-2xl font-bold text-primary">
+                        {completedCandidates.length}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </ScrollArea>
-
-            <div className="flex items-center justify-between pt-2">
-              <div className="text-sm text-muted-foreground">
-                {selectedMarkers.length} marker(s) selected
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="distribute" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Auto-Distribution</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-primary">
-                      {completedCandidates.length}
+                      <div className="text-sm text-muted-foreground">Candidates</div>
                     </div>
-                    <div className="text-sm text-muted-foreground">Candidates</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-primary">
-                      {selectedMarkers.length}
+                    <div>
+                      <div className="text-2xl font-bold text-primary">
+                        {selectedMarkers.length}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Markers</div>
                     </div>
-                    <div className="text-sm text-muted-foreground">Markers</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-primary">
-                      {selectedMarkers.length > 0
-                        ? Math.ceil(completedCandidates.length / selectedMarkers.length)
-                        : 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Per Marker</div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <div className="text-sm font-medium">Distribution Strategy</div>
-                  <div className="text-sm text-muted-foreground">
-                    Candidates will be evenly distributed among selected markers using round-robin
-                    allocation.
-                  </div>
-                </div>
-
-                <Button
-                  onClick={handleAutoDistribute}
-                  disabled={selectedMarkers.length === 0}
-                  className="w-full"
-                  size="lg"
-                >
-                  <Zap className="mr-2 h-4 w-4" />
-                  Auto-Distribute Now
-                </Button>
-
-                {Object.keys(assignments).length > 0 && (
-                  <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-md">
-                    <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                      <CheckCircle2 className="h-4 w-4" />
-                      Distribution complete! Check Summary tab to review.
+                    <div>
+                      <div className="text-2xl font-bold text-primary">
+                        {selectedMarkers.length > 0
+                          ? Math.ceil(completedCandidates.length / selectedMarkers.length)
+                          : 0}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Per Marker</div>
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          <TabsContent value="summary" className="space-y-4">
-            <ScrollArea className="h-96">
-              {Object.keys(assignments).length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No assignments yet</p>
-                  <p className="text-sm">Use auto-distribute to assign candidates</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {selectedMarkers.map((markerId) => {
-                    const marker = mockMarkers.find((m) => m.id === markerId);
-                    const assignedCount = getMarkerAssignmentCount(markerId);
-                    
-                    if (!marker || assignedCount === 0) return null;
+                  <Separator />
 
-                    return (
-                      <Card key={markerId}>
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <CardTitle className="text-base">{marker.name}</CardTitle>
-                              <div className="text-sm text-muted-foreground">
-                                {marker.email}
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Distribution Strategy</div>
+                    <div className="text-sm text-muted-foreground">
+                      Candidates will be evenly distributed among selected markers using round-robin
+                      allocation.
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleAutoDistribute}
+                    disabled={selectedMarkers.length === 0}
+                    className="w-full"
+                    size="lg"
+                  >
+                    <Zap className="mr-2 h-4 w-4" />
+                    Auto-Distribute Now
+                  </Button>
+
+                  {Object.keys(assignments).length > 0 && (
+                    <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-md">
+                      <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Distribution complete! Check Summary tab to review.
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="summary" className="space-y-4 flex-1 flex flex-col overflow-hidden">
+              <ScrollArea className="flex-1">
+                {Object.keys(assignments).length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No assignments yet</p>
+                    <p className="text-sm">Use auto-distribute to assign candidates</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {selectedMarkers.map((markerId) => {
+                      const marker = mockMarkers.find((m) => m.id === markerId);
+                      const assignedCount = getMarkerAssignmentCount(markerId);
+
+                      if (!marker || assignedCount === 0) return null;
+
+                      return (
+                        <Card key={markerId}>
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle className="text-base">{marker.name}</CardTitle>
+                                <div className="text-sm text-muted-foreground">
+                                  {marker.email}
+                                </div>
+                              </div>
+                              <Badge variant="default" className="text-base">
+                                {assignedCount} candidates
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div>
+                                <span className="text-muted-foreground">Current Load:</span>{" "}
+                                <span className="font-medium">{marker.assignedCount}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">New Total:</span>{" "}
+                                <span className="font-medium">
+                                  {marker.assignedCount + assignedCount}
+                                </span>
                               </div>
                             </div>
-                            <Badge variant="default" className="text-base">
-                              {assignedCount} candidates
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div>
-                              <span className="text-muted-foreground">Current Load:</span>{" "}
-                              <span className="font-medium">{marker.assignedCount}</span>
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground">New Total:</span>{" "}
-                              <span className="font-medium">
-                                {marker.assignedCount + assignedCount}
-                              </span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
+        </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button variant="outline" onClick={onClose}>
