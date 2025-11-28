@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { UserCheck, Users, Zap, Search, CheckCircle2 } from "lucide-react";
+import { UserCheck, Users, Zap, Search, CheckCircle2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 interface Candidate {
@@ -64,6 +64,8 @@ export const BulkMarkerAssignment = ({
   const [candidateSearch, setCandidateSearch] = useState("");
   const [markerSearch, setMarkerSearch] = useState("");
   const [assignments, setAssignments] = useState<Record<string, string[]>>({});
+  const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
+  const [manualAssignToMarker, setManualAssignToMarker] = useState<string>("");
 
   const completedCandidates = mockCandidates.filter((c) => c.testCompleted);
   const filteredCandidates = completedCandidates.filter(
@@ -84,6 +86,52 @@ export const BulkMarkerAssignment = ({
         ? prev.filter((id) => id !== markerId)
         : [...prev, markerId]
     );
+  };
+
+  const handleToggleCandidate = (candidateId: string) => {
+    setSelectedCandidates((prev) =>
+      prev.includes(candidateId)
+        ? prev.filter((id) => id !== candidateId)
+        : [...prev, candidateId]
+    );
+  };
+
+  const handleManualAssign = () => {
+    if (selectedCandidates.length === 0) {
+      toast.error("Please select at least one candidate");
+      return;
+    }
+    if (!manualAssignToMarker) {
+      toast.error("Please select a marker to assign to");
+      return;
+    }
+
+    setAssignments((prev) => {
+      const updated = { ...prev };
+      if (!updated[manualAssignToMarker]) {
+        updated[manualAssignToMarker] = [];
+      }
+      
+      // Remove selected candidates from other markers
+      Object.keys(updated).forEach((markerId) => {
+        updated[markerId] = updated[markerId].filter(
+          (cId) => !selectedCandidates.includes(cId)
+        );
+      });
+      
+      // Add to selected marker
+      updated[manualAssignToMarker] = [
+        ...updated[manualAssignToMarker],
+        ...selectedCandidates,
+      ];
+      
+      return updated;
+    });
+
+    toast.success(
+      `Assigned ${selectedCandidates.length} candidate(s) to ${mockMarkers.find((m) => m.id === manualAssignToMarker)?.name}`
+    );
+    setSelectedCandidates([]);
   };
 
   const handleAutoDistribute = () => {
@@ -141,14 +189,18 @@ export const BulkMarkerAssignment = ({
 
         <div className="flex-1 flex flex-col overflow-hidden">
           <Tabs defaultValue="markers" className="w-full flex-1 flex flex-col overflow-hidden">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="markers">
                 <UserCheck className="mr-2 h-4 w-4" />
                 Select Markers
               </TabsTrigger>
-              <TabsTrigger value="distribute">
+              <TabsTrigger value="manual">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Manual
+              </TabsTrigger>
+              <TabsTrigger value="auto">
                 <Zap className="mr-2 h-4 w-4" />
-                Auto-Distribute
+                Auto
               </TabsTrigger>
               <TabsTrigger value="summary">
                 <CheckCircle2 className="mr-2 h-4 w-4" />
@@ -217,7 +269,98 @@ export const BulkMarkerAssignment = ({
               </div>
             </TabsContent>
 
-            <TabsContent value="distribute" className="space-y-4 flex-1 flex flex-col overflow-auto">
+            <TabsContent value="manual" className="space-y-4 flex-1 flex flex-col overflow-hidden">
+              <div className="space-y-2">
+                <Label>Search Candidates</Label>
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name or email..."
+                    value={candidateSearch}
+                    onChange={(e) => setCandidateSearch(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Label>Assign to:</Label>
+                <select
+                  className="flex-1 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={manualAssignToMarker}
+                  onChange={(e) => setManualAssignToMarker(e.target.value)}
+                  disabled={selectedMarkers.length === 0}
+                >
+                  <option value="">Select a marker...</option>
+                  {selectedMarkers.map((markerId) => {
+                    const marker = mockMarkers.find((m) => m.id === markerId);
+                    return (
+                      <option key={markerId} value={markerId}>
+                        {marker?.name}
+                      </option>
+                    );
+                  })}
+                </select>
+                <Button
+                  onClick={handleManualAssign}
+                  disabled={selectedCandidates.length === 0 || !manualAssignToMarker}
+                >
+                  Assign ({selectedCandidates.length})
+                </Button>
+              </div>
+
+              <ScrollArea className="flex-1 border rounded-md p-4">
+                <div className="space-y-2">
+                  {filteredCandidates.map((candidate) => {
+                    const assignedMarker = Object.keys(assignments).find((markerId) =>
+                      assignments[markerId]?.includes(candidate.id)
+                    );
+                    const marker = assignedMarker
+                      ? mockMarkers.find((m) => m.id === assignedMarker)
+                      : null;
+
+                    return (
+                      <Card
+                        key={candidate.id}
+                        className={selectedCandidates.includes(candidate.id) ? "border-primary" : ""}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center space-x-3">
+                            <Checkbox
+                              checked={selectedCandidates.includes(candidate.id)}
+                              onCheckedChange={() => handleToggleCandidate(candidate.id)}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-sm">{candidate.name}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {candidate.email}
+                                  </div>
+                                </div>
+                                {marker && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {marker.name}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+
+              <div className="text-sm text-muted-foreground">
+                {selectedCandidates.length} candidate(s) selected •{" "}
+                {Object.values(assignments).reduce((sum, arr) => sum + arr.length, 0)}/
+                {completedCandidates.length} assigned
+              </div>
+            </TabsContent>
+
+            <TabsContent value="auto" className="space-y-4 flex-1 flex flex-col overflow-auto">
               <Card>
                 <CardHeader>
                   <CardTitle className="text-base">Auto-Distribution</CardTitle>
