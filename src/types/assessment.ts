@@ -32,6 +32,7 @@ export interface Candidate {
   evaluationStatus?: "not_started" | "in_progress" | "completed";
   totalScore?: number;
   maxScore?: number;
+  completionDate?: string;
 }
 
 export interface Question {

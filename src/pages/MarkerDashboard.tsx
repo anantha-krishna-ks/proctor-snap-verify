@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, ClipboardList, CheckCircle2, Clock, ArrowLeft, LogOut } from "lucide-react";
+import { Search, ClipboardList, CheckCircle2, Clock, ArrowLeft, LogOut, Calendar, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -27,6 +27,7 @@ interface AssignedCandidate {
   evaluationStatus: "not_started" | "in_progress" | "completed";
   totalScore?: number;
   maxScore: number;
+  completionDate?: string;
 }
 
 const mockAssignedCandidates: AssignedCandidate[] = [
@@ -39,6 +40,7 @@ const mockAssignedCandidates: AssignedCandidate[] = [
     submittedAt: "2024-03-15T10:30:00",
     evaluationStatus: "not_started",
     maxScore: 100,
+    completionDate: "2024-12-10",
   },
   {
     id: "c2",
@@ -50,6 +52,7 @@ const mockAssignedCandidates: AssignedCandidate[] = [
     evaluationStatus: "in_progress",
     totalScore: 45,
     maxScore: 100,
+    completionDate: "2024-12-05",
   },
   {
     id: "c3",
@@ -61,6 +64,7 @@ const mockAssignedCandidates: AssignedCandidate[] = [
     evaluationStatus: "completed",
     totalScore: 87,
     maxScore: 100,
+    completionDate: "2024-12-01",
   },
 ];
 
@@ -100,6 +104,54 @@ const MarkerDashboard = () => {
         return <Badge className="bg-green-600">Completed</Badge>;
       default:
         return null;
+    }
+  };
+
+  const calculateDaysLeft = (completionDate?: string) => {
+    if (!completionDate) return null;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const deadline = new Date(completionDate);
+    deadline.setHours(0, 0, 0, 0);
+    
+    const diffTime = deadline.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays;
+  };
+
+  const getDaysLeftBadge = (daysLeft: number | null) => {
+    if (daysLeft === null) return null;
+    
+    if (daysLeft < 0) {
+      return (
+        <Badge variant="destructive" className="flex items-center gap-1">
+          <AlertTriangle className="h-3 w-3" />
+          Overdue by {Math.abs(daysLeft)}d
+        </Badge>
+      );
+    } else if (daysLeft === 0) {
+      return (
+        <Badge variant="destructive" className="flex items-center gap-1">
+          <AlertTriangle className="h-3 w-3" />
+          Due Today
+        </Badge>
+      );
+    } else if (daysLeft <= 3) {
+      return (
+        <Badge className="bg-amber-500 flex items-center gap-1">
+          <Clock className="h-3 w-3" />
+          {daysLeft}d left
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge variant="outline" className="flex items-center gap-1">
+          <Calendar className="h-3 w-3" />
+          {daysLeft}d left
+        </Badge>
+      );
     }
   };
 
@@ -206,40 +258,58 @@ const MarkerDashboard = () => {
                   <TableHead>Assessment</TableHead>
                   <TableHead>Submitted</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Deadline</TableHead>
                   <TableHead>Score</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCandidates.map((candidate) => (
-                  <TableRow key={candidate.id}>
-                    <TableCell className="font-medium">{candidate.name}</TableCell>
-                    <TableCell>{candidate.email}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {candidate.scheduleName}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {candidate.assessmentName}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(candidate.submittedAt).toLocaleString()}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(candidate.evaluationStatus)}</TableCell>
-                    <TableCell>
-                      {candidate.totalScore !== undefined
-                        ? `${candidate.totalScore}/${candidate.maxScore}`
-                        : `-/${candidate.maxScore}`}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        onClick={() => navigate(`/marker/evaluate/${candidate.id}`)}
-                      >
-                        {candidate.evaluationStatus === "completed" ? "Review" : "Evaluate"}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {filteredCandidates.map((candidate) => {
+                  const daysLeft = calculateDaysLeft(candidate.completionDate);
+                  return (
+                    <TableRow key={candidate.id}>
+                      <TableCell className="font-medium">{candidate.name}</TableCell>
+                      <TableCell>{candidate.email}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {candidate.scheduleName}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {candidate.assessmentName}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(candidate.submittedAt).toLocaleString()}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(candidate.evaluationStatus)}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {candidate.completionDate ? (
+                            <>
+                              <div className="text-sm">
+                                {new Date(candidate.completionDate).toLocaleDateString()}
+                              </div>
+                              {candidate.evaluationStatus !== "completed" && getDaysLeftBadge(daysLeft)}
+                            </>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Not set</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {candidate.totalScore !== undefined
+                          ? `${candidate.totalScore}/${candidate.maxScore}`
+                          : `-/${candidate.maxScore}`}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          onClick={() => navigate(`/marker/evaluate/${candidate.id}`)}
+                        >
+                          {candidate.evaluationStatus === "completed" ? "Review" : "Evaluate"}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>

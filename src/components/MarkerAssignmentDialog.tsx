@@ -18,7 +18,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { UserCheck, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { UserCheck, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
 interface Candidate {
@@ -65,6 +66,7 @@ export const MarkerAssignmentDialog = ({
 }: MarkerAssignmentDialogProps) => {
   const [selectedMarker, setSelectedMarker] = useState("");
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
+  const [completionDate, setCompletionDate] = useState("");
 
   const handleToggleCandidate = (candidateId: string) => {
     setSelectedCandidates((prev) =>
@@ -92,9 +94,14 @@ export const MarkerAssignmentDialog = ({
       return;
     }
 
+    if (!completionDate) {
+      toast.error("Please select a completion date");
+      return;
+    }
+
     const marker = mockMarkers.find((m) => m.id === selectedMarker);
     toast.success(
-      `Assigned ${selectedCandidates.length} candidate(s) to ${marker?.name}`
+      `Assigned ${selectedCandidates.length} candidate(s) to ${marker?.name} with completion date ${new Date(completionDate).toLocaleDateString()}`
     );
     onClose();
   };
@@ -136,6 +143,26 @@ export const MarkerAssignmentDialog = ({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="completion-date">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Evaluation Completion Date
+              </div>
+            </Label>
+            <Input
+              id="completion-date"
+              type="date"
+              value={completionDate}
+              onChange={(e) => setCompletionDate(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              className="w-full"
+            />
+            <p className="text-xs text-muted-foreground">
+              Set deadline for the marker to complete all evaluations
+            </p>
           </div>
 
           <div className="space-y-2">
