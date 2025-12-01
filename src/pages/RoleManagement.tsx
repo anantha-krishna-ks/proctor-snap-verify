@@ -5,11 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePrivileges } from "@/hooks/usePrivileges";
 import { AVAILABLE_PRIVILEGES, Role } from "@/types/privileges";
 import { mockUsers } from "@/data/adminMockData";
@@ -121,56 +122,63 @@ const RoleManagement = () => {
   }, {} as Record<string, typeof AVAILABLE_PRIVILEGES>);
 
   const RoleForm = () => (
-    <div className="space-y-4">
-      <div>
-        <label className="text-sm font-medium">Role Name</label>
-        <Input
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="Enter role name"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium">Description</label>
-        <Textarea
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Enter role description"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium mb-2 block">Privileges</label>
-        <div className="space-y-4 max-h-96 overflow-y-auto border rounded-md p-4">
-          {Object.entries(privilegesByCategory).map(([category, privs]) => (
-            <div key={category}>
-              <h4 className="font-medium text-sm mb-2 capitalize">
-                {category.replace(/_/g, " ")}
-              </h4>
-              <div className="space-y-2 ml-2">
-                {privs.map((priv) => (
-                  <div key={priv.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={priv.id}
-                      checked={formData.privileges.includes(priv.id)}
-                      onCheckedChange={() => togglePrivilege(priv.id)}
-                    />
-                    <label
-                      htmlFor={priv.id}
-                      className="text-sm cursor-pointer flex-1"
-                    >
-                      {priv.name}
-                      <span className="text-muted-foreground ml-2">
-                        - {priv.description}
-                      </span>
-                    </label>
+    <>
+      <div className="space-y-4">
+        <div>
+          <label className="text-sm font-medium">Role Name</label>
+          <Input
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Enter role name"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium">Description</label>
+          <Textarea
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Enter role description"
+            rows={3}
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium mb-2 block">Privileges</label>
+          <ScrollArea className="h-[400px] border rounded-md p-4">
+            <div className="space-y-4">
+              {Object.entries(privilegesByCategory).map(([category, privs]) => (
+                <div key={category}>
+                  <h4 className="font-medium text-sm mb-2 capitalize sticky top-0 bg-background py-1">
+                    {category.replace(/_/g, " ")}
+                  </h4>
+                  <div className="space-y-2 ml-2">
+                    {privs.map((priv) => (
+                      <div key={priv.id} className="flex items-start space-x-2">
+                        <Checkbox
+                          id={priv.id}
+                          checked={formData.privileges.includes(priv.id)}
+                          onCheckedChange={() => togglePrivilege(priv.id)}
+                          className="mt-1"
+                        />
+                        <label
+                          htmlFor={priv.id}
+                          className="text-sm cursor-pointer flex-1 leading-tight"
+                        >
+                          <div className="font-medium">{priv.name}</div>
+                          <div className="text-muted-foreground text-xs">
+                            {priv.description}
+                          </div>
+                        </label>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </ScrollArea>
         </div>
       </div>
-      <div className="flex justify-end gap-2">
+      
+      <SheetFooter className="mt-6">
         <Button
           variant="outline"
           onClick={() => {
@@ -184,8 +192,8 @@ const RoleManagement = () => {
         <Button onClick={editingRole ? handleUpdate : handleCreate}>
           {editingRole ? "Update" : "Create"} Role
         </Button>
-      </div>
-    </div>
+      </SheetFooter>
+    </>
   );
 
   return (
@@ -210,23 +218,25 @@ const RoleManagement = () => {
               <p className="text-sm text-muted-foreground">
                 Manage roles and their privileges
               </p>
-              <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <DialogTrigger asChild>
+              <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                <SheetTrigger asChild>
                   <Button onClick={() => { resetForm(); setEditingRole(null); }}>
                     <Plus className="mr-2 h-4 w-4" />
                     Create Role
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>Create New Role</DialogTitle>
-                    <DialogDescription>
+                </SheetTrigger>
+                <SheetContent className="w-[600px] sm:max-w-[600px]">
+                  <SheetHeader>
+                    <SheetTitle>Create New Role</SheetTitle>
+                    <SheetDescription>
                       Define a custom role with specific privileges for your organization
-                    </DialogDescription>
-                  </DialogHeader>
-                  <RoleForm />
-                </DialogContent>
-              </Dialog>
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <RoleForm />
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -416,17 +426,19 @@ const RoleManagement = () => {
           </TabsContent>
         </Tabs>
 
-        <Dialog open={!!editingRole} onOpenChange={(open) => !open && setEditingRole(null)}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Edit Role</DialogTitle>
-              <DialogDescription>
+        <Sheet open={!!editingRole} onOpenChange={(open) => !open && setEditingRole(null)}>
+          <SheetContent className="w-[600px] sm:max-w-[600px]">
+            <SheetHeader>
+              <SheetTitle>Edit Role</SheetTitle>
+              <SheetDescription>
                 Update role privileges and information
-              </DialogDescription>
-            </DialogHeader>
-            <RoleForm />
-          </DialogContent>
-        </Dialog>
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-6">
+              <RoleForm />
+            </div>
+          </SheetContent>
+        </Sheet>
       </main>
     </div>
   );
