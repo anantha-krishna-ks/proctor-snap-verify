@@ -7,13 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePrivileges } from "@/hooks/usePrivileges";
 import { AVAILABLE_PRIVILEGES, Role } from "@/types/privileges";
-import { Plus, Pencil, Trash2, Shield } from "lucide-react";
+import { mockUsers } from "@/data/adminMockData";
+import { Plus, Pencil, Trash2, Shield, UserPlus, X } from "lucide-react";
 import { toast } from "sonner";
 
 const RoleManagement = () => {
-  const { roles, createRole, updateRole, deleteRole } = usePrivileges();
+  const { roles, createRole, updateRole, deleteRole, userRoles, assignRole, removeRole, getUserRoles } = usePrivileges();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [formData, setFormData] = useState({
@@ -21,6 +25,9 @@ const RoleManagement = () => {
     description: "",
     privileges: [] as string[],
   });
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [selectedRoleId, setSelectedRoleId] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleCreate = () => {
     if (!formData.name.trim()) {
@@ -85,6 +92,27 @@ const RoleManagement = () => {
         : [...prev.privileges, privilegeId],
     }));
   };
+
+  const handleAssignRole = () => {
+    if (!selectedUserId || !selectedRoleId) {
+      toast.error("Please select both user and role");
+      return;
+    }
+    assignRole(selectedUserId, selectedRoleId);
+    toast.success("Role assigned successfully");
+    setSelectedUserId("");
+    setSelectedRoleId("");
+  };
+
+  const handleRemoveRole = (userId: string, roleId: string) => {
+    removeRole(userId, roleId);
+    toast.success("Role removed successfully");
+  };
+
+  const filteredUsers = mockUsers.filter(user => 
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const privilegesByCategory = AVAILABLE_PRIVILEGES.reduce((acc, priv) => {
     if (!acc[priv.category]) acc[priv.category] = [];
@@ -164,94 +192,229 @@ const RoleManagement = () => {
     <div className="min-h-screen bg-background">
       <AdminHeader />
       <main className="container mx-auto px-6 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-2xl font-bold">Role Management</h2>
-            <p className="text-muted-foreground">
-              Create and manage custom roles with specific privileges
-            </p>
-          </div>
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { resetForm(); setEditingRole(null); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Role
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Create New Role</DialogTitle>
-                <DialogDescription>
-                  Define a custom role with specific privileges for your organization
-                </DialogDescription>
-              </DialogHeader>
-              <RoleForm />
-            </DialogContent>
-          </Dialog>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold">Role & User Management</h2>
+          <p className="text-muted-foreground">
+            Create roles, manage privileges, and assign users to roles
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {roles.map((role) => (
-            <Card key={role.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="flex items-center gap-2">
-                      {role.name}
-                      {role.isSystemRole && (
-                        <Badge variant="secondary">
-                          <Shield className="h-3 w-3 mr-1" />
-                          System
-                        </Badge>
+        <Tabs defaultValue="roles" className="w-full">
+          <TabsList>
+            <TabsTrigger value="roles">Roles & Privileges</TabsTrigger>
+            <TabsTrigger value="assignments">User Assignments</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="roles" className="mt-6">
+            <div className="flex justify-between items-center mb-6">
+              <p className="text-sm text-muted-foreground">
+                Manage roles and their privileges
+              </p>
+              <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => { resetForm(); setEditingRole(null); }}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Role
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Create New Role</DialogTitle>
+                    <DialogDescription>
+                      Define a custom role with specific privileges for your organization
+                    </DialogDescription>
+                  </DialogHeader>
+                  <RoleForm />
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {roles.map((role) => (
+                <Card key={role.id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="flex items-center gap-2">
+                          {role.name}
+                          {role.isSystemRole && (
+                            <Badge variant="secondary">
+                              <Shield className="h-3 w-3 mr-1" />
+                              System
+                            </Badge>
+                          )}
+                        </CardTitle>
+                        <CardDescription>{role.description}</CardDescription>
+                      </div>
+                      {!role.isSystemRole && (
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEdit(role)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(role.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       )}
-                    </CardTitle>
-                    <CardDescription>{role.description}</CardDescription>
-                  </div>
-                  {!role.isSystemRole && (
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEdit(role)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(role.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
-                  )}
-                </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium">
+                        Privileges ({role.privileges.length})
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {role.privileges.slice(0, 5).map((privId) => {
+                          const priv = AVAILABLE_PRIVILEGES.find(p => p.id === privId);
+                          return priv ? (
+                            <Badge key={privId} variant="outline" className="text-xs">
+                              {priv.name}
+                            </Badge>
+                          ) : null;
+                        })}
+                        {role.privileges.length > 5 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{role.privileges.length - 5} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="assignments" className="mt-6">
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Assign Role to User</CardTitle>
+                <CardDescription>
+                  Select a user and assign them a role
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <div className="text-sm font-medium">
-                    Privileges ({role.privileges.length})
+                <div className="flex gap-4 items-end">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium mb-2 block">User</label>
+                    <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mockUsers.map((user) => (
+                          <SelectItem key={user.id} value={user.email}>
+                            {user.name} ({user.email})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {role.privileges.slice(0, 5).map((privId) => {
-                      const priv = AVAILABLE_PRIVILEGES.find(p => p.id === privId);
-                      return priv ? (
-                        <Badge key={privId} variant="outline" className="text-xs">
-                          {priv.name}
-                        </Badge>
-                      ) : null;
-                    })}
-                    {role.privileges.length > 5 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{role.privileges.length - 5} more
-                      </Badge>
-                    )}
+                  <div className="flex-1">
+                    <label className="text-sm font-medium mb-2 block">Role</label>
+                    <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {roles.map((role) => (
+                          <SelectItem key={role.id} value={role.id}>
+                            {role.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+                  <Button onClick={handleAssignRole}>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Assign Role
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Current User Assignments</CardTitle>
+                <CardDescription>
+                  View and manage role assignments for all users
+                </CardDescription>
+                <div className="mt-4">
+                  <Input
+                    placeholder="Search users..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="max-w-sm"
+                  />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Organization</TableHead>
+                      <TableHead>Assigned Roles</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => {
+                      const assignedRoles = getUserRoles(user.email);
+                      return (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">{user.name}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{user.organization}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap gap-1">
+                              {assignedRoles.length > 0 ? (
+                                assignedRoles.map((role) => (
+                                  <Badge key={role.id} variant="secondary" className="gap-1">
+                                    {role.name}
+                                    <button
+                                      onClick={() => handleRemoveRole(user.email, role.id)}
+                                      className="ml-1 hover:text-destructive"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </button>
+                                  </Badge>
+                                ))
+                              ) : (
+                                <span className="text-muted-foreground text-sm">No roles assigned</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedUserId(user.email);
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                              }}
+                            >
+                              <UserPlus className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         <Dialog open={!!editingRole} onOpenChange={(open) => !open && setEditingRole(null)}>
           <DialogContent className="max-w-2xl">
