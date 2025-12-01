@@ -44,6 +44,11 @@ export const MarkerAssignmentsSlider = ({
     (c) => c.scheduleId === schedule.id && c.markerId
   );
 
+  // Only pending candidates (not completed) can be reassigned
+  const reassignableCandidates = scheduleCandidates.filter(
+    (c) => c.evaluationStatus !== "completed"
+  );
+
   // Group candidates by marker
   const markerGroups = schedule.assignedMarkers?.map((marker) => ({
     ...marker,
@@ -61,7 +66,17 @@ export const MarkerAssignmentsSlider = ({
     }))
     .filter((group) => group.candidates.length > 0 || searchQuery === "");
 
-  const handleToggleCandidate = (candidateId: string) => {
+  const handleToggleCandidate = (candidateId: string, isCompleted: boolean) => {
+    // Prevent selecting completed candidates
+    if (isCompleted) {
+      toast({
+        title: "Cannot reassign",
+        description: "Completed evaluations cannot be reassigned.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newSelected = new Set(selectedCandidates);
     if (newSelected.has(candidateId)) {
       newSelected.delete(candidateId);
@@ -104,10 +119,11 @@ export const MarkerAssignmentsSlider = ({
   };
 
   const handleSelectAll = () => {
-    if (selectedCandidates.size === scheduleCandidates.length) {
+    if (selectedCandidates.size === reassignableCandidates.length) {
       setSelectedCandidates(new Set());
     } else {
-      setSelectedCandidates(new Set(scheduleCandidates.map((c) => c.id)));
+      // Only select pending candidates (not completed)
+      setSelectedCandidates(new Set(reassignableCandidates.map((c) => c.id)));
     }
   };
 
@@ -189,12 +205,12 @@ export const MarkerAssignmentsSlider = ({
                   size="sm"
                   onClick={handleSelectAll}
                 >
-                  {selectedCandidates.size === scheduleCandidates.length
+                  {selectedCandidates.size === reassignableCandidates.length
                     ? "Deselect All"
-                    : "Select All"}
+                    : "Select All Pending"}
                 </Button>
                 <div className="text-sm text-muted-foreground">
-                  {scheduleCandidates.length} total candidate(s)
+                  {reassignableCandidates.length} pending / {scheduleCandidates.length} total
                 </div>
               </div>
               {filteredMarkerGroups.map((group) => (
@@ -218,48 +234,56 @@ export const MarkerAssignmentsSlider = ({
                   </div>
 
                   <div className="space-y-2">
-                    {group.candidates.map((candidate) => (
-                      <div
-                        key={candidate.id}
-                        className="flex items-center gap-3 p-3 bg-muted/30 rounded-md hover:bg-muted/50 transition-colors"
-                      >
-                        <Checkbox
-                          checked={selectedCandidates.has(candidate.id)}
-                          onCheckedChange={() => handleToggleCandidate(candidate.id)}
-                        />
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={candidate.profileImageUrl} />
-                          <AvatarFallback>
-                            {candidate.name.split(" ").map((n) => n[0]).join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm truncate">
-                            {candidate.name}
+                    {group.candidates.map((candidate) => {
+                      const isCompleted = candidate.evaluationStatus === "completed";
+                      return (
+                        <div
+                          key={candidate.id}
+                          className={`flex items-center gap-3 p-3 bg-muted/30 rounded-md transition-colors ${
+                            isCompleted ? "opacity-60" : "hover:bg-muted/50"
+                          }`}
+                        >
+                          <Checkbox
+                            checked={selectedCandidates.has(candidate.id)}
+                            onCheckedChange={() =>
+                              handleToggleCandidate(candidate.id, isCompleted)
+                            }
+                            disabled={isCompleted}
+                          />
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={candidate.profileImageUrl} />
+                            <AvatarFallback>
+                              {candidate.name.split(" ").map((n) => n[0]).join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">
+                              {candidate.name}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {candidate.email}
+                            </div>
                           </div>
-                          <div className="text-xs text-muted-foreground truncate">
-                            {candidate.email}
+                          <div className="flex items-center gap-2">
+                            {candidate.evaluationStatus === "completed" ? (
+                              <Badge variant="default" className="text-xs gap-1">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Evaluated
+                              </Badge>
+                            ) : candidate.evaluationStatus === "in_progress" ? (
+                              <Badge variant="secondary" className="text-xs">
+                                In Progress
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs gap-1">
+                                <XCircle className="w-3 h-3" />
+                                Pending
+                              </Badge>
+                            )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {candidate.evaluationStatus === "completed" ? (
-                            <Badge variant="default" className="text-xs gap-1">
-                              <CheckCircle2 className="w-3 h-3" />
-                              Evaluated
-                            </Badge>
-                          ) : candidate.evaluationStatus === "in_progress" ? (
-                            <Badge variant="secondary" className="text-xs">
-                              In Progress
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-xs gap-1">
-                              <XCircle className="w-3 h-3" />
-                              Pending
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
