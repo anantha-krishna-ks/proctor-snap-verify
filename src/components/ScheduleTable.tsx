@@ -11,11 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, AlertCircle, UserCheck } from "lucide-react";
+import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, AlertCircle, UserCheck, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { BulkMarkerAssignment } from "@/components/BulkMarkerAssignment";
 import { MarkerAssignmentsSlider } from "@/components/MarkerAssignmentsSlider";
+import { MarkerProgressDialog } from "@/components/MarkerProgressDialog";
+import { candidates } from "@/data/mockData";
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -31,6 +33,10 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
     scheduleName: string;
   } | null>(null);
   const [assignmentsSlider, setAssignmentsSlider] = useState<{
+    open: boolean;
+    schedule: Schedule;
+  } | null>(null);
+  const [progressDialog, setProgressDialog] = useState<{
     open: boolean;
     schedule: Schedule;
   } | null>(null);
@@ -310,6 +316,21 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                           <UserCheck className="w-4 h-4 mr-2" />
                           Assign Markers
                         </Button>
+                        {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setProgressDialog({
+                                open: true,
+                                schedule: schedule,
+                              })
+                            }
+                          >
+                            <BarChart3 className="w-4 h-4 mr-2" />
+                            View Marker Progress
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </TableCell>
@@ -336,6 +357,30 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
           schedule={assignmentsSlider.schedule}
         />
       )}
+
+      {progressDialog && (() => {
+        const scheduleCandidates = candidates.filter(c => c.scheduleId === progressDialog.schedule.id);
+        const markerProgress = (progressDialog.schedule.assignedMarkers || []).map(marker => {
+          const markerCandidates = scheduleCandidates.filter(c => c.markerId === marker.markerId);
+          return {
+            markerId: marker.markerId,
+            markerName: marker.markerName,
+            notStarted: markerCandidates.filter(c => c.evaluationStatus === "not_started").length,
+            inProgress: markerCandidates.filter(c => c.evaluationStatus === "in_progress").length,
+            completed: markerCandidates.filter(c => c.evaluationStatus === "completed").length,
+            total: markerCandidates.length,
+          };
+        });
+
+        return (
+          <MarkerProgressDialog
+            open={progressDialog.open}
+            onClose={() => setProgressDialog(null)}
+            scheduleName={progressDialog.schedule.scheduleName}
+            markerProgress={markerProgress}
+          />
+        );
+      })()}
     </div>
   );
 };
