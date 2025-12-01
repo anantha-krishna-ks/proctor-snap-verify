@@ -11,7 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, ClipboardList, CheckCircle2, Clock, ArrowLeft, LogOut, Calendar, AlertTriangle } from "lucide-react";
+import { Search, ClipboardList, CheckCircle2, Clock, ArrowLeft, LogOut, Calendar, AlertTriangle, LayoutList, CalendarDays } from "lucide-react";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format, isSameDay, parseISO } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AdminHeader } from "@/components/admin/AdminHeader";
@@ -72,6 +74,8 @@ const MarkerDashboard = () => {
   const navigate = useNavigate();
   const { hasPrivilege } = usePrivileges();
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"table" | "calendar">("table");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
   const handleLogout = () => {
     localStorage.removeItem("userRole");
@@ -153,6 +157,28 @@ const MarkerDashboard = () => {
         </Badge>
       );
     }
+  };
+
+  // Get candidates with deadlines for calendar view
+  const candidatesWithDeadlines = mockAssignedCandidates.filter(c => c.completionDate);
+  
+  // Get dates that have deadlines
+  const datesWithDeadlines = candidatesWithDeadlines.map(c => parseISO(c.completionDate!));
+  
+  // Get candidates for selected date
+  const candidatesForSelectedDate = selectedDate 
+    ? candidatesWithDeadlines.filter(c => 
+        isSameDay(parseISO(c.completionDate!), selectedDate)
+      )
+    : [];
+  
+  // Modifier to highlight dates with deadlines
+  const modifiers = {
+    hasDeadline: datesWithDeadlines,
+  };
+  
+  const modifiersClassNames = {
+    hasDeadline: "bg-primary/20 font-bold hover:bg-primary/30",
   };
 
   return (
@@ -245,73 +271,166 @@ const MarkerDashboard = () => {
                     className="pl-8 w-64"
                   />
                 </div>
+                <div className="flex border rounded-lg">
+                  <Button
+                    variant={viewMode === "table" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("table")}
+                    className="rounded-r-none"
+                  >
+                    <LayoutList className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "calendar" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("calendar")}
+                    className="rounded-l-none"
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Candidate Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Schedule</TableHead>
-                  <TableHead>Assessment</TableHead>
-                  <TableHead>Submitted</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Deadline</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCandidates.map((candidate) => {
-                  const daysLeft = calculateDaysLeft(candidate.completionDate);
-                  return (
-                    <TableRow key={candidate.id}>
-                      <TableCell className="font-medium">{candidate.name}</TableCell>
-                      <TableCell>{candidate.email}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {candidate.scheduleName}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {candidate.assessmentName}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(candidate.submittedAt).toLocaleString()}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(candidate.evaluationStatus)}</TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          {candidate.completionDate ? (
-                            <>
-                              <div className="text-sm">
-                                {new Date(candidate.completionDate).toLocaleDateString()}
+            {viewMode === "table" ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Candidate Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Schedule</TableHead>
+                    <TableHead>Assessment</TableHead>
+                    <TableHead>Submitted</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Deadline</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredCandidates.map((candidate) => {
+                    const daysLeft = calculateDaysLeft(candidate.completionDate);
+                    return (
+                      <TableRow key={candidate.id}>
+                        <TableCell className="font-medium">{candidate.name}</TableCell>
+                        <TableCell>{candidate.email}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {candidate.scheduleName}
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          {candidate.assessmentName}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(candidate.submittedAt).toLocaleString()}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(candidate.evaluationStatus)}</TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            {candidate.completionDate ? (
+                              <>
+                                <div className="text-sm">
+                                  {new Date(candidate.completionDate).toLocaleDateString()}
+                                </div>
+                                {candidate.evaluationStatus !== "completed" && getDaysLeftBadge(daysLeft)}
+                              </>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">Not set</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {candidate.totalScore !== undefined
+                            ? `${candidate.totalScore}/${candidate.maxScore}`
+                            : `-/${candidate.maxScore}`}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            onClick={() => navigate(`/marker/evaluate/${candidate.id}`)}
+                          >
+                            {candidate.evaluationStatus === "completed" ? "Review" : "Evaluate"}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="flex flex-col items-center">
+                  <h3 className="text-lg font-semibold mb-4">Evaluation Calendar</h3>
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    modifiers={modifiers}
+                    modifiersClassNames={modifiersClassNames}
+                    className="rounded-md border"
+                  />
+                  <div className="mt-4 text-sm text-muted-foreground">
+                    <p className="flex items-center gap-2">
+                      <span className="w-4 h-4 rounded bg-primary/20 border border-primary/40"></span>
+                      Dates with deadlines
+                    </p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">
+                    {selectedDate ? `Deadlines for ${format(selectedDate, "MMMM d, yyyy")}` : "Select a date"}
+                  </h3>
+                  {candidatesForSelectedDate.length > 0 ? (
+                    <div className="space-y-3">
+                      {candidatesForSelectedDate.map((candidate) => {
+                        const daysLeft = calculateDaysLeft(candidate.completionDate);
+                        return (
+                          <Card key={candidate.id} className="p-4">
+                            <div className="space-y-2">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h4 className="font-semibold">{candidate.name}</h4>
+                                  <p className="text-sm text-muted-foreground">{candidate.email}</p>
+                                </div>
+                                {getStatusBadge(candidate.evaluationStatus)}
                               </div>
-                              {candidate.evaluationStatus !== "completed" && getDaysLeftBadge(daysLeft)}
-                            </>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">Not set</span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {candidate.totalScore !== undefined
-                          ? `${candidate.totalScore}/${candidate.maxScore}`
-                          : `-/${candidate.maxScore}`}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          size="sm"
-                          onClick={() => navigate(`/marker/evaluate/${candidate.id}`)}
-                        >
-                          {candidate.evaluationStatus === "completed" ? "Review" : "Evaluate"}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                              
+                              <div className="text-sm">
+                                <p className="text-muted-foreground">{candidate.scheduleName}</p>
+                                <p className="font-medium">{candidate.assessmentName}</p>
+                              </div>
+                              
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  {candidate.evaluationStatus !== "completed" && getDaysLeftBadge(daysLeft)}
+                                  {candidate.totalScore !== undefined && (
+                                    <Badge variant="outline">
+                                      {candidate.totalScore}/{candidate.maxScore}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <Button
+                                  size="sm"
+                                  onClick={() => navigate(`/marker/evaluate/${candidate.id}`)}
+                                >
+                                  {candidate.evaluationStatus === "completed" ? "Review" : "Evaluate"}
+                                </Button>
+                              </div>
+                            </div>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <CalendarDays className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p>No evaluations due on this date</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>
