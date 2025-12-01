@@ -72,6 +72,13 @@ export const MarkerAssignmentsSlider = ({
     }))
     .filter((group) => group.candidates.length > 0 || searchQuery === "");
 
+  // Auto-expand markers with pending candidates
+  const defaultExpandedMarkers = filteredMarkerGroups
+    .filter((group) => 
+      group.candidates.some((c) => c.evaluationStatus !== "completed")
+    )
+    .map((group) => group.markerId);
+
   const handleToggleCandidate = (candidateId: string, isCompleted: boolean) => {
     // Prevent selecting completed candidates
     if (isCompleted) {
@@ -219,7 +226,7 @@ export const MarkerAssignmentsSlider = ({
                   {reassignableCandidates.length} pending / {scheduleCandidates.length} total
                 </div>
               </div>
-              <Accordion type="multiple" className="space-y-2">
+              <Accordion type="multiple" defaultValue={defaultExpandedMarkers} className="space-y-2">
                 {filteredMarkerGroups.map((group) => (
                   <AccordionItem
                     key={group.markerId}
