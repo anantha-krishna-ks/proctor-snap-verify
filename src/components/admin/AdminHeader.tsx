@@ -8,13 +8,16 @@ import {
   FileStack, 
   Calendar,
   UserCheck,
-  LogOut
+  LogOut,
+  Shield
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { usePrivileges } from "@/hooks/usePrivileges";
 
 export const AdminHeader = () => {
   const navigate = useNavigate();
+  const { hasPrivilege } = usePrivileges();
 
   const handleLogout = () => {
     localStorage.removeItem("userRole");
@@ -45,27 +48,46 @@ export const AdminHeader = () => {
         </div>
         
         <nav className="flex gap-1 flex-wrap">
-          <AdminNavButton to="/admin" icon={LayoutDashboard}>
-            Dashboard
-          </AdminNavButton>
-          <AdminNavButton to="/admin/users" icon={Users}>
-            User Management
-          </AdminNavButton>
-          <AdminNavButton to="/admin/products" icon={FolderOpen}>
-            Products/Courses
-          </AdminNavButton>
-          <AdminNavButton to="/admin/item-bank" icon={Database}>
-            Item Bank
-          </AdminNavButton>
-          <AdminNavButton to="/admin/test-bank" icon={FileStack}>
-            Test Bank
-          </AdminNavButton>
-          <AdminNavButton to="/scheduling" icon={Calendar}>
-            Scheduling
-          </AdminNavButton>
-          <AdminNavButton to="/marker" icon={UserCheck}>
-            Marker Dashboard
-          </AdminNavButton>
+          {hasPrivilege("dashboard.admin") && (
+            <AdminNavButton to="/admin" icon={LayoutDashboard}>
+              Dashboard
+            </AdminNavButton>
+          )}
+          {hasPrivilege("role.view") && (
+            <AdminNavButton to="/admin/roles" icon={Shield}>
+              Roles & Privileges
+            </AdminNavButton>
+          )}
+          {hasPrivilege("user.view") && (
+            <AdminNavButton to="/admin/users" icon={Users}>
+              User Management
+            </AdminNavButton>
+          )}
+          {hasPrivilege("test.view") && (
+            <AdminNavButton to="/admin/products" icon={FolderOpen}>
+              Products/Courses
+            </AdminNavButton>
+          )}
+          {hasPrivilege("item.view") && (
+            <AdminNavButton to="/admin/item-bank" icon={Database}>
+              Item Bank
+            </AdminNavButton>
+          )}
+          {hasPrivilege("test.view") && (
+            <AdminNavButton to="/admin/test-bank" icon={FileStack}>
+              Test Bank
+            </AdminNavButton>
+          )}
+          {hasPrivilege("schedule.view") && (
+            <AdminNavButton to="/scheduling" icon={Calendar}>
+              Scheduling
+            </AdminNavButton>
+          )}
+          {hasPrivilege("dashboard.marker") && (
+            <AdminNavButton to="/marker" icon={UserCheck}>
+              Marker Dashboard
+            </AdminNavButton>
+          )}
         </nav>
       </div>
     </header>
