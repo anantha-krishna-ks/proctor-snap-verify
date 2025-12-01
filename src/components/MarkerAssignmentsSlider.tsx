@@ -7,6 +7,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -213,80 +219,87 @@ export const MarkerAssignmentsSlider = ({
                   {reassignableCandidates.length} pending / {scheduleCandidates.length} total
                 </div>
               </div>
-              {filteredMarkerGroups.map((group) => (
-                <div
-                  key={group.markerId}
-                  className="border rounded-lg p-4 space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <User className="w-5 h-5 text-primary" />
-                      <div>
-                        <div className="font-semibold">{group.markerName}</div>
-                        <div className="text-xs text-muted-foreground">
-                          ID: {group.markerId}
+              <Accordion type="multiple" className="space-y-2">
+                {filteredMarkerGroups.map((group) => (
+                  <AccordionItem
+                    key={group.markerId}
+                    value={group.markerId}
+                    className="border rounded-lg px-4"
+                  >
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex items-center justify-between w-full pr-4">
+                        <div className="flex items-center gap-2">
+                          <User className="w-5 h-5 text-primary" />
+                          <div className="text-left">
+                            <div className="font-semibold">{group.markerName}</div>
+                            <div className="text-xs text-muted-foreground">
+                              ID: {group.markerId}
+                            </div>
+                          </div>
                         </div>
+                        <Badge variant="secondary">
+                          {group.candidates.length} candidate(s)
+                        </Badge>
                       </div>
-                    </div>
-                    <Badge variant="secondary">
-                      {group.candidates.length} candidate(s)
-                    </Badge>
-                  </div>
+                    </AccordionTrigger>
 
-                  <div className="space-y-2">
-                    {group.candidates.map((candidate) => {
-                      const isCompleted = candidate.evaluationStatus === "completed";
-                      return (
-                        <div
-                          key={candidate.id}
-                          className={`flex items-center gap-3 p-3 bg-muted/30 rounded-md transition-colors ${
-                            isCompleted ? "opacity-60" : "hover:bg-muted/50"
-                          }`}
-                        >
-                          <Checkbox
-                            checked={selectedCandidates.has(candidate.id)}
-                            onCheckedChange={() =>
-                              handleToggleCandidate(candidate.id, isCompleted)
-                            }
-                            disabled={isCompleted}
-                          />
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={candidate.profileImageUrl} />
-                            <AvatarFallback>
-                              {candidate.name.split(" ").map((n) => n[0]).join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm truncate">
-                              {candidate.name}
+                    <AccordionContent className="pt-3 pb-4">
+                      <div className="space-y-2">
+                        {group.candidates.map((candidate) => {
+                          const isCompleted = candidate.evaluationStatus === "completed";
+                          return (
+                            <div
+                              key={candidate.id}
+                              className={`flex items-center gap-3 p-3 bg-muted/30 rounded-md transition-colors ${
+                                isCompleted ? "opacity-60" : "hover:bg-muted/50"
+                              }`}
+                            >
+                              <Checkbox
+                                checked={selectedCandidates.has(candidate.id)}
+                                onCheckedChange={() =>
+                                  handleToggleCandidate(candidate.id, isCompleted)
+                                }
+                                disabled={isCompleted}
+                              />
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage src={candidate.profileImageUrl} />
+                                <AvatarFallback>
+                                  {candidate.name.split(" ").map((n) => n[0]).join("")}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm truncate">
+                                  {candidate.name}
+                                </div>
+                                <div className="text-xs text-muted-foreground truncate">
+                                  {candidate.email}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {candidate.evaluationStatus === "completed" ? (
+                                  <Badge variant="default" className="text-xs gap-1">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                    Evaluated
+                                  </Badge>
+                                ) : candidate.evaluationStatus === "in_progress" ? (
+                                  <Badge variant="secondary" className="text-xs">
+                                    In Progress
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-xs gap-1">
+                                    <XCircle className="w-3 h-3" />
+                                    Pending
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
-                            <div className="text-xs text-muted-foreground truncate">
-                              {candidate.email}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {candidate.evaluationStatus === "completed" ? (
-                              <Badge variant="default" className="text-xs gap-1">
-                                <CheckCircle2 className="w-3 h-3" />
-                                Evaluated
-                              </Badge>
-                            ) : candidate.evaluationStatus === "in_progress" ? (
-                              <Badge variant="secondary" className="text-xs">
-                                In Progress
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-xs gap-1">
-                                <XCircle className="w-3 h-3" />
-                                Pending
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                          );
+                        })}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
 
               {filteredMarkerGroups.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
