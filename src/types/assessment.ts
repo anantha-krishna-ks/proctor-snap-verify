@@ -40,6 +40,7 @@ export interface Question {
   questionType: "essay" | "short_answer" | "coding" | "file_upload";
   maxScore: number;
   candidateAnswer: string;
+  modelAnswer?: string;
   candidateScore?: number;
   markerComments?: string;
 }

@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, CheckCircle, User, Calendar, Clock, ChevronLeft, ChevronRight, List } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ArrowLeft, Save, CheckCircle, User, Calendar, Clock, ChevronLeft, ChevronRight, List, BookOpen, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { CandidateEvaluation, Question } from "@/types/assessment";
 import { IdentityVerificationModal } from "@/components/IdentityVerificationModal";
@@ -36,6 +37,7 @@ const mockEvaluation: CandidateEvaluation = {
       questionType: "essay",
       maxScore: 25,
       candidateAnswer: "To reverse a linked list, I would use an iterative approach with three pointers: prev, current, and next. The algorithm works by traversing the list and reversing the links between nodes.\n\nCode:\n```python\ndef reverse_linked_list(head):\n    prev = None\n    current = head\n    while current:\n        next = current.next\n        current.next = prev\n        prev = current\n        current = next\n    return prev\n```\n\nTime Complexity: O(n) where n is the number of nodes\nSpace Complexity: O(1) as we only use constant extra space",
+      modelAnswer: "**Optimal Solution:**\n\n```python\ndef reverse_linked_list(head):\n    prev = None\n    current = head\n    \n    while current is not None:\n        next_node = current.next\n        current.next = prev\n        prev = current\n        current = next_node\n    \n    return prev\n```\n\n**Explanation:**\n- Use three pointers: prev (initially None), current (head), and next_node\n- Iterate through the list, reversing the direction of each link\n- Move prev and current forward until current becomes None\n\n**Complexity Analysis:**\n- Time Complexity: O(n) - single pass through the list\n- Space Complexity: O(1) - only constant extra space for pointers\n\n**Key Points:**\n- Handles empty list (returns None)\n- Handles single node (returns that node)\n- No recursion needed, making it stack-safe",
     },
     {
       id: "q2",
@@ -43,6 +45,7 @@ const mockEvaluation: CandidateEvaluation = {
       questionType: "essay",
       maxScore: 20,
       candidateAnswer: "SQL databases use structured schemas with tables and relationships, while NoSQL databases are more flexible and can handle unstructured data. SQL is better for complex queries and transactions, while NoSQL is better for scalability and handling large volumes of varied data types.",
+      modelAnswer: "**Key Differences:**\n\n**SQL (Relational):**\n- Fixed schema with predefined structure\n- ACID transactions (Atomicity, Consistency, Isolation, Durability)\n- Vertical scaling (scale-up)\n- Complex JOIN operations\n- Examples: PostgreSQL, MySQL, Oracle\n\n**NoSQL:**\n- Flexible/dynamic schema\n- BASE properties (Basically Available, Soft state, Eventual consistency)\n- Horizontal scaling (scale-out)\n- Limited JOIN support\n- Types: Document (MongoDB), Key-Value (Redis), Column-family (Cassandra), Graph (Neo4j)\n\n**When to Choose SQL:**\n- Complex queries with multiple JOINs\n- ACID compliance required (banking, e-commerce)\n- Well-defined schema that rarely changes\n- Strong data integrity requirements\n\n**When to Choose NoSQL:**\n- Massive scale and high throughput\n- Flexible/evolving data models\n- Simple query patterns\n- High availability over consistency\n- Real-time big data applications",
     },
     {
       id: "q3",
@@ -50,6 +53,7 @@ const mockEvaluation: CandidateEvaluation = {
       questionType: "short_answer",
       maxScore: 15,
       candidateAnswer: "The virtual DOM is a lightweight copy of the actual DOM. React uses it to track changes and update only the parts of the real DOM that changed, making updates more efficient.",
+      modelAnswer: "The virtual DOM is an in-memory representation of the real DOM. React uses it to optimize UI updates through a process called reconciliation:\n\n1. When state changes, React creates a new virtual DOM tree\n2. Compares it with the previous virtual DOM (diffing)\n3. Calculates the minimum changes needed\n4. Batches these changes and updates only the affected real DOM nodes\n\nThis approach is more efficient than directly manipulating the DOM for each change, as DOM operations are expensive. The virtual DOM minimizes reflows and repaints, resulting in better performance.",
     },
     {
       id: "q4",
@@ -57,6 +61,7 @@ const mockEvaluation: CandidateEvaluation = {
       questionType: "coding",
       maxScore: 30,
       candidateAnswer: "```python\nimport heapq\n\ndef find_kth_largest(nums, k):\n    return heapq.nlargest(k, nums)[-1]\n\n# Alternative approach using quickselect\ndef find_kth_largest_quickselect(nums, k):\n    k = len(nums) - k\n    \n    def quickselect(l, r):\n        pivot = nums[r]\n        p = l\n        for i in range(l, r):\n            if nums[i] <= pivot:\n                nums[p], nums[i] = nums[i], nums[p]\n                p += 1\n        nums[p], nums[r] = nums[r], nums[p]\n        \n        if p < k:\n            return quickselect(p + 1, r)\n        elif p > k:\n            return quickselect(l, p - 1)\n        else:\n            return nums[p]\n    \n    return quickselect(0, len(nums) - 1)\n```",
+      modelAnswer: "**Optimal Solution - Quickselect (Average O(n)):**\n\n```python\ndef find_kth_largest(nums, k):\n    def quickselect(left, right, k_smallest):\n        if left == right:\n            return nums[left]\n        \n        # Partition around random pivot\n        pivot_idx = partition(left, right)\n        \n        if k_smallest == pivot_idx:\n            return nums[k_smallest]\n        elif k_smallest < pivot_idx:\n            return quickselect(left, pivot_idx - 1, k_smallest)\n        else:\n            return quickselect(pivot_idx + 1, right, k_smallest)\n    \n    def partition(left, right):\n        pivot = nums[right]\n        store_idx = left\n        \n        for i in range(left, right):\n            if nums[i] < pivot:\n                nums[store_idx], nums[i] = nums[i], nums[store_idx]\n                store_idx += 1\n        \n        nums[store_idx], nums[right] = nums[right], nums[store_idx]\n        return store_idx\n    \n    # kth largest is (n-k)th smallest\n    return quickselect(0, len(nums) - 1, len(nums) - k)\n```\n\n**Alternative - Min Heap O(n log k):**\n```python\nimport heapq\n\ndef find_kth_largest(nums, k):\n    return heapq.nlargest(k, nums)[-1]\n```\n\n**Complexity:**\n- Quickselect: Average O(n), Worst O(n²)\n- Heap: O(n log k)\n- Sorting: O(n log n)",
     },
     {
       id: "q5",
@@ -64,6 +69,7 @@ const mockEvaluation: CandidateEvaluation = {
       questionType: "essay",
       maxScore: 10,
       candidateAnswer: "The CAP theorem states that a distributed system can only guarantee two out of three properties: Consistency, Availability, and Partition tolerance.",
+      modelAnswer: "**CAP Theorem (Brewer's Theorem):**\n\nStates that a distributed system can simultaneously provide only TWO of three guarantees:\n\n**C - Consistency:** All nodes see the same data at the same time. Every read receives the most recent write.\n\n**A - Availability:** Every request receives a response (success or failure), without guarantee of most recent data.\n\n**P - Partition Tolerance:** System continues operating despite network partitions (communication breakdowns between nodes).\n\n**Trade-offs:**\n- **CP Systems:** Sacrifice availability during partitions (e.g., MongoDB, HBase, Redis)\n- **AP Systems:** Sacrifice consistency for availability (e.g., Cassandra, DynamoDB, CouchDB)\n- **CA Systems:** Theoretically possible only without partitions (impractical in distributed systems)\n\n**Reality:** Since network partitions are inevitable in distributed systems, the real choice is between Consistency and Availability when partitions occur.",
     },
   ],
 };
@@ -76,6 +82,7 @@ const MarkerEvaluation = () => {
   const [comments, setComments] = useState<Record<string, string>>({});
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [showModelAnswer, setShowModelAnswer] = useState(false);
 
   const currentQuestion = evaluation.questions[currentQuestionIndex];
   const isFirstQuestion = currentQuestionIndex === 0;
@@ -286,13 +293,32 @@ const MarkerEvaluation = () => {
                       </span>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                   <CardContent className="space-y-4">
                     <div>
                       <Label className="text-sm font-medium mb-2 block">Candidate's Answer</Label>
                       <div className="p-4 bg-muted rounded-md whitespace-pre-wrap text-sm">
                         {currentQuestion.candidateAnswer}
                       </div>
                     </div>
+
+                    {currentQuestion.modelAnswer && (
+                      <Collapsible open={showModelAnswer} onOpenChange={setShowModelAnswer}>
+                        <CollapsibleTrigger asChild>
+                          <Button variant="outline" className="w-full justify-between">
+                            <span className="flex items-center gap-2">
+                              <BookOpen className="h-4 w-4" />
+                              Model Answer
+                            </span>
+                            <ChevronDown className={`h-4 w-4 transition-transform ${showModelAnswer ? 'rotate-180' : ''}`} />
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-2">
+                          <div className="p-4 bg-primary/5 border border-primary/20 rounded-md whitespace-pre-wrap text-sm">
+                            {currentQuestion.modelAnswer}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    )}
                     
                     <div className="grid grid-cols-1 gap-4">
                       <div>
