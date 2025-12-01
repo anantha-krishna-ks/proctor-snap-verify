@@ -18,6 +18,8 @@ import { usePrivileges } from "@/hooks/usePrivileges";
 export const AdminHeader = () => {
   const navigate = useNavigate();
   const { hasPrivilege } = usePrivileges();
+  const userRole = localStorage.getItem("userRole");
+  const isAdmin = userRole === "admin";
 
   const handleLogout = () => {
     localStorage.removeItem("userRole");
@@ -48,42 +50,42 @@ export const AdminHeader = () => {
         </div>
         
         <nav className="flex gap-1 flex-wrap">
-          {hasPrivilege("dashboard.admin") && (
+          {(isAdmin || hasPrivilege("dashboard.admin")) && (
             <AdminNavButton to="/admin" icon={LayoutDashboard}>
               Dashboard
             </AdminNavButton>
           )}
-          {hasPrivilege("role.view") && (
+          {(isAdmin || hasPrivilege("role.view")) && (
             <AdminNavButton to="/admin/roles" icon={Shield}>
               Roles & Privileges
             </AdminNavButton>
           )}
-          {hasPrivilege("user.view") && (
+          {(isAdmin || hasPrivilege("user.view")) && (
             <AdminNavButton to="/admin/users" icon={Users}>
               User Management
             </AdminNavButton>
           )}
-          {hasPrivilege("test.view") && (
+          {(isAdmin || hasPrivilege("test.view")) && (
             <AdminNavButton to="/admin/products" icon={FolderOpen}>
               Products/Courses
             </AdminNavButton>
           )}
-          {hasPrivilege("item.view") && (
+          {(isAdmin || hasPrivilege("item.view")) && (
             <AdminNavButton to="/admin/item-bank" icon={Database}>
               Item Bank
             </AdminNavButton>
           )}
-          {hasPrivilege("test.view") && (
+          {(isAdmin || hasPrivilege("test.view")) && (
             <AdminNavButton to="/admin/test-bank" icon={FileStack}>
               Test Bank
             </AdminNavButton>
           )}
-          {hasPrivilege("schedule.view") && (
+          {(isAdmin || hasPrivilege("schedule.view")) && (
             <AdminNavButton to="/scheduling" icon={Calendar}>
               Scheduling
             </AdminNavButton>
           )}
-          {hasPrivilege("dashboard.marker") && (
+          {(isAdmin || hasPrivilege("dashboard.marker")) && (
             <AdminNavButton to="/marker" icon={UserCheck}>
               Marker Dashboard
             </AdminNavButton>
