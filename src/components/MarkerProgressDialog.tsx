@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, Clock, PlayCircle, RefreshCw } from "lucide-react";
+import { CheckCircle2, Clock, PlayCircle } from "lucide-react";
 
 interface MarkerProgress {
   markerId: string;
@@ -26,7 +26,6 @@ interface MarkerProgressDialogProps {
   onClose: () => void;
   scheduleName: string;
   markerProgress: MarkerProgress[];
-  onReassignClick?: () => void;
 }
 
 export const MarkerProgressDialog = ({
@@ -34,7 +33,6 @@ export const MarkerProgressDialog = ({
   onClose,
   scheduleName,
   markerProgress,
-  onReassignClick,
 }: MarkerProgressDialogProps) => {
   const calculateProgress = (completed: number, total: number) => {
     return total > 0 ? (completed / total) * 100 : 0;
@@ -44,20 +42,10 @@ export const MarkerProgressDialog = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[80vh]">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle>Marker Progress Report</DialogTitle>
-              <DialogDescription>
-                Schedule: {scheduleName}
-              </DialogDescription>
-            </div>
-            {onReassignClick && (
-              <Button variant="outline" size="sm" onClick={onReassignClick}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Reassign Candidates
-              </Button>
-            )}
-          </div>
+          <DialogTitle>Marker Progress Report</DialogTitle>
+          <DialogDescription>
+            Schedule: {scheduleName}
+          </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="h-[500px] pr-4">
