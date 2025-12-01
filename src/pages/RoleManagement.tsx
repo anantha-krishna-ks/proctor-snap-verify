@@ -14,7 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePrivileges } from "@/hooks/usePrivileges";
 import { AVAILABLE_PRIVILEGES, Role } from "@/types/privileges";
 import { mockUsers } from "@/data/adminMockData";
-import { Plus, Pencil, Trash2, Shield, UserPlus, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Shield, UserPlus, X, LayoutGrid, LayoutList } from "lucide-react";
 import { toast } from "sonner";
 
 interface RoleFormProps {
@@ -166,6 +166,7 @@ const RoleManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [bulkRoleId, setBulkRoleId] = useState<string>("");
+  const [roleViewMode, setRoleViewMode] = useState<"card" | "table">("card");
 
   const handleCreate = () => {
     if (!formData.name.trim()) {
@@ -316,13 +317,32 @@ const RoleManagement = () => {
               <p className="text-sm text-muted-foreground">
                 Manage roles and their privileges
               </p>
-              <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                <SheetTrigger asChild>
-                  <Button onClick={() => { resetForm(); setEditingRole(null); }}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Role
+              <div className="flex items-center gap-2">
+                <div className="flex items-center border rounded-md">
+                  <Button
+                    variant={roleViewMode === "card" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setRoleViewMode("card")}
+                    className="rounded-r-none"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
                   </Button>
-                </SheetTrigger>
+                  <Button
+                    variant={roleViewMode === "table" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setRoleViewMode("table")}
+                    className="rounded-l-none"
+                  >
+                    <LayoutList className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                  <SheetTrigger asChild>
+                    <Button onClick={() => { resetForm(); setEditingRole(null); }}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Role
+                    </Button>
+                  </SheetTrigger>
                 <SheetContent className="w-full sm:w-[640px] sm:max-w-[640px] overflow-y-auto">
                   <SheetHeader className="pb-2">
                     <SheetTitle>Create role</SheetTitle>
@@ -353,69 +373,139 @@ const RoleManagement = () => {
                 </SheetContent>
               </Sheet>
             </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {roles.map((role) => (
-                <Card key={role.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="flex items-center gap-2">
-                          {role.name}
-                          {role.isSystemRole && (
-                            <Badge variant="secondary">
-                              <Shield className="h-3 w-3 mr-1" />
-                              System
-                            </Badge>
-                          )}
-                        </CardTitle>
-                        <CardDescription>{role.description}</CardDescription>
-                      </div>
-                      {!role.isSystemRole && (
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openEdit(role)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(role.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+            {roleViewMode === "card" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {roles.map((role) => (
+                  <Card key={role.id}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="flex items-center gap-2">
+                            {role.name}
+                            {role.isSystemRole && (
+                              <Badge variant="secondary">
+                                <Shield className="h-3 w-3 mr-1" />
+                                System
+                              </Badge>
+                            )}
+                          </CardTitle>
+                          <CardDescription>{role.description}</CardDescription>
                         </div>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="text-sm font-medium">
-                        Privileges ({role.privileges.length})
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {role.privileges.slice(0, 5).map((privId) => {
-                          const priv = AVAILABLE_PRIVILEGES.find(p => p.id === privId);
-                          return priv ? (
-                            <Badge key={privId} variant="outline" className="text-xs">
-                              {priv.name}
-                            </Badge>
-                          ) : null;
-                        })}
-                        {role.privileges.length > 5 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{role.privileges.length - 5} more
-                          </Badge>
+                        {!role.isSystemRole && (
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openEdit(role)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(role.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         )}
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium">
+                          Privileges ({role.privileges.length})
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {role.privileges.slice(0, 5).map((privId) => {
+                            const priv = AVAILABLE_PRIVILEGES.find(p => p.id === privId);
+                            return priv ? (
+                              <Badge key={privId} variant="outline" className="text-xs">
+                                {priv.name}
+                              </Badge>
+                            ) : null;
+                          })}
+                          {role.privileges.length > 5 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{role.privileges.length - 5} more
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[250px]">Role Name</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="w-[100px] text-center">Type</TableHead>
+                      <TableHead className="w-[120px] text-center">Privileges</TableHead>
+                      <TableHead className="w-[100px] text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {roles.map((role) => (
+                      <TableRow key={role.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-muted-foreground" />
+                            {role.name}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {role.description || "No description"}
+                          </p>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {role.isSystemRole ? (
+                            <Badge variant="secondary" className="text-xs">
+                              System
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs">
+                              Custom
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="secondary">{role.privileges.length}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {!role.isSystemRole ? (
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openEdit(role)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(role.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Protected</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="assignments" className="mt-6">
