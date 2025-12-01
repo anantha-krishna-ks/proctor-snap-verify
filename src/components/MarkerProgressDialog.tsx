@@ -1,10 +1,9 @@
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,34 +20,34 @@ interface MarkerProgress {
   total: number;
 }
 
-interface MarkerProgressDialogProps {
+interface MarkerProgressSliderProps {
   open: boolean;
   onClose: () => void;
   scheduleName: string;
   markerProgress: MarkerProgress[];
 }
 
-export const MarkerProgressDialog = ({
+export const MarkerProgressSlider = ({
   open,
   onClose,
   scheduleName,
   markerProgress,
-}: MarkerProgressDialogProps) => {
+}: MarkerProgressSliderProps) => {
   const calculateProgress = (completed: number, total: number) => {
     return total > 0 ? (completed / total) * 100 : 0;
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>Marker Progress Report</DialogTitle>
-          <DialogDescription>
+    <Sheet open={open} onOpenChange={onClose}>
+      <SheetContent side="right" className="w-full sm:max-w-2xl">
+        <SheetHeader>
+          <SheetTitle className="text-xl">Marker Progress Report</SheetTitle>
+          <div className="text-sm text-muted-foreground">
             Schedule: {scheduleName}
-          </DialogDescription>
-        </DialogHeader>
+          </div>
+        </SheetHeader>
 
-        <ScrollArea className="h-[500px] pr-4">
+        <ScrollArea className="h-[calc(100vh-120px)] mt-6 pr-4">
           <div className="space-y-4">
             {markerProgress.map((marker) => (
               <Card key={marker.markerId} className="p-4">
@@ -128,7 +127,7 @@ export const MarkerProgressDialog = ({
             )}
           </div>
         </ScrollArea>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 };
