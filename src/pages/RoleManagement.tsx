@@ -45,8 +45,8 @@ const RoleForm = ({ formData, setFormData, onSubmit, onCancel, isEditing, privil
   };
 
   return (
-    <>
-      <div className="space-y-4 py-4">
+    <div className="flex flex-col gap-4 py-4 h-full">
+      <div className="space-y-4 flex-1 min-h-0">
         <div>
           <label className="text-sm font-medium block mb-2">Role Name</label>
           <Input
@@ -64,9 +64,9 @@ const RoleForm = ({ formData, setFormData, onSubmit, onCancel, isEditing, privil
             rows={3}
           />
         </div>
-        <div>
+        <div className="min-h-0 flex-1 flex flex-col">
           <label className="text-sm font-medium mb-2 block">Privileges</label>
-          <ScrollArea className="h-[350px] border rounded-md p-4">
+          <ScrollArea className="border rounded-md p-4 flex-1">
             <div className="space-y-4">
               {Object.entries(privilegesByCategory).map(([category, privs]) => (
                 <div key={category}>
@@ -77,13 +77,13 @@ const RoleForm = ({ formData, setFormData, onSubmit, onCancel, isEditing, privil
                     {privs.map((priv) => (
                       <div key={priv.id} className="flex items-start space-x-2">
                         <Checkbox
-                          id={`${isEditing ? 'edit' : 'create'}-${priv.id}`}
+                          id={`${isEditing ? "edit" : "create"}-${priv.id}`}
                           checked={formData.privileges.includes(priv.id)}
                           onCheckedChange={() => togglePrivilege(priv.id)}
                           className="mt-1"
                         />
                         <label
-                          htmlFor={`${isEditing ? 'edit' : 'create'}-${priv.id}`}
+                          htmlFor={`${isEditing ? "edit" : "create"}-${priv.id}`}
                           className="text-sm cursor-pointer flex-1 leading-tight"
                         >
                           <div className="font-medium">{priv.name}</div>
@@ -100,16 +100,15 @@ const RoleForm = ({ formData, setFormData, onSubmit, onCancel, isEditing, privil
           </ScrollArea>
         </div>
       </div>
-      
-      <SheetFooter className="gap-2">
+      <div className="flex justify-end gap-2 border-t pt-4 mt-2">
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button onClick={onSubmit}>
           {isEditing ? "Update" : "Create"} Role
         </Button>
-      </SheetFooter>
-    </>
+      </div>
+    </div>
   );
 };
 
