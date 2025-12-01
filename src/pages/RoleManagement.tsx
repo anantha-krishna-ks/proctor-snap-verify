@@ -33,6 +33,31 @@ interface RoleFormProps {
 }
 
 const RoleForm = ({ formData, setFormData, isEditing, privilegesByCategory }: RoleFormProps) => {
+  const [nameError, setNameError] = useState<string>("");
+
+  const validateName = (name: string) => {
+    if (!name.trim()) {
+      setNameError("Role name is required");
+      return false;
+    }
+    if (name.trim().length < 3) {
+      setNameError("Role name must be at least 3 characters");
+      return false;
+    }
+    setNameError("");
+    return true;
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, name: value }));
+    if (value.length > 0) {
+      validateName(value);
+    } else {
+      setNameError("");
+    }
+  };
+
   const togglePrivilege = (privilegeId: string) => {
     setFormData(prev => ({
       ...prev,
@@ -56,9 +81,13 @@ const RoleForm = ({ formData, setFormData, isEditing, privilegesByCategory }: Ro
               </label>
               <Input
                 value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={handleNameChange}
                 placeholder="e.g., Senior Marker, Content Reviewer"
+                className={nameError ? "border-destructive focus-visible:ring-destructive" : ""}
               />
+              {nameError && (
+                <p className="text-xs text-destructive mt-1.5">{nameError}</p>
+              )}
             </div>
             <div>
               <label className="text-sm font-medium block mb-1">Description</label>
