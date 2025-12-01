@@ -11,12 +11,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, AlertCircle, UserCheck, BarChart3 } from "lucide-react";
+import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, AlertCircle, UserCheck, BarChart3, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { BulkMarkerAssignment } from "@/components/BulkMarkerAssignment";
 import { MarkerAssignmentsSlider } from "@/components/MarkerAssignmentsSlider";
 import { MarkerProgressDialog } from "@/components/MarkerProgressDialog";
+import { CandidateReassignmentDialog } from "@/components/CandidateReassignmentDialog";
 import { candidates } from "@/data/mockData";
 
 interface ScheduleTableProps {
@@ -37,6 +38,10 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
     schedule: Schedule;
   } | null>(null);
   const [progressDialog, setProgressDialog] = useState<{
+    open: boolean;
+    schedule: Schedule;
+  } | null>(null);
+  const [reassignmentDialog, setReassignmentDialog] = useState<{
     open: boolean;
     schedule: Schedule;
   } | null>(null);
@@ -317,19 +322,34 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                           Assign Markers
                         </Button>
                         {schedule.assignedMarkers && schedule.assignedMarkers.length > 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setProgressDialog({
-                                open: true,
-                                schedule: schedule,
-                              })
-                            }
-                          >
-                            <BarChart3 className="w-4 h-4 mr-2" />
-                            View Marker Progress
-                          </Button>
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setProgressDialog({
+                                  open: true,
+                                  schedule: schedule,
+                                })
+                              }
+                            >
+                              <BarChart3 className="w-4 h-4 mr-2" />
+                              View Marker Progress
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setReassignmentDialog({
+                                  open: true,
+                                  schedule: schedule,
+                                })
+                              }
+                            >
+                              <RefreshCw className="w-4 h-4 mr-2" />
+                              Reassign Candidates
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -378,9 +398,27 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
             onClose={() => setProgressDialog(null)}
             scheduleName={progressDialog.schedule.scheduleName}
             markerProgress={markerProgress}
+            onReassignClick={() => {
+              setProgressDialog(null);
+              setReassignmentDialog({
+                open: true,
+                schedule: progressDialog.schedule,
+              });
+            }}
           />
         );
       })()}
+
+      {reassignmentDialog && (
+        <CandidateReassignmentDialog
+          open={reassignmentDialog.open}
+          onClose={() => setReassignmentDialog(null)}
+          schedule={reassignmentDialog.schedule}
+          assignedCandidates={candidates.filter(
+            c => c.scheduleId === reassignmentDialog.schedule.id && c.markerId
+          )}
+        />
+      )}
     </div>
   );
 };
