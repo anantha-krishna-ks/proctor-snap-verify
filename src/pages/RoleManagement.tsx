@@ -164,6 +164,8 @@ const RoleManagement = () => {
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [selectedRoleId, setSelectedRoleId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [bulkRoleId, setBulkRoleId] = useState<string>("");
 
   const handleCreate = () => {
     if (!formData.name.trim()) {
@@ -243,6 +245,42 @@ const RoleManagement = () => {
   const handleRemoveRole = (userId: string, roleId: string) => {
     removeRole(userId, roleId);
     toast.success("Role removed successfully");
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUserIds(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedUserIds.length === filteredUsers.length) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(filteredUsers.map(u => u.email));
+    }
+  };
+
+  const handleBulkAssign = () => {
+    if (selectedUserIds.length === 0) {
+      toast.error("Please select at least one user");
+      return;
+    }
+    if (!bulkRoleId) {
+      toast.error("Please select a role to assign");
+      return;
+    }
+    selectedUserIds.forEach(userId => assignRole(userId, bulkRoleId));
+    toast.success(`Role assigned to ${selectedUserIds.length} user(s)`);
+    setSelectedUserIds([]);
+    setBulkRoleId("");
+  };
+
+  const clearSelection = () => {
+    setSelectedUserIds([]);
+    setBulkRoleId("");
   };
 
   const filteredUsers = mockUsers.filter(user => 
@@ -444,9 +482,49 @@ const RoleManagement = () => {
                 </div>
               </CardHeader>
               <CardContent>
+                {selectedUserIds.length > 0 && (
+                  <div className="mb-4 p-4 bg-muted rounded-lg border flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 flex-1">
+                      <Badge variant="secondary" className="text-sm">
+                        {selectedUserIds.length} selected
+                      </Badge>
+                      <Select value={bulkRoleId} onValueChange={setBulkRoleId}>
+                        <SelectTrigger className="w-[240px]">
+                          <SelectValue placeholder="Select role to assign" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {roles.map((role) => (
+                            <SelectItem key={role.id} value={role.id}>
+                              {role.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button onClick={handleBulkAssign} size="sm">
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Assign to Selected
+                      </Button>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={clearSelection}
+                      className="shrink-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={selectedUserIds.length === filteredUsers.length && filteredUsers.length > 0}
+                          onCheckedChange={toggleSelectAll}
+                          aria-label="Select all users"
+                        />
+                      </TableHead>
                       <TableHead>User</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Organization</TableHead>
@@ -459,6 +537,13 @@ const RoleManagement = () => {
                       const assignedRoles = getUserRoles(user.email);
                       return (
                         <TableRow key={user.id}>
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedUserIds.includes(user.email)}
+                              onCheckedChange={() => toggleUserSelection(user.email)}
+                              aria-label={`Select ${user.name}`}
+                            />
+                          </TableCell>
                           <TableCell className="font-medium">{user.name}</TableCell>
                           <TableCell>{user.email}</TableCell>
                           <TableCell>{user.organization}</TableCell>
