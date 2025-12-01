@@ -3,11 +3,13 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { PrivilegeProvider } from "@/hooks/usePrivileges";
 import AdminDashboard from "./pages/AdminDashboard";
 import ScheduleDashboard from "./pages/ScheduleDashboard";
 import HeadshotApproval from "./pages/HeadshotApproval";
 import MarkerDashboard from "./pages/MarkerDashboard";
 import MarkerEvaluation from "./pages/MarkerEvaluation";
+import RoleManagement from "./pages/RoleManagement";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -31,17 +33,26 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
+    <PrivilegeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
           <Route path="/login" element={<Login />} />
           <Route
             path="/admin"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/roles"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <RoleManagement />
               </ProtectedRoute>
             }
           />
@@ -83,6 +94,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </PrivilegeProvider>
   </QueryClientProvider>
 );
 

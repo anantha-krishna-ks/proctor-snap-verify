@@ -3,8 +3,11 @@ import { schedules } from "@/data/mockData";
 import { ScheduleHeader } from "@/components/ScheduleHeader";
 import { ScheduleTable } from "@/components/ScheduleTable";
 import { Pagination } from "@/components/Pagination";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { usePrivileges } from "@/hooks/usePrivileges";
 
 const ScheduleDashboard = () => {
+  const { hasPrivilege } = usePrivileges();
   const [selectedAssessment, setSelectedAssessment] = useState("easy-proctor");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,12 +28,16 @@ const ScheduleDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <ScheduleHeader
-        selectedAssessment={selectedAssessment}
-        onAssessmentChange={setSelectedAssessment}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
+      {hasPrivilege("dashboard.admin") ? (
+        <AdminHeader />
+      ) : (
+        <ScheduleHeader
+          selectedAssessment={selectedAssessment}
+          onAssessmentChange={setSelectedAssessment}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+      )}
 
       <main className="container mx-auto px-6 py-6">
         <ScheduleTable schedules={paginatedSchedules} />

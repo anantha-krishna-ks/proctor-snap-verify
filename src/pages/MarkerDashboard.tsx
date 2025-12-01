@@ -14,6 +14,8 @@ import {
 import { Search, ClipboardList, CheckCircle2, Clock, ArrowLeft, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { AdminHeader } from "@/components/admin/AdminHeader";
+import { usePrivileges } from "@/hooks/usePrivileges";
 
 interface AssignedCandidate {
   id: string;
@@ -64,6 +66,7 @@ const mockAssignedCandidates: AssignedCandidate[] = [
 
 const MarkerDashboard = () => {
   const navigate = useNavigate();
+  const { hasPrivilege } = usePrivileges();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogout = () => {
@@ -102,32 +105,36 @@ const MarkerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/admin")}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Admin
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">Marker Dashboard</h1>
-                <p className="text-sm text-muted-foreground">
-                  Evaluate assigned candidates
-                </p>
+      {hasPrivilege("dashboard.admin") ? (
+        <AdminHeader />
+      ) : (
+        <header className="border-b border-border bg-card">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/admin")}
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Admin
+                </Button>
+                <div>
+                  <h1 className="text-2xl font-bold text-foreground">Marker Dashboard</h1>
+                  <p className="text-sm text-muted-foreground">
+                    Evaluate assigned candidates
+                  </p>
+                </div>
               </div>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
             </div>
-            <Button variant="outline" size="sm" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       <main className="container mx-auto px-6 py-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
