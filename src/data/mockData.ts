@@ -73,6 +73,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-15T10:30:00",
     status: "approved",
     testCompleted: true,
+    markerId: "m1",
+    markerName: "Dr. Sarah Wilson",
+    evaluationStatus: "completed",
   },
   {
     id: "2",
@@ -84,6 +87,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-15T11:15:00",
     status: "pending",
     testCompleted: true,
+    markerId: "m1",
+    markerName: "Dr. Sarah Wilson",
+    evaluationStatus: "not_started",
   },
   {
     id: "3",
@@ -95,6 +101,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-15T14:20:00",
     status: "rejected",
     testCompleted: true,
+    markerId: "m1",
+    markerName: "Dr. Sarah Wilson",
+    evaluationStatus: "in_progress",
   },
   {
     id: "4",
@@ -106,6 +115,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-15T16:45:00",
     status: "approved",
     testCompleted: true,
+    markerId: "m2",
+    markerName: "Prof. Michael Brown",
+    evaluationStatus: "completed",
   },
   {
     id: "5",
@@ -117,6 +129,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-15T13:30:00",
     status: "pending",
     testCompleted: true,
+    markerId: "m2",
+    markerName: "Prof. Michael Brown",
+    evaluationStatus: "not_started",
   },
   {
     id: "6",
@@ -128,6 +143,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-15T15:20:00",
     status: "approved",
     testCompleted: true,
+    markerId: "m1",
+    markerName: "Dr. Sarah Wilson",
+    evaluationStatus: "in_progress",
   },
   {
     id: "7",
@@ -139,6 +157,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-15T12:10:00",
     status: "rejected",
     testCompleted: true,
+    markerId: "m2",
+    markerName: "Prof. Michael Brown",
+    evaluationStatus: "not_started",
   },
   {
     id: "8",
@@ -150,6 +171,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-15T09:30:00",
     status: "pending",
     testCompleted: true,
+    markerId: "m1",
+    markerName: "Dr. Sarah Wilson",
+    evaluationStatus: "not_started",
   },
   {
     id: "9",
@@ -161,6 +185,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-18T09:45:00",
     status: "approved",
     testCompleted: true,
+    markerId: "m3",
+    markerName: "Dr. Emily Chen",
+    evaluationStatus: "completed",
   },
   {
     id: "10",
@@ -172,6 +199,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-18T10:20:00",
     status: "pending",
     testCompleted: true,
+    markerId: "m3",
+    markerName: "Dr. Emily Chen",
+    evaluationStatus: "in_progress",
   },
   {
     id: "11",
@@ -183,6 +213,9 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-18T11:15:00",
     status: "rejected",
     testCompleted: true,
+    markerId: "m3",
+    markerName: "Dr. Emily Chen",
+    evaluationStatus: "not_started",
   },
   {
     id: "12",
@@ -194,5 +227,8 @@ export const candidates: Candidate[] = [
     submittedAt: "2025-01-18T14:30:00",
     status: "approved",
     testCompleted: true,
+    markerId: "m3",
+    markerName: "Dr. Emily Chen",
+    evaluationStatus: "not_started",
   },
 ];
