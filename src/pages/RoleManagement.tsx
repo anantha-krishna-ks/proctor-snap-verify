@@ -17,6 +17,102 @@ import { mockUsers } from "@/data/adminMockData";
 import { Plus, Pencil, Trash2, Shield, UserPlus, X } from "lucide-react";
 import { toast } from "sonner";
 
+interface RoleFormProps {
+  formData: {
+    name: string;
+    description: string;
+    privileges: string[];
+  };
+  setFormData: React.Dispatch<React.SetStateAction<{
+    name: string;
+    description: string;
+    privileges: string[];
+  }>>;
+  onSubmit: () => void;
+  onCancel: () => void;
+  isEditing: boolean;
+  privilegesByCategory: Record<string, typeof AVAILABLE_PRIVILEGES>;
+}
+
+const RoleForm = ({ formData, setFormData, onSubmit, onCancel, isEditing, privilegesByCategory }: RoleFormProps) => {
+  const togglePrivilege = (privilegeId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      privileges: prev.privileges.includes(privilegeId)
+        ? prev.privileges.filter(p => p !== privilegeId)
+        : [...prev.privileges, privilegeId],
+    }));
+  };
+
+  return (
+    <>
+      <div className="space-y-4 py-4">
+        <div>
+          <label className="text-sm font-medium block mb-2">Role Name</label>
+          <Input
+            value={formData.name}
+            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            placeholder="Enter role name"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium block mb-2">Description</label>
+          <Textarea
+            value={formData.description}
+            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            placeholder="Enter role description"
+            rows={3}
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium mb-2 block">Privileges</label>
+          <ScrollArea className="h-[350px] border rounded-md p-4">
+            <div className="space-y-4">
+              {Object.entries(privilegesByCategory).map(([category, privs]) => (
+                <div key={category}>
+                  <h4 className="font-medium text-sm mb-2 capitalize sticky top-0 bg-background py-1">
+                    {category.replace(/_/g, " ")}
+                  </h4>
+                  <div className="space-y-2 ml-2">
+                    {privs.map((priv) => (
+                      <div key={priv.id} className="flex items-start space-x-2">
+                        <Checkbox
+                          id={`${isEditing ? 'edit' : 'create'}-${priv.id}`}
+                          checked={formData.privileges.includes(priv.id)}
+                          onCheckedChange={() => togglePrivilege(priv.id)}
+                          className="mt-1"
+                        />
+                        <label
+                          htmlFor={`${isEditing ? 'edit' : 'create'}-${priv.id}`}
+                          className="text-sm cursor-pointer flex-1 leading-tight"
+                        >
+                          <div className="font-medium">{priv.name}</div>
+                          <div className="text-muted-foreground text-xs">
+                            {priv.description}
+                          </div>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+      </div>
+      
+      <SheetFooter className="gap-2">
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button onClick={onSubmit}>
+          {isEditing ? "Update" : "Create"} Role
+        </Button>
+      </SheetFooter>
+    </>
+  );
+};
+
 const RoleManagement = () => {
   const { roles, createRole, updateRole, deleteRole, userRoles, assignRole, removeRole, getUserRoles } = usePrivileges();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -121,81 +217,6 @@ const RoleManagement = () => {
     return acc;
   }, {} as Record<string, typeof AVAILABLE_PRIVILEGES>);
 
-  const RoleForm = () => (
-    <>
-      <div className="space-y-4">
-        <div>
-          <label className="text-sm font-medium">Role Name</label>
-          <Input
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Enter role name"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Description</label>
-          <Textarea
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Enter role description"
-            rows={3}
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium mb-2 block">Privileges</label>
-          <ScrollArea className="h-[400px] border rounded-md p-4">
-            <div className="space-y-4">
-              {Object.entries(privilegesByCategory).map(([category, privs]) => (
-                <div key={category}>
-                  <h4 className="font-medium text-sm mb-2 capitalize sticky top-0 bg-background py-1">
-                    {category.replace(/_/g, " ")}
-                  </h4>
-                  <div className="space-y-2 ml-2">
-                    {privs.map((priv) => (
-                      <div key={priv.id} className="flex items-start space-x-2">
-                        <Checkbox
-                          id={priv.id}
-                          checked={formData.privileges.includes(priv.id)}
-                          onCheckedChange={() => togglePrivilege(priv.id)}
-                          className="mt-1"
-                        />
-                        <label
-                          htmlFor={priv.id}
-                          className="text-sm cursor-pointer flex-1 leading-tight"
-                        >
-                          <div className="font-medium">{priv.name}</div>
-                          <div className="text-muted-foreground text-xs">
-                            {priv.description}
-                          </div>
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
-      </div>
-      
-      <SheetFooter className="mt-6">
-        <Button
-          variant="outline"
-          onClick={() => {
-            setIsCreateOpen(false);
-            setEditingRole(null);
-            resetForm();
-          }}
-        >
-          Cancel
-        </Button>
-        <Button onClick={editingRole ? handleUpdate : handleCreate}>
-          {editingRole ? "Update" : "Create"} Role
-        </Button>
-      </SheetFooter>
-    </>
-  );
-
   return (
     <div className="min-h-screen bg-background">
       <AdminHeader />
@@ -225,16 +246,24 @@ const RoleManagement = () => {
                     Create Role
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-[600px] sm:max-w-[600px]">
+                <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
                   <SheetHeader>
                     <SheetTitle>Create New Role</SheetTitle>
                     <SheetDescription>
                       Define a custom role with specific privileges for your organization
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="mt-6">
-                    <RoleForm />
-                  </div>
+                  <RoleForm
+                    formData={formData}
+                    setFormData={setFormData}
+                    onSubmit={handleCreate}
+                    onCancel={() => {
+                      setIsCreateOpen(false);
+                      resetForm();
+                    }}
+                    isEditing={false}
+                    privilegesByCategory={privilegesByCategory}
+                  />
                 </SheetContent>
               </Sheet>
             </div>
@@ -427,16 +456,24 @@ const RoleManagement = () => {
         </Tabs>
 
         <Sheet open={!!editingRole} onOpenChange={(open) => !open && setEditingRole(null)}>
-          <SheetContent className="w-[600px] sm:max-w-[600px]">
+          <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
             <SheetHeader>
               <SheetTitle>Edit Role</SheetTitle>
               <SheetDescription>
                 Update role privileges and information
               </SheetDescription>
             </SheetHeader>
-            <div className="mt-6">
-              <RoleForm />
-            </div>
+            <RoleForm
+              formData={formData}
+              setFormData={setFormData}
+              onSubmit={handleUpdate}
+              onCancel={() => {
+                setEditingRole(null);
+                resetForm();
+              }}
+              isEditing={true}
+              privilegesByCategory={privilegesByCategory}
+            />
           </SheetContent>
         </Sheet>
       </main>
