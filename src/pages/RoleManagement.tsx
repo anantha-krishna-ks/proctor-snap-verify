@@ -28,13 +28,11 @@ interface RoleFormProps {
     description: string;
     privileges: string[];
   }>>;
-  onSubmit: () => void;
-  onCancel: () => void;
   isEditing: boolean;
   privilegesByCategory: Record<string, typeof AVAILABLE_PRIVILEGES>;
 }
 
-const RoleForm = ({ formData, setFormData, onSubmit, onCancel, isEditing, privilegesByCategory }: RoleFormProps) => {
+const RoleForm = ({ formData, setFormData, isEditing, privilegesByCategory }: RoleFormProps) => {
   const togglePrivilege = (privilegeId: string) => {
     setFormData(prev => ({
       ...prev,
@@ -99,14 +97,6 @@ const RoleForm = ({ formData, setFormData, onSubmit, onCancel, isEditing, privil
             </div>
           </ScrollArea>
         </div>
-      </div>
-      <div className="flex justify-end gap-2 border-t pt-4 mt-2">
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button onClick={onSubmit}>
-          {isEditing ? "Update" : "Create"} Role
-        </Button>
       </div>
     </div>
   );
@@ -245,24 +235,50 @@ const RoleManagement = () => {
                     Create Role
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
-                  <SheetHeader>
-                    <SheetTitle>Create New Role</SheetTitle>
-                    <SheetDescription>
-                      Define a custom role with specific privileges for your organization
-                    </SheetDescription>
+                <SheetContent className="flex flex-col w-[600px] sm:max-w-[600px]">
+                  <SheetHeader className="border-b pb-3 mb-3 flex items-center justify-between">
+                    <div>
+                      <SheetTitle>Create New Role</SheetTitle>
+                      <SheetDescription>
+                        Define a custom role with specific privileges for your organization
+                      </SheetDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsCreateOpen(false);
+                          resetForm();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleCreate}>
+                        Create Role
+                      </Button>
+                    </div>
                   </SheetHeader>
-                  <RoleForm
-                    formData={formData}
-                    setFormData={setFormData}
-                    onSubmit={handleCreate}
-                    onCancel={() => {
-                      setIsCreateOpen(false);
-                      resetForm();
-                    }}
-                    isEditing={false}
-                    privilegesByCategory={privilegesByCategory}
-                  />
+                  <div className="flex-1 min-h-0">
+                    <RoleForm
+                      formData={formData}
+                      setFormData={setFormData}
+                      isEditing={false}
+                      privilegesByCategory={privilegesByCategory}
+                    />
+                  </div>
+                  <SheetFooter className="mt-4 border-t pt-4 flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsCreateOpen(false);
+                        resetForm();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleCreate}>Create Role</Button>
+                  </SheetFooter>
                 </SheetContent>
               </Sheet>
             </div>
@@ -455,24 +471,50 @@ const RoleManagement = () => {
         </Tabs>
 
         <Sheet open={!!editingRole} onOpenChange={(open) => !open && setEditingRole(null)}>
-          <SheetContent className="w-[600px] sm:max-w-[600px] overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>Edit Role</SheetTitle>
-              <SheetDescription>
-                Update role privileges and information
-              </SheetDescription>
+          <SheetContent className="flex flex-col w-[600px] sm:max-w-[600px]">
+            <SheetHeader className="border-b pb-3 mb-3 flex items-center justify-between">
+              <div>
+                <SheetTitle>Edit Role</SheetTitle>
+                <SheetDescription>
+                  Update role privileges and information
+                </SheetDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEditingRole(null);
+                    resetForm();
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleUpdate}>
+                  Update Role
+                </Button>
+              </div>
             </SheetHeader>
-            <RoleForm
-              formData={formData}
-              setFormData={setFormData}
-              onSubmit={handleUpdate}
-              onCancel={() => {
-                setEditingRole(null);
-                resetForm();
-              }}
-              isEditing={true}
-              privilegesByCategory={privilegesByCategory}
-            />
+            <div className="flex-1 min-h-0">
+              <RoleForm
+                formData={formData}
+                setFormData={setFormData}
+                isEditing={true}
+                privilegesByCategory={privilegesByCategory}
+              />
+            </div>
+            <SheetFooter className="mt-4 border-t pt-4 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditingRole(null);
+                  resetForm();
+                }}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleUpdate}>Update Role</Button>
+            </SheetFooter>
           </SheetContent>
         </Sheet>
       </main>
