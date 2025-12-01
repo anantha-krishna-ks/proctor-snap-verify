@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { BulkMarkerAssignment } from "@/components/BulkMarkerAssignment";
 import { MarkerAssignmentsSlider } from "@/components/MarkerAssignmentsSlider";
-import { MarkerProgressDialog } from "@/components/MarkerProgressDialog";
+import { MarkerProgressSlider } from "@/components/MarkerProgressDialog";
 import { candidates } from "@/data/mockData";
 
 interface ScheduleTableProps {
@@ -375,7 +375,7 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
         });
 
         return (
-          <MarkerProgressDialog
+          <MarkerProgressSlider
             open={progressDialog.open}
             onClose={() => setProgressDialog(null)}
             scheduleName={progressDialog.schedule.scheduleName}
