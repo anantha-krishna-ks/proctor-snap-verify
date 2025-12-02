@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -234,19 +235,36 @@ export const MarkerAssignmentsSlider = ({
                     className="border rounded-lg px-4"
                   >
                     <AccordionTrigger className="hover:no-underline">
-                      <div className="flex items-center justify-between w-full pr-4">
-                        <div className="flex items-center gap-2">
-                          <User className="w-5 h-5 text-primary" />
-                          <div className="text-left">
-                            <div className="font-semibold">{group.markerName}</div>
-                            <div className="text-xs text-muted-foreground">
-                              ID: {group.markerId}
+                      <div className="flex flex-col gap-3 w-full pr-4">
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <User className="w-5 h-5 text-primary" />
+                            <div className="text-left">
+                              <div className="font-semibold">{group.markerName}</div>
+                              <div className="text-xs text-muted-foreground">
+                                ID: {group.markerId}
+                              </div>
                             </div>
                           </div>
+                          <Badge variant="secondary">
+                            {group.candidates.length} candidate(s)
+                          </Badge>
                         </div>
-                        <Badge variant="secondary">
-                          {group.candidates.length} candidate(s)
-                        </Badge>
+                        <div className="w-full space-y-1">
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Progress</span>
+                            <span>
+                              {group.candidates.filter(c => c.evaluationStatus === "completed").length} / {group.candidates.length} completed
+                            </span>
+                          </div>
+                          <Progress 
+                            value={
+                              (group.candidates.filter(c => c.evaluationStatus === "completed").length / 
+                              group.candidates.length) * 100
+                            } 
+                            className="h-2"
+                          />
+                        </div>
                       </div>
                     </AccordionTrigger>
 
