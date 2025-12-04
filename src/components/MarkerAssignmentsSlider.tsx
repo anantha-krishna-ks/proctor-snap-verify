@@ -74,6 +74,7 @@ export const MarkerAssignmentsSlider = ({
   const [assigningToMarker, setAssigningToMarker] = useState<string | null>(null);
   const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(new Set());
   const [candidateSearch, setCandidateSearch] = useState("");
+  const [selectedMarkers, setSelectedMarkers] = useState<Set<string>>(new Set());
   const [assignments, setAssignments] = useState<Record<string, string[]>>(() => {
     // Initialize from existing assignments or empty
     const initial: Record<string, string[]> = {};
@@ -81,13 +82,34 @@ export const MarkerAssignmentsSlider = ({
       initial[m.id] = [];
     });
     // Simulate some existing assignments based on candidate data
-    allScheduleCandidates.forEach(c => {
+    completedTestCandidates.forEach(c => {
       if (c.markerId && initial[c.markerId]) {
         initial[c.markerId].push(c.id);
       }
     });
     return initial;
   });
+
+  // Toggle marker selection
+  const handleToggleMarker = (markerId: string) => {
+    setSelectedMarkers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(markerId)) {
+        newSet.delete(markerId);
+      } else {
+        newSet.add(markerId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAllMarkers = () => {
+    if (selectedMarkers.size === filteredMarkers.length) {
+      setSelectedMarkers(new Set());
+    } else {
+      setSelectedMarkers(new Set(filteredMarkers.map(m => m.id)));
+    }
+  };
 
   // Filter markers
   const filteredMarkers = mockMarkers.filter(
@@ -123,26 +145,35 @@ export const MarkerAssignmentsSlider = ({
 
   // Handlers
   const handleAutoDistribute = () => {
-    if (mockMarkers.length === 0) {
-      toast.error("No markers available");
+    const selectedMarkersList = mockMarkers.filter(m => selectedMarkers.has(m.id));
+    if (selectedMarkersList.length < 2) {
+      toast.error("Select at least 2 markers to auto-distribute");
       return;
     }
 
-    const newAssignments: Record<string, string[]> = {};
-    mockMarkers.forEach((m) => {
+    const newAssignments: Record<string, string[]> = { ...assignments };
+    // Reset only selected markers
+    selectedMarkersList.forEach((m) => {
       newAssignments[m.id] = [];
     });
 
-    completedTestCandidates.forEach((candidate, index) => {
-      const markerIndex = index % mockMarkers.length;
-      const markerId = mockMarkers[markerIndex].id;
+    // Get unassigned + assigned to selected markers
+    const candidatesToDistribute = completedTestCandidates.filter(c => {
+      const currentAssignedTo = Object.entries(assignments).find(([, ids]) => ids.includes(c.id))?.[0];
+      return !currentAssignedTo || selectedMarkers.has(currentAssignedTo);
+    });
+
+    candidatesToDistribute.forEach((candidate, index) => {
+      const markerIndex = index % selectedMarkersList.length;
+      const markerId = selectedMarkersList[markerIndex].id;
       newAssignments[markerId].push(candidate.id);
     });
 
     setAssignments(newAssignments);
     toast.success(
-      `Auto-distributed ${completedTestCandidates.length} candidates among ${mockMarkers.length} markers`
+      `Auto-distributed ${candidatesToDistribute.length} candidates among ${selectedMarkersList.length} markers`
     );
+    setSelectedMarkers(new Set());
   };
 
   const handleAssignCandidates = () => {
@@ -228,15 +259,19 @@ export const MarkerAssignmentsSlider = ({
                 {schedule.scheduleName} • {completedTestCandidates.length} candidates ready
               </SheetDescription>
             </div>
-            <Button onClick={handleAutoDistribute} className="gap-2">
+            <Button 
+              onClick={handleAutoDistribute} 
+              className="gap-2"
+              disabled={selectedMarkers.size < 2}
+            >
               <Zap className="w-4 h-4" />
-              Auto Distribute
+              Auto Distribute {selectedMarkers.size > 0 && `(${selectedMarkers.size})`}
             </Button>
           </div>
         </SheetHeader>
 
         {/* Stats Summary */}
-        <div className="flex items-center gap-4 px-6 py-3 bg-muted/30 border-b text-sm">
+        <div className="flex items-center gap-4 px-6 py-2 bg-muted/30 border-b text-sm">
           <div className="flex items-center gap-1.5">
             <Users className="w-4 h-4 text-muted-foreground" />
             <span className="font-medium">{completedTestCandidates.length}</span>
@@ -256,18 +291,28 @@ export const MarkerAssignmentsSlider = ({
         </div>
 
         {/* Filters */}
-        <div className="px-6 py-3 border-b flex items-center gap-3">
+        <div className="px-6 py-2 border-b flex items-center gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search markers..."
               value={markerSearch}
               onChange={(e) => setMarkerSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 h-9"
             />
           </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleSelectAllMarkers}
+            className="shrink-0"
+          >
+            {selectedMarkers.size === filteredMarkers.length && filteredMarkers.length > 0
+              ? "Deselect All"
+              : "Select All"}
+          </Button>
           <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="w-[140px] h-9">
               <Eye className="w-4 h-4 mr-2" />
               <SelectValue placeholder="View" />
             </SelectTrigger>
@@ -294,19 +339,25 @@ export const MarkerAssignmentsSlider = ({
                     value={marker.id}
                     className="border rounded-lg bg-card overflow-hidden"
                   >
-                    <div className="flex items-center gap-2 px-4 py-3">
+                    <div className="flex items-center gap-3 px-4 py-3">
+                      <Checkbox
+                        checked={selectedMarkers.has(marker.id)}
+                        onCheckedChange={() => handleToggleMarker(marker.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="shrink-0"
+                      />
                       <AccordionTrigger className="flex-1 hover:no-underline p-0 [&>svg]:hidden">
                         <div className="flex items-center gap-3 w-full">
-                          <Avatar className="h-10 w-10 shrink-0">
-                            <AvatarFallback className="bg-primary/10 text-primary">
+                          <Avatar className="h-9 w-9 shrink-0">
+                            <AvatarFallback className="bg-primary/10 text-primary text-sm">
                               {marker.name.split(" ").map((n) => n[0]).join("")}
                             </AvatarFallback>
                           </Avatar>
                           <div className="text-left flex-1 min-w-0">
-                            <div className="font-medium truncate">{marker.name}</div>
-                            <div className="text-sm text-muted-foreground truncate">{marker.email}</div>
+                            <div className="font-medium text-sm truncate">{marker.name}</div>
+                            <div className="text-xs text-muted-foreground truncate">{marker.email}</div>
                           </div>
-                          <Badge variant="secondary" className="text-sm font-semibold shrink-0">
+                          <Badge variant="secondary" className="text-xs font-semibold shrink-0">
                             {totalAssignedToMarker} assigned
                           </Badge>
                           <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200" />
@@ -320,9 +371,9 @@ export const MarkerAssignmentsSlider = ({
                           e.stopPropagation();
                           setAssigningToMarker(marker.id);
                         }}
-                        className="gap-1.5 shrink-0"
+                        className="gap-1.5 shrink-0 h-8 text-xs"
                       >
-                        <UserPlus className="w-4 h-4" />
+                        <UserPlus className="w-3.5 h-3.5" />
                         Assign
                       </Button>
                     </div>
