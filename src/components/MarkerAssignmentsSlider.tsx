@@ -863,53 +863,47 @@ export const MarkerAssignmentsSlider = ({
         {/* Management Mode */}
         {viewMode === "management" && (
           <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Stats Overview */}
-            <div className="grid grid-cols-4 gap-3 p-4 bg-muted/30 border-b">
-              <div className="text-center">
-                <div className="text-2xl font-bold">{allScheduleCandidates.length}</div>
-                <div className="text-xs text-muted-foreground">Total Candidates</div>
+            {/* Compact Stats Bar */}
+            <div className="flex items-center gap-4 px-4 py-2 bg-muted/30 border-b text-sm">
+              <div className="flex items-center gap-1.5">
+                <Users className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium">{allScheduleCandidates.length}</span>
+                <span className="text-muted-foreground">total</span>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{assignedCandidates.length}</div>
-                <div className="text-xs text-muted-foreground">Assigned</div>
+              <Separator orientation="vertical" className="h-4" />
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                <span className="font-medium text-green-600">{assignedCandidates.length}</span>
+                <span className="text-muted-foreground">assigned</span>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{unassignedCandidates.length}</div>
-                <div className="text-xs text-muted-foreground">Unassigned</div>
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-orange-600" />
+                <span className="font-medium text-orange-600">{unassignedCandidates.length}</span>
+                <span className="text-muted-foreground">unassigned</span>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">{schedule.assignedMarkers?.length || 0}</div>
-                <div className="text-xs text-muted-foreground">Markers</div>
+              <Separator orientation="vertical" className="h-4" />
+              <div className="flex items-center gap-1.5">
+                <User className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium">{schedule.assignedMarkers?.length || 0}</span>
+                <span className="text-muted-foreground">markers</span>
               </div>
+              
+              {/* Inline Marker Progress */}
+              {markerStats.length > 0 && (
+                <>
+                  <Separator orientation="vertical" className="h-4" />
+                  <div className="flex items-center gap-2 flex-1 overflow-x-auto">
+                    {markerStats.map((marker) => (
+                      <div key={marker.markerId} className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-xs text-muted-foreground">{marker.markerName.split(' ')[0]}:</span>
+                        <Progress value={marker.progress} className="h-1.5 w-12" />
+                        <span className="text-xs font-medium">{marker.completed}/{marker.total}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
-
-            {/* Marker Progress Cards */}
-            {markerStats.length > 0 && (
-              <div className="p-4 border-b space-y-3">
-                <div className="text-sm font-medium">Marker Progress</div>
-                <div className="grid grid-cols-2 gap-3">
-                  {markerStats.map((marker) => (
-                    <div key={marker.markerId} className="p-3 bg-muted/30 rounded-lg space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-primary" />
-                          <span className="font-medium text-sm">{marker.markerName}</span>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">
-                          {marker.total} assigned
-                        </Badge>
-                      </div>
-                      <Progress value={marker.progress} className="h-2" />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{marker.completed} completed</span>
-                        <span>{marker.inProgress} in progress</span>
-                        <span>{marker.notStarted} pending</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Filters and Search */}
             <div className="p-4 border-b space-y-3">
