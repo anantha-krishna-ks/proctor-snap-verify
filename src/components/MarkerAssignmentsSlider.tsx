@@ -16,21 +16,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { 
-  Search, User, CheckCircle2, XCircle, Clock, UserPlus, Users, 
-  Zap, Eye, ChevronDown
+  Search, User, CheckCircle2, XCircle, Clock, UserPlus, Users, Zap
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -57,7 +49,7 @@ interface MarkerAssignmentsSliderProps {
   schedule: Schedule;
 }
 
-type StatusFilter = "all" | "not_started" | "in_progress" | "completed";
+
 
 export const MarkerAssignmentsSlider = ({
   open,
@@ -70,7 +62,6 @@ export const MarkerAssignmentsSlider = ({
   
   // State
   const [markerSearch, setMarkerSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [assigningToMarker, setAssigningToMarker] = useState<string | null>(null);
   const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(new Set());
   const [candidateSearch, setCandidateSearch] = useState("");
@@ -118,16 +109,10 @@ export const MarkerAssignmentsSlider = ({
       m.email.toLowerCase().includes(markerSearch.toLowerCase())
   );
 
-  // Get assigned candidates for a marker with status filter
+  // Get assigned candidates for a marker
   const getMarkerCandidates = (markerId: string) => {
     const assignedIds = assignments[markerId] || [];
-    let markerCandidates = completedTestCandidates.filter(c => assignedIds.includes(c.id));
-    
-    if (statusFilter !== "all") {
-      markerCandidates = markerCandidates.filter(c => c.evaluationStatus === statusFilter);
-    }
-    
-    return markerCandidates;
+    return completedTestCandidates.filter(c => assignedIds.includes(c.id));
   };
 
   // Get unassigned candidates
@@ -311,18 +296,6 @@ export const MarkerAssignmentsSlider = ({
               ? "Deselect All"
               : "Select All"}
           </Button>
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-            <SelectTrigger className="w-[140px] h-9">
-              <Eye className="w-4 h-4 mr-2" />
-              <SelectValue placeholder="View" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="not_started">Pending</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         {/* Markers List with Accordions */}
@@ -346,7 +319,7 @@ export const MarkerAssignmentsSlider = ({
                         onClick={(e) => e.stopPropagation()}
                         className="shrink-0"
                       />
-                      <AccordionTrigger className="flex-1 hover:no-underline p-0 [&>svg]:hidden">
+                      <AccordionTrigger className="flex-1 hover:no-underline p-0">
                         <div className="flex items-center gap-3 w-full">
                           <Avatar className="h-9 w-9 shrink-0">
                             <AvatarFallback className="bg-primary/10 text-primary text-sm">
@@ -357,24 +330,22 @@ export const MarkerAssignmentsSlider = ({
                             <div className="font-medium text-sm truncate">{marker.name}</div>
                             <div className="text-xs text-muted-foreground truncate">{marker.email}</div>
                           </div>
-                          <Badge variant="secondary" className="text-xs font-semibold shrink-0">
+                          <Badge variant="secondary" className="text-xs font-semibold shrink-0 mr-2">
                             {totalAssignedToMarker} assigned
                           </Badge>
-                          <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200" />
                         </div>
                       </AccordionTrigger>
                       
                       <Button
-                        variant="outline"
-                        size="sm"
+                        variant="ghost"
+                        size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
                           setAssigningToMarker(marker.id);
                         }}
-                        className="gap-1.5 shrink-0 h-8 text-xs"
+                        className="shrink-0 h-8 w-8"
                       >
-                        <UserPlus className="w-3.5 h-3.5" />
-                        Assign
+                        <UserPlus className="w-4 h-4" />
                       </Button>
                     </div>
                     
@@ -382,9 +353,7 @@ export const MarkerAssignmentsSlider = ({
                       <Separator className="mb-3" />
                       {markerCandidates.length === 0 ? (
                         <div className="text-center py-6 text-muted-foreground text-sm">
-                          {totalAssignedToMarker === 0 
-                            ? "No candidates assigned yet" 
-                            : "No candidates match the current filter"}
+                          No candidates assigned yet
                         </div>
                       ) : (
                         <div className="space-y-2">
