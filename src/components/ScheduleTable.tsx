@@ -14,7 +14,7 @@ import {
 import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, AlertCircle, UserCheck, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { BulkMarkerAssignment } from "@/components/BulkMarkerAssignment";
+
 import { MarkerAssignmentsSlider } from "@/components/MarkerAssignmentsSlider";
 import { MarkerProgressSlider } from "@/components/MarkerProgressDialog";
 import { candidates } from "@/data/mockData";
@@ -27,11 +27,6 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
   const navigate = useNavigate();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-  const [markerAssignmentDialog, setMarkerAssignmentDialog] = useState<{
-    open: boolean;
-    scheduleId: string;
-    scheduleName: string;
-  } | null>(null);
   const [assignmentsSlider, setAssignmentsSlider] = useState<{
     open: boolean;
     schedule: Schedule;
@@ -306,10 +301,9 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            setMarkerAssignmentDialog({
+                            setAssignmentsSlider({
                               open: true,
-                              scheduleId: schedule.id,
-                              scheduleName: schedule.scheduleName,
+                              schedule: schedule,
                             })
                           }
                         >
@@ -343,14 +337,6 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
         </TableBody>
       </Table>
 
-      {markerAssignmentDialog && (
-        <BulkMarkerAssignment
-          open={markerAssignmentDialog.open}
-          onClose={() => setMarkerAssignmentDialog(null)}
-          scheduleId={markerAssignmentDialog.scheduleId}
-          scheduleName={markerAssignmentDialog.scheduleName}
-        />
-      )}
 
       {assignmentsSlider && (
         <MarkerAssignmentsSlider
