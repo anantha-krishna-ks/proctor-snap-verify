@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/accordion";
 import { 
   Search, User, CheckCircle2, XCircle, Clock, UserPlus, Users, 
-  Zap, Eye, ChevronRight
+  Zap, Eye, ChevronDown
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -294,39 +294,37 @@ export const MarkerAssignmentsSlider = ({
                     value={marker.id}
                     className="border rounded-lg bg-card overflow-hidden"
                   >
-                    <div className="flex items-center px-4 py-3">
+                    <div className="flex items-center gap-2 px-4 py-3">
                       <AccordionTrigger className="flex-1 hover:no-underline p-0 [&>svg]:hidden">
-                        <div className="flex items-center gap-3 flex-1">
-                          <Avatar className="h-10 w-10">
+                        <div className="flex items-center gap-3 w-full">
+                          <Avatar className="h-10 w-10 shrink-0">
                             <AvatarFallback className="bg-primary/10 text-primary">
                               {marker.name.split(" ").map((n) => n[0]).join("")}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="text-left flex-1">
-                            <div className="font-medium">{marker.name}</div>
-                            <div className="text-sm text-muted-foreground">{marker.email}</div>
+                          <div className="text-left flex-1 min-w-0">
+                            <div className="font-medium truncate">{marker.name}</div>
+                            <div className="text-sm text-muted-foreground truncate">{marker.email}</div>
                           </div>
-                          <Badge variant="secondary" className="text-sm font-semibold">
+                          <Badge variant="secondary" className="text-sm font-semibold shrink-0">
                             {totalAssignedToMarker} assigned
                           </Badge>
+                          <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200" />
                         </div>
                       </AccordionTrigger>
                       
-                      <div className="flex items-center gap-2 ml-3">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setAssigningToMarker(marker.id);
-                          }}
-                          className="gap-1.5"
-                        >
-                          <UserPlus className="w-4 h-4" />
-                          Assign
-                        </Button>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground transition-transform duration-200 [[data-state=open]_&]:rotate-90" />
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAssigningToMarker(marker.id);
+                        }}
+                        className="gap-1.5 shrink-0"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        Assign
+                      </Button>
                     </div>
                     
                     <AccordionContent className="px-4 pb-4 pt-0">
