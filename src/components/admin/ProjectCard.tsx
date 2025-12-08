@@ -65,7 +65,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
               <DropdownMenuItem onClick={() => handleNavigate("tests")}>
                 View Tests
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigate("schedules")}>
+              <DropdownMenuItem onClick={() => navigate("/schedules")}>
                 View Schedules
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleNavigate("blueprints")}>
