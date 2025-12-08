@@ -21,10 +21,14 @@ import {
 } from "@/components/ui/table";
 import { mockForms, mockConfigurations } from "@/data/formsMockData";
 import { format } from "date-fns";
+import CreateConfigurationSheet from "@/components/CreateConfigurationSheet";
+import type { FormConfiguration } from "@/types/forms";
 
 const FormsDashboard = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [configSheetOpen, setConfigSheetOpen] = useState(false);
+  const [configurations, setConfigurations] = useState(mockConfigurations);
 
   const filteredForms = mockForms.filter(
     (form) =>
@@ -87,7 +91,7 @@ const FormsDashboard = () => {
               <Settings className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockConfigurations.length}</div>
+              <div className="text-2xl font-bold">{configurations.length}</div>
             </CardContent>
           </Card>
           <Card>
@@ -115,6 +119,13 @@ const FormsDashboard = () => {
             />
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setConfigSheetOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Configuration
+            </Button>
             <Button
               variant="outline"
               onClick={() => navigate("/forms/configurations")}
@@ -190,6 +201,14 @@ const FormsDashboard = () => {
           </CardContent>
         </Card>
       </main>
+
+      <CreateConfigurationSheet
+        open={configSheetOpen}
+        onOpenChange={setConfigSheetOpen}
+        onConfigurationCreated={(newConfig) => {
+          setConfigurations((prev) => [...prev, newConfig]);
+        }}
+      />
     </div>
   );
 };
