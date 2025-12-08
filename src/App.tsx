@@ -10,6 +10,10 @@ import HeadshotApproval from "./pages/HeadshotApproval";
 import MarkerDashboard from "./pages/MarkerDashboard";
 import MarkerEvaluation from "./pages/MarkerEvaluation";
 import RoleManagement from "./pages/RoleManagement";
+import FormsDashboard from "./pages/FormsDashboard";
+import CreateForm from "./pages/CreateForm";
+import ConfigurationsList from "./pages/ConfigurationsList";
+import CreateConfiguration from "./pages/CreateConfiguration";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -85,6 +89,38 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["marker"]}>
                 <MarkerEvaluation />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <FormsDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms/create"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <CreateForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms/configurations"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ConfigurationsList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms/configurations/create"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <CreateConfiguration />
               </ProtectedRoute>
             }
           />
