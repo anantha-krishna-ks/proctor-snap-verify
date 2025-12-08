@@ -1,122 +1,75 @@
-import { AdminHeader } from "@/components/admin/AdminHeader";
-import { StatCard } from "@/components/admin/StatCard";
-import { RecentActivityList } from "@/components/admin/RecentActivityList";
-import { dashboardStats, recentActivities } from "@/data/adminMockData";
-import { 
-  Users, 
-  Shield, 
-  PenTool, 
-  Eye, 
-  FileEdit, 
-  Database, 
-  FileText, 
-  CheckCircle2, 
-  Activity,
-  Clock,
-  UserCheck
-} from "lucide-react";
+import { useState } from "react";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { DashboardHeader } from "@/components/admin/DashboardHeader";
+import { ProjectCard } from "@/components/admin/ProjectCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { mockProjects } from "@/data/projectMockData";
 
 const AdminDashboard = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredProjects = mockProjects.filter(
+    (project) =>
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.code.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="min-h-screen bg-background">
-      <AdminHeader />
-      
-      <main className="container mx-auto px-6 py-6">
-        {/* User Statistics */}
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-foreground">User Statistics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-            <StatCard
-              title="Total Users"
-              value={dashboardStats.totalUsers}
-              icon={Users}
-              trend={{ value: 12, isPositive: true }}
-            />
-            <StatCard
-              title="Admins"
-              value={dashboardStats.totalAdmins}
-              icon={Shield}
-              description="System administrators"
-            />
-            <StatCard
-              title="Authors"
-              value={dashboardStats.totalAuthors}
-              icon={PenTool}
-              description="Content creators"
-            />
-            <StatCard
-              title="Proctors"
-              value={dashboardStats.totalProctors}
-              icon={Eye}
-              description="Test supervisors"
-            />
-            <StatCard
-              title="Test Authors"
-              value={dashboardStats.totalTestAuthors}
-              icon={FileEdit}
-              description="Assessment creators"
-            />
-            <StatCard
-              title="Markers"
-              value={dashboardStats.totalMarkers}
-              icon={UserCheck}
-              description="Evaluators"
-            />
-          </div>
-        </section>
+    <div className="min-h-screen bg-background flex flex-col">
+      <DashboardHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
-        {/* Assessment Metrics */}
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-foreground">Assessment Metrics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              title="Total Items Created"
-              value={dashboardStats.totalItems}
-              icon={Database}
-              trend={{ value: 8, isPositive: true }}
-            />
-            <StatCard
-              title="Tests Created"
-              value={dashboardStats.totalTests}
-              icon={FileText}
-              description="Total test assessments"
-            />
-            <StatCard
-              title="Successful Tests Taken"
-              value={dashboardStats.successfulTestsTaken.toLocaleString()}
-              icon={CheckCircle2}
-              trend={{ value: 15, isPositive: true }}
-            />
-            <StatCard
-              title="Active Assessments"
-              value={dashboardStats.activeAssessments}
-              icon={Activity}
-              description="Currently running"
-            />
-          </div>
-        </section>
+      <div className="flex flex-1">
+        <AdminSidebar />
 
-        {/* Recent Activity & Quick Actions */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <RecentActivityList activities={recentActivities} />
+        <main className="flex-1 p-6">
+          {/* Title and Actions */}
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-semibold text-foreground">Latest Products</h1>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" className="border-primary text-primary hover:bg-primary/5">
+                Manage Products
+              </Button>
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by product code, name"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
           </div>
-          
-          <div className="space-y-4">
-            <StatCard
-              title="Pending Approvals"
-              value={dashboardStats.pendingApprovals}
-              icon={Clock}
-              description="Headshots awaiting review"
-              className="bg-warning/5 border-warning/20"
-            />
-          </div>
-        </section>
 
-        <div className="mt-6 text-center text-xs text-muted-foreground">
-          Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd
-        </div>
-      </main>
+          {/* Project Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProjects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </div>
+
+          {filteredProjects.length === 0 && (
+            <div className="text-center py-12 text-muted-foreground">
+              No products found matching your search.
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="mt-8 text-center text-xs text-muted-foreground">
+            Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd{" "}
+            <a
+              href="https://www.excelsoftcorp.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              https://www.excelsoftcorp.com
+            </a>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
