@@ -20,15 +20,17 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { mockConfigurations } from "@/data/formsMockData";
-import type { FormItem, FormSection, FormBlueprint } from "@/types/forms";
+import type { FormItem, FormSection, FormBlueprint, FormConfiguration } from "@/types/forms";
 import { toast } from "@/hooks/use-toast";
 import AddItemsSheet from "@/components/AddItemsSheet";
 import AddBlueprintSheet from "@/components/AddBlueprintSheet";
+import CreateConfigurationSheet from "@/components/CreateConfigurationSheet";
 
 const CreateForm = () => {
   const navigate = useNavigate();
   const [formName, setFormName] = useState("");
   const [formCode, setFormCode] = useState("");
+  const [configurations, setConfigurations] = useState<FormConfiguration[]>(mockConfigurations);
   const [selectedConfigId, setSelectedConfigId] = useState("default");
   const [sections, setSections] = useState<FormSection[]>([
     { id: "section-1", name: "Section 1", items: [] }
@@ -36,9 +38,16 @@ const CreateForm = () => {
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const [showAddItems, setShowAddItems] = useState(false);
   const [showAddBlueprint, setShowAddBlueprint] = useState(false);
+  const [showConfigSheet, setShowConfigSheet] = useState(false);
   const [expandedSections, setExpandedSections] = useState<string[]>(["section-1"]);
 
-  const selectedConfig = mockConfigurations.find((c) => c.id === selectedConfigId);
+  const selectedConfig = configurations.find((c) => c.id === selectedConfigId);
+
+  const handleConfigurationCreated = (config: FormConfiguration) => {
+    setConfigurations([...configurations, config]);
+    setSelectedConfigId(config.id);
+    toast({ title: "Configuration Created", description: `"${config.name}" has been created and selected` });
+  };
 
   const handleAddSection = () => {
     const newSection: FormSection = {
@@ -214,7 +223,7 @@ const CreateForm = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate("/forms/configurations/create")}
+                  onClick={() => setShowConfigSheet(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   New Config
@@ -226,8 +235,8 @@ const CreateForm = () => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select a configuration" />
                 </SelectTrigger>
-                <SelectContent>
-                  {mockConfigurations.map((config) => (
+                <SelectContent className="bg-popover">
+                  {configurations.map((config) => (
                     <SelectItem key={config.id} value={config.id}>
                       <div className="flex items-center gap-2">
                         {config.name}
@@ -400,6 +409,11 @@ const CreateForm = () => {
         open={showAddBlueprint}
         onOpenChange={setShowAddBlueprint}
         onApplyBlueprint={handleApplyBlueprint}
+      />
+      <CreateConfigurationSheet
+        open={showConfigSheet}
+        onOpenChange={setShowConfigSheet}
+        onConfigurationCreated={handleConfigurationCreated}
       />
     </div>
   );
