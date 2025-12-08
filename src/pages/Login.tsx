@@ -43,14 +43,8 @@ const Login = () => {
 
     toast.success(`Logged in as ${roles.find(r => r.value === selectedRole)?.label}`);
 
-    // Redirect based on role
-    if (selectedRole === "marker") {
-      navigate("/marker");
-    } else if (selectedRole === "admin") {
-      navigate("/admin");
-    } else {
-      navigate("/admin");
-    }
+    // All users land on dashboard after login
+    navigate("/admin");
   };
 
   return (
