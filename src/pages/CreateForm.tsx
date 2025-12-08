@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Settings, Trash2, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, Settings, Trash2, GripVertical, ChevronDown, ChevronUp, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,42 +14,106 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { mockConfigurations } from "@/data/formsMockData";
-import type { FormConfiguration, FormItem } from "@/types/forms";
+import type { FormItem, FormSection, FormBlueprint } from "@/types/forms";
 import { toast } from "@/hooks/use-toast";
-
-// Mock available items to add
-const availableItems: FormItem[] = [
-  { id: "item-1", title: "What is the capital of France?", type: "mcq", marks: 2 },
-  { id: "item-2", title: "Explain the theory of relativity", type: "essay", marks: 10 },
-  { id: "item-3", title: "The sun rises in the ___", type: "fill-blank", marks: 1 },
-  { id: "item-4", title: "Water boils at 100°C", type: "true-false", marks: 1 },
-  { id: "item-5", title: "Calculate the area of a circle with radius 5", type: "mcq", marks: 3 },
-  { id: "item-6", title: "Describe photosynthesis process", type: "essay", marks: 8 },
-];
+import AddItemsSheet from "@/components/AddItemsSheet";
+import AddBlueprintSheet from "@/components/AddBlueprintSheet";
 
 const CreateForm = () => {
   const navigate = useNavigate();
   const [formName, setFormName] = useState("");
   const [formCode, setFormCode] = useState("");
   const [selectedConfigId, setSelectedConfigId] = useState("default");
-  const [selectedItems, setSelectedItems] = useState<FormItem[]>([]);
+  const [sections, setSections] = useState<FormSection[]>([
+    { id: "section-1", name: "Section 1", items: [] }
+  ]);
+  const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
+  const [showAddItems, setShowAddItems] = useState(false);
+  const [showAddBlueprint, setShowAddBlueprint] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<string[]>(["section-1"]);
 
   const selectedConfig = mockConfigurations.find((c) => c.id === selectedConfigId);
 
-  const handleAddItem = (item: FormItem) => {
-    if (!selectedItems.find((i) => i.id === item.id)) {
-      setSelectedItems([...selectedItems, item]);
+  const handleAddSection = () => {
+    const newSection: FormSection = {
+      id: `section-${Date.now()}`,
+      name: `Section ${sections.length + 1}`,
+      items: [],
+    };
+    setSections([...sections, newSection]);
+    setExpandedSections([...expandedSections, newSection.id]);
+  };
+
+  const handleRemoveSection = (sectionId: string) => {
+    if (sections.length === 1) {
+      toast({ title: "Error", description: "At least one section is required", variant: "destructive" });
+      return;
     }
+    setSections(sections.filter((s) => s.id !== sectionId));
+    setExpandedSections(expandedSections.filter((id) => id !== sectionId));
   };
 
-  const handleRemoveItem = (itemId: string) => {
-    setSelectedItems(selectedItems.filter((i) => i.id !== itemId));
+  const handleUpdateSectionName = (sectionId: string, name: string) => {
+    setSections(sections.map((s) => s.id === sectionId ? { ...s, name } : s));
   };
 
-  const getTotalMarks = () => {
-    return selectedItems.reduce((sum, item) => sum + item.marks, 0);
+  const handleOpenAddItems = (sectionId: string) => {
+    setActiveSectionId(sectionId);
+    setShowAddItems(true);
   };
+
+  const handleOpenAddBlueprint = (sectionId: string) => {
+    setActiveSectionId(sectionId);
+    setShowAddBlueprint(true);
+  };
+
+  const handleAddItemsToSection = (items: FormItem[]) => {
+    if (!activeSectionId) return;
+    setSections(sections.map((section) => {
+      if (section.id === activeSectionId) {
+        const existingIds = section.items.map((i) => i.id);
+        const newItems = items.filter((item) => !existingIds.includes(item.id));
+        return { ...section, items: [...section.items, ...newItems] };
+      }
+      return section;
+    }));
+  };
+
+  const handleApplyBlueprint = (blueprint: FormBlueprint) => {
+    toast({ 
+      title: "Blueprint Applied", 
+      description: `Applied "${blueprint.name}" - items will be auto-selected based on rules` 
+    });
+    // In a real implementation, this would query items based on blueprint rules
+  };
+
+  const handleRemoveItem = (sectionId: string, itemId: string) => {
+    setSections(sections.map((section) => {
+      if (section.id === sectionId) {
+        return { ...section, items: section.items.filter((i) => i.id !== itemId) };
+      }
+      return section;
+    }));
+  };
+
+  const toggleSectionExpanded = (sectionId: string) => {
+    setExpandedSections(
+      expandedSections.includes(sectionId)
+        ? expandedSections.filter((id) => id !== sectionId)
+        : [...expandedSections, sectionId]
+    );
+  };
+
+  const getTotalItems = () => sections.reduce((sum, s) => sum + s.items.length, 0);
+  const getTotalMarks = () => sections.reduce((sum, s) => sum + s.items.reduce((iSum, i) => iSum + i.marks, 0), 0);
+
+  const getAllExistingItemIds = () => sections.flatMap((s) => s.items.map((i) => i.id));
 
   const getItemTypeBadge = (type: string) => {
     const colors: Record<string, string> = {
@@ -70,7 +134,7 @@ const CreateForm = () => {
       toast({ title: "Error", description: "Form code is required", variant: "destructive" });
       return;
     }
-    if (selectedItems.length === 0) {
+    if (getTotalItems() === 0) {
       toast({ title: "Error", description: "Add at least one item", variant: "destructive" });
       return;
     }
@@ -108,186 +172,235 @@ const CreateForm = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Form Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Basic Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Form Details</CardTitle>
-                <CardDescription>Basic information about your form</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="formName">Form Name *</Label>
-                    <Input
-                      id="formName"
-                      placeholder="e.g., Mathematics Final Exam"
-                      value={formName}
-                      onChange={(e) => setFormName(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="formCode">Form Code *</Label>
-                    <Input
-                      id="formCode"
-                      placeholder="e.g., MATH-101"
-                      value={formCode}
-                      onChange={(e) => setFormCode(e.target.value)}
-                    />
-                  </div>
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Basic Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Form Details</CardTitle>
+              <CardDescription>Basic information about your form</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="formName">Form Name *</Label>
+                  <Input
+                    id="formName"
+                    placeholder="e.g., Mathematics Final Exam"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                  />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="space-y-2">
+                  <Label htmlFor="formCode">Form Code *</Label>
+                  <Input
+                    id="formCode"
+                    placeholder="e.g., MATH-101"
+                    value={formCode}
+                    onChange={(e) => setFormCode(e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Configuration Selection */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Configuration</CardTitle>
-                    <CardDescription>Select exam settings configuration</CardDescription>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate("/forms/configurations/create")}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Config
-                  </Button>
+          {/* Configuration Selection */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Configuration</CardTitle>
+                  <CardDescription>Select exam settings configuration</CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Select value={selectedConfigId} onValueChange={setSelectedConfigId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a configuration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockConfigurations.map((config) => (
-                      <SelectItem key={config.id} value={config.id}>
-                        <div className="flex items-center gap-2">
-                          {config.name}
-                          {config.isDefault && (
-                            <Badge variant="secondary" className="text-xs">
-                              Default
-                            </Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/forms/configurations/create")}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Config
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Select value={selectedConfigId} onValueChange={setSelectedConfigId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a configuration" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockConfigurations.map((config) => (
+                    <SelectItem key={config.id} value={config.id}>
+                      <div className="flex items-center gap-2">
+                        {config.name}
+                        {config.isDefault && (
+                          <Badge variant="secondary" className="text-xs">
+                            Default
+                          </Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {selectedConfig && (
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <Settings className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">Configuration Preview</span>
+                  </div>
+                  <Separator />
+                  <div className="grid grid-cols-2 gap-2 text-muted-foreground">
+                    <span>Duration:</span>
+                    <span className="text-foreground">{selectedConfig.examRules.duration} min</span>
+                    <span>Language:</span>
+                    <span className="text-foreground">{selectedConfig.examRules.language}</span>
+                    <span>Back Navigation:</span>
+                    <span className="text-foreground">
+                      {selectedConfig.examRules.allowBackNavigation ? "Allowed" : "Not Allowed"}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Sections */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Sections & Items</CardTitle>
+                  <CardDescription>
+                    {getTotalItems()} items • {getTotalMarks()} total marks
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleAddSection}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Section
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {sections.map((section) => (
+                <Collapsible
+                  key={section.id}
+                  open={expandedSections.includes(section.id)}
+                  onOpenChange={() => toggleSectionExpanded(section.id)}
+                >
+                  <div className="border rounded-lg">
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50">
+                        <div className="flex items-center gap-3">
+                          {expandedSections.includes(section.id) ? (
+                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
                           )}
+                          <Input
+                            value={section.name}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              handleUpdateSectionName(section.id, e.target.value);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-8 w-48 font-medium"
+                          />
+                          <Badge variant="secondary">
+                            {section.items.length} items
+                          </Badge>
                         </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {selectedConfig && (
-                  <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Settings className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">Configuration Preview</span>
-                    </div>
-                    <Separator />
-                    <div className="grid grid-cols-2 gap-2 text-muted-foreground">
-                      <span>Duration:</span>
-                      <span className="text-foreground">{selectedConfig.examRules.duration} min</span>
-                      <span>Language:</span>
-                      <span className="text-foreground">{selectedConfig.examRules.language}</span>
-                      <span>Back Navigation:</span>
-                      <span className="text-foreground">
-                        {selectedConfig.examRules.allowBackNavigation ? "Allowed" : "Not Allowed"}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Selected Items */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Selected Items ({selectedItems.length})</CardTitle>
-                <CardDescription>
-                  Total Marks: {getTotalMarks()}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {selectedItems.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No items added yet</p>
-                    <p className="text-sm">Select items from the panel on the right</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {selectedItems.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center gap-3 p-3 border rounded-lg bg-card hover:bg-muted/50"
-                      >
-                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                        <span className="text-sm font-medium text-muted-foreground w-6">
-                          {index + 1}.
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm truncate">{item.title}</p>
-                        </div>
-                        <Badge className={getItemTypeBadge(item.type)}>{item.type}</Badge>
-                        <span className="text-sm text-muted-foreground">{item.marks} marks</span>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 text-destructive"
-                          onClick={() => handleRemoveItem(item.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveSection(section.id);
+                          }}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <Separator />
+                      <div className="p-4 space-y-3">
+                        {/* Add buttons */}
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenAddItems(section.id)}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Items
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenAddBlueprint(section.id)}
+                          >
+                            <Layers className="h-4 w-4 mr-2" />
+                            Add Rule/Blueprint
+                          </Button>
+                        </div>
 
-          {/* Right Column - Available Items */}
-          <div className="space-y-6">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle>Available Items</CardTitle>
-                <CardDescription>Click to add items to your form</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {availableItems.map((item) => {
-                    const isSelected = selectedItems.find((i) => i.id === item.id);
-                    return (
-                      <div
-                        key={item.id}
-                        onClick={() => !isSelected && handleAddItem(item)}
-                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                          isSelected
-                            ? "bg-muted/50 border-primary/50 opacity-50 cursor-not-allowed"
-                            : "hover:bg-muted/50 hover:border-primary/30"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm flex-1">{item.title}</p>
-                          <Plus className={`h-4 w-4 shrink-0 ${isSelected ? "invisible" : ""}`} />
-                        </div>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge className={`text-xs ${getItemTypeBadge(item.type)}`}>
-                            {item.type}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">{item.marks} marks</span>
-                        </div>
+                        {/* Items list */}
+                        {section.items.length === 0 ? (
+                          <div className="text-center py-6 text-muted-foreground border-2 border-dashed rounded-lg">
+                            <p className="text-sm">No items in this section</p>
+                            <p className="text-xs">Click "Add Items" to get started</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            {section.items.map((item, index) => (
+                              <div
+                                key={item.id}
+                                className="flex items-center gap-3 p-3 border rounded-lg bg-card hover:bg-muted/50"
+                              >
+                                <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+                                <span className="text-sm font-medium text-muted-foreground w-6">
+                                  {index + 1}.
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm truncate">{item.title}</p>
+                                </div>
+                                <Badge className={getItemTypeBadge(item.type)}>{item.type}</Badge>
+                                <span className="text-sm text-muted-foreground">{item.marks} marks</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive"
+                                  onClick={() => handleRemoveItem(section.id, item.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    </CollapsibleContent>
+                  </div>
+                </Collapsible>
+              ))}
+            </CardContent>
+          </Card>
         </div>
       </main>
+
+      {/* Sheets */}
+      <AddItemsSheet
+        open={showAddItems}
+        onOpenChange={setShowAddItems}
+        existingItemIds={getAllExistingItemIds()}
+        onAddItems={handleAddItemsToSection}
+      />
+      <AddBlueprintSheet
+        open={showAddBlueprint}
+        onOpenChange={setShowAddBlueprint}
+        onApplyBlueprint={handleApplyBlueprint}
+      />
     </div>
   );
 };
