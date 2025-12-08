@@ -30,6 +30,26 @@ export interface FormItem {
   title: string;
   type: 'mcq' | 'essay' | 'fill-blank' | 'true-false';
   marks: number;
+  category?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
+}
+
+export interface FormSection {
+  id: string;
+  name: string;
+  items: FormItem[];
+}
+
+export interface FormBlueprint {
+  id: string;
+  name: string;
+  description: string;
+  rules: {
+    category?: string;
+    difficulty?: 'easy' | 'medium' | 'hard';
+    type?: FormItem['type'];
+    count: number;
+  }[];
 }
 
 export interface Form {
