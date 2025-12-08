@@ -1,0 +1,71 @@
+export interface FormConfiguration {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  createdAt: string;
+  // Exam Rules
+  examRules: {
+    duration: number; // in minutes
+    language: string;
+    allowBackNavigation: boolean;
+    enableSectionTimers: boolean;
+    allowPauseResume: boolean;
+    showItemFeedback: boolean;
+  };
+  // Exam Instructions
+  examInstructions: string;
+  // Security
+  security: {
+    startPaused: boolean;
+    preventCopyPaste: boolean;
+    disableRightClick: boolean;
+    fullScreenMode: boolean;
+    shuffleQuestions: boolean;
+    shuffleOptions: boolean;
+  };
+}
+
+export interface FormItem {
+  id: string;
+  title: string;
+  type: 'mcq' | 'essay' | 'fill-blank' | 'true-false';
+  marks: number;
+}
+
+export interface Form {
+  id: string;
+  name: string;
+  code: string;
+  configurationId: string;
+  configurationName: string;
+  items: FormItem[];
+  totalMarks: number;
+  totalQuestions: number;
+  status: 'draft' | 'published' | 'archived';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const defaultConfiguration: FormConfiguration = {
+  id: 'default',
+  name: 'Default Configuration',
+  isDefault: true,
+  createdAt: new Date().toISOString(),
+  examRules: {
+    duration: 60,
+    language: 'English',
+    allowBackNavigation: true,
+    enableSectionTimers: false,
+    allowPauseResume: false,
+    showItemFeedback: false,
+  },
+  examInstructions: '<p>Please read all questions carefully before answering.</p><p>You can navigate between questions using the navigation panel.</p>',
+  security: {
+    startPaused: false,
+    preventCopyPaste: true,
+    disableRightClick: true,
+    fullScreenMode: false,
+    shuffleQuestions: false,
+    shuffleOptions: false,
+  },
+};
