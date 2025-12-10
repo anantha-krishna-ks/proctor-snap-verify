@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, FileText, Users, BarChart3, ClipboardList, TrendingUp, CheckCircle, XCircle, Clock, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, LineChart, Line, Legend, Cell } from "recharts";
+import { mockProjects } from "@/data/projectMockData";
 
 // Sample Data
 const assessmentOverviewData = {
@@ -74,7 +75,11 @@ const performanceTrend = [
 
 const ReportsDashboard = () => {
   const navigate = useNavigate();
+  const { productId } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
+  
+  const product = mockProjects.find(p => p.id === productId);
+  const productName = product?.name || "Product";
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,6 +90,7 @@ const ReportsDashboard = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
+            <p className="text-xs text-muted-foreground">{productName}</p>
             <h1 className="text-2xl font-semibold text-foreground">Assessment Reports</h1>
             <p className="text-sm text-muted-foreground">Analytics and insights for your assessments</p>
           </div>
