@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, FileText, Calendar, MoreHorizontal, Image } from "lucide-react";
+import { FolderOpen, FileText, Calendar, MoreHorizontal, Image, BarChart3 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,7 +58,7 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="bg-popover">
               <DropdownMenuItem onClick={() => handleNavigate("items")}>
                 View Items
               </DropdownMenuItem>
@@ -70,6 +70,10 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleNavigate("blueprints")}>
                 View Blueprints
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate(`/admin/products/${project.id}/reports`)}>
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Reports
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

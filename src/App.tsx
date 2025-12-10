@@ -126,7 +126,7 @@ const App = () => (
             }
           />
           <Route
-            path="/reports"
+            path="/admin/products/:productId/reports"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <ReportsDashboard />
