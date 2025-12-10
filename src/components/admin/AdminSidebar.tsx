@@ -8,6 +8,7 @@ import {
   PenTool,
   Database,
   Settings,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ const navItems = [
   { title: "Roles", url: "/admin/roles", icon: Shield },
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Marker", url: "/marker", icon: PenTool },
+  { title: "Reports", url: "/reports", icon: BarChart3 },
   { title: "Metadata", url: "/admin/metadata", icon: Database },
   { title: "Masters", url: "/admin/masters", icon: Settings },
 ];

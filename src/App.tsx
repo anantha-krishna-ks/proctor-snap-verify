@@ -14,6 +14,7 @@ import FormsDashboard from "./pages/FormsDashboard";
 import CreateForm from "./pages/CreateForm";
 import ConfigurationsList from "./pages/ConfigurationsList";
 import CreateConfiguration from "./pages/CreateConfiguration";
+import ReportsDashboard from "./pages/ReportsDashboard";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -121,6 +122,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <CreateConfiguration />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ReportsDashboard />
               </ProtectedRoute>
             }
           />
