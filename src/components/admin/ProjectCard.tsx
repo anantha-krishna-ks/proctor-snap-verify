@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FolderOpen, FileText, Calendar, MoreHorizontal, Image, BarChart3 } from "lucide-react";
+import { FolderOpen, FileText, Calendar, MoreHorizontal, Image, BarChart3, Package, ClipboardList, CalendarDays, Layers } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,15 +60,19 @@ export const ProjectCard = ({ project }: ProjectCardProps) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover">
               <DropdownMenuItem onClick={() => handleNavigate("items")}>
+                <Package className="h-4 w-4 mr-2" />
                 View Items
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/forms")}>
+                <ClipboardList className="h-4 w-4 mr-2" />
                 Forms
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/scheduling")}>
+                <CalendarDays className="h-4 w-4 mr-2" />
                 View Schedules
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleNavigate("blueprints")}>
+                <Layers className="h-4 w-4 mr-2" />
                 View Blueprints
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate(`/admin/products/${project.id}/reports`)}>
