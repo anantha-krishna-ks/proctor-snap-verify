@@ -27,24 +27,170 @@ const assessmentOverviewData = {
 };
 
 const coachingReportData = {
-  candidate: "Anita Sharma",
-  assessment: "Math Aptitude Test",
-  totalScore: 72,
-  maxScore: 100,
-  passed: true,
-  sections: [
-    { name: "Algebra", score: 18, maxScore: 20, percentage: 90 },
-    { name: "Geometry", score: 12, maxScore: 20, percentage: 60 },
-    { name: "Statistics", score: 22, maxScore: 30, percentage: 73 },
-    { name: "Arithmetic", score: 20, maxScore: 30, percentage: 67 },
-  ],
-  feedback: "Strong in Algebra, needs improvement in Statistics and Arithmetic.",
-  questionFeedback: [
-    { question: "Q1: Solve 2x + 5 = 15", correct: true, comment: "Excellent work!" },
-    { question: "Q2: Find area of triangle", correct: false, comment: "Review area formulas" },
-    { question: "Q3: Calculate mean of dataset", correct: true, comment: "Good understanding" },
-    { question: "Q4: Simplify 3x² + 2x - x²", correct: true, comment: "Correct simplification" },
-    { question: "Q5: Percentage increase from 50 to 75", correct: false, comment: "Practice percentage calculations" },
+  // Participant & Assessment Info
+  assessmentType: "Test",
+  participantId: "SamuelEdbrooke13525",
+  participantGroup: "Travis Perkins plc",
+  participantDetails: "",
+  participantAuthor: "d.mallinson@onwards.co.uk",
+  assessmentName: "Trade Supplier V1.0 Paper 334.181",
+  assessmentId: "04361370050430137",
+  assessmentLastModified: "Sep 25 2024 11:18:30",
+  assessmentDescription: "Thank you for taking this knowledge test.",
+  
+  // Right column
+  timeTaken: "00:18:59",
+  status: "Finished",
+  totalScore: 26,
+  maxScore: 36,
+  percentageScore: 87,
+  questionsPresented: 21,
+  questionsAnswered: 20,
+  assessmentOutcomeLabel: "Distinction",
+  
+  // Feedback
+  assessmentOutcomeFeedback: "Your results will be available from your training provider / employer within 10 working days of completing the end point assessment process.",
+  
+  // Timestamps
+  dateOfMakingReport: "Nov 17 2025 21:36:21",
+  dateStarted: "Nov 14 2025 10:52:40",
+  dateFinished: "Nov 14 2025 11:10:30",
+  whetherMonitored: "No",
+  nameOfMonitor: "",
+  assessmentTimeLimit: 60,
+  
+  // Questions
+  questions: [
+    {
+      id: 1,
+      questionWording: "What is the correct procedure for handling customer complaints?",
+      topic: "Trade Supplier 603377952.1 Customer Service Excellence",
+      questionType: "Multiple Choice",
+      possibleOutcomes: "0 Accept the offer., 1 Pretend you don't understand., 2 Call the police., 3 Tell your manager.",
+      outcomeChosen: "3 Tell your manager.",
+      answerGiven: "Tell your manager",
+      actualScore: 1,
+      maximumScore: 1,
+      feedbackShown: "",
+      correct: true,
+    },
+    {
+      id: 2,
+      questionWording: "How should you store hazardous materials in the warehouse?",
+      topic: "Trade Supplier 603377952.1 Health and Safety Compliance",
+      questionType: "Multiple Choice",
+      possibleOutcomes: "0 Anywhere convenient., 1 In designated storage areas., 2 Near exits., 3 On the shop floor.",
+      outcomeChosen: "1 In designated storage areas.",
+      answerGiven: "In designated storage areas.",
+      actualScore: 1,
+      maximumScore: 1,
+      feedbackShown: "",
+      correct: true,
+    },
+    {
+      id: 3,
+      questionWording: "What is the maximum weight an individual should lift without assistance?",
+      topic: "Trade Supplier 603377952.1 Manual Handling",
+      questionType: "Multiple Choice",
+      possibleOutcomes: "0 50kg., 1 25kg., 2 10kg., 3 No limit.",
+      outcomeChosen: "0 50kg.",
+      answerGiven: "50kg.",
+      actualScore: 0,
+      maximumScore: 1,
+      feedbackShown: "The recommended maximum weight is 25kg. Review manual handling guidelines.",
+      correct: false,
+    },
+    {
+      id: 4,
+      questionWording: "Which document is required for all trade transactions?",
+      topic: "Trade Supplier 603377952.1 Documentation",
+      questionType: "Multiple Choice",
+      possibleOutcomes: "0 Personal ID., 1 Invoice., 2 Business card., 3 None required.",
+      outcomeChosen: "1 Invoice.",
+      answerGiven: "Invoice.",
+      actualScore: 1,
+      maximumScore: 1,
+      feedbackShown: "",
+      correct: true,
+    },
+    {
+      id: 5,
+      questionWording: "What is the first step when dealing with a product return?",
+      topic: "Trade Supplier 603377952.1 Returns Process",
+      questionType: "Multiple Choice",
+      possibleOutcomes: "0 Refuse the return., 1 Check the receipt., 2 Call the manager., 3 Accept without checking.",
+      outcomeChosen: "1 Check the receipt.",
+      answerGiven: "Check the receipt.",
+      actualScore: 1,
+      maximumScore: 1,
+      feedbackShown: "",
+      correct: true,
+    },
+    {
+      id: 6,
+      questionWording: "How should damaged goods be reported?",
+      topic: "Trade Supplier 603377952.1 Stock Management",
+      questionType: "Multiple Choice",
+      possibleOutcomes: "0 Ignore them., 1 Report to supervisor immediately., 2 Sell at discount., 3 Dispose quietly.",
+      outcomeChosen: "1 Report to supervisor immediately.",
+      answerGiven: "Report to supervisor immediately.",
+      actualScore: 1,
+      maximumScore: 1,
+      feedbackShown: "",
+      correct: true,
+    },
+    {
+      id: 7,
+      questionWording: "Which is an appropriate question to ask a customer to best meet and exceed their needs?",
+      topic: "Trade Supplier 603377952.1 Identify specialist customer needs",
+      questionType: "Multiple Choice",
+      possibleOutcomes: "0 How long do you usually take to complete a job?, 1 What do you want?, 2 Youre ok grabbing what you want from the warehouse., 3 What is the job that you're doing?",
+      outcomeChosen: "3 What is the job that you're doing?",
+      answerGiven: "What is the job that you're doing?",
+      actualScore: 1,
+      maximumScore: 1,
+      feedbackShown: "",
+      correct: true,
+    },
+    {
+      id: 8,
+      questionWording: "What is a barrier to active listening?",
+      topic: "Trade Supplier 603377952.2 Recognise how to be an effective listener",
+      questionType: "Multiple Choice",
+      possibleOutcomes: "0 Verbal nods., 1 Maintaining eye contact., 2 Asking probing questions., 3 Excessive talking.",
+      outcomeChosen: "1 Maintaining eye contact.",
+      answerGiven: "Maintaining eye contact.",
+      actualScore: 0,
+      maximumScore: 1,
+      feedbackShown: "Maintaining eye contact is actually a sign of active listening, not a barrier. The correct answer is excessive talking.",
+      correct: false,
+    },
+    {
+      id: 9,
+      questionWording: "What PPE is required when handling cement products?",
+      topic: "Trade Supplier 603377952.1 Safety Equipment",
+      questionType: "Multiple Choice",
+      possibleOutcomes: "0 No PPE required., 1 Gloves and mask., 2 Just gloves., 3 Safety glasses only.",
+      outcomeChosen: "1 Gloves and mask.",
+      answerGiven: "Gloves and mask.",
+      actualScore: 1,
+      maximumScore: 1,
+      feedbackShown: "",
+      correct: true,
+    },
+    {
+      id: 10,
+      questionWording: "What is the correct procedure for end-of-day cash handling?",
+      topic: "Trade Supplier 603377952.1 Cash Management",
+      questionType: "Multiple Choice",
+      possibleOutcomes: "0 Leave in till., 1 Count and secure in safe., 2 Take home., 3 Give to colleague.",
+      outcomeChosen: "1 Count and secure in safe.",
+      answerGiven: "Count and secure in safe.",
+      actualScore: 1,
+      maximumScore: 1,
+      feedbackShown: "",
+      correct: true,
+    },
   ],
 };
 
@@ -77,9 +223,13 @@ const ReportsDashboard = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedQuestionId, setSelectedQuestionId] = useState(1);
   
   const product = mockProjects.find(p => p.id === productId);
   const productName = product?.name || "Product";
+  
+  const selectedQuestion = coachingReportData.questions.find(q => q.id === selectedQuestionId);
+  const isPassed = coachingReportData.percentageScore >= 60;
 
   return (
     <div className="min-h-screen bg-background">
@@ -192,84 +342,213 @@ const ReportsDashboard = () => {
 
           {/* Coaching Report */}
           <TabsContent value="coaching" className="space-y-6">
+            {/* Header with Title */}
             <Card>
-              <CardHeader className="flex flex-row items-start justify-between">
-                <div>
-                  <CardTitle className="text-xl">{coachingReportData.candidate}</CardTitle>
-                  <CardDescription>{coachingReportData.assessment}</CardDescription>
-                </div>
-                <Badge variant={coachingReportData.passed ? "default" : "destructive"} className="text-sm px-3 py-1">
-                  {coachingReportData.passed ? "PASS" : "FAIL"}
-                </Badge>
+              <CardHeader className="text-center border-b border-border pb-4">
+                <CardTitle className="text-2xl font-bold">Coaching Report</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="text-4xl font-bold text-primary">
-                    {coachingReportData.totalScore}/{coachingReportData.maxScore}
+              <CardContent className="pt-6">
+                {/* Main Info Table */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Left Column */}
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Assessment type</span>
+                      <span className="text-foreground">{coachingReportData.assessmentType}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Participant ID</span>
+                      <span className="text-foreground">{coachingReportData.participantId}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Participant group</span>
+                      <span className="text-foreground">{coachingReportData.participantGroup}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Participant details</span>
+                      <span className="text-foreground">{coachingReportData.participantDetails || "-"}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Assessment author</span>
+                      <span className="text-foreground">{coachingReportData.participantAuthor}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Assessment name</span>
+                      <span className="text-foreground">{coachingReportData.assessmentName}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Assessment ID</span>
+                      <span className="text-foreground">{coachingReportData.assessmentId}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Assessment last modified</span>
+                      <span className="text-foreground">{coachingReportData.assessmentLastModified}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Assessment description</span>
+                      <span className="text-foreground">{coachingReportData.assessmentDescription}</span>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <Progress value={(coachingReportData.totalScore / coachingReportData.maxScore) * 100} className="h-3" />
+                  
+                  {/* Right Column */}
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Time taken</span>
+                      <span className="text-foreground">{coachingReportData.timeTaken}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Status</span>
+                      <span className="text-foreground">{coachingReportData.status}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Total score</span>
+                      <span className="text-foreground font-semibold">{coachingReportData.totalScore}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Maximum score</span>
+                      <span className="text-foreground">{coachingReportData.maxScore}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Percentage score</span>
+                      <span className="text-foreground font-semibold">{coachingReportData.percentageScore}%</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Questions presented</span>
+                      <span className="text-foreground">{coachingReportData.questionsPresented}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Questions answered</span>
+                      <span className="text-foreground">{coachingReportData.questionsAnswered}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Assessment outcome label</span>
+                      <Badge variant={isPassed ? "default" : "destructive"} className="w-fit">
+                        {coachingReportData.assessmentOutcomeLabel}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
-                <div className="p-4 bg-muted/50 rounded-lg mb-6">
-                  <p className="text-muted-foreground italic">"{coachingReportData.feedback}"</p>
+
+                {/* Assessment Outcome Feedback */}
+                <div className="mt-6 pt-4 border-t border-border">
+                  <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                    <span className="font-medium text-muted-foreground">Assessment outcome feedback</span>
+                    <span className="text-foreground">{coachingReportData.assessmentOutcomeFeedback}</span>
+                  </div>
+                </div>
+
+                {/* Timestamps */}
+                <div className="mt-6 pt-4 border-t border-border grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Date/time of making report</span>
+                      <span className="text-foreground">{coachingReportData.dateOfMakingReport}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Date/time started</span>
+                      <span className="text-foreground">{coachingReportData.dateStarted}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Date/time finished</span>
+                      <span className="text-foreground">{coachingReportData.dateFinished}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Whether monitored</span>
+                      <span className="text-foreground">{coachingReportData.whetherMonitored}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Name of the monitor</span>
+                      <span className="text-foreground">{coachingReportData.nameOfMonitor || "-"}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Assessment time limit</span>
+                      <span className="text-foreground">{coachingReportData.assessmentTimeLimit}</span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
+            {/* Questions Section */}
             <Card>
               <CardHeader>
-                <CardTitle>Section Breakdown</CardTitle>
+                <CardTitle>Questions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {coachingReportData.sections.map((section) => (
-                    <div key={section.name} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-foreground">{section.name}</span>
-                        <span className="text-sm text-muted-foreground">
-                          {section.score}/{section.maxScore} ({section.percentage}%)
-                        </span>
-                      </div>
-                      <Progress 
-                        value={section.percentage} 
-                        className={`h-2 ${section.percentage >= 80 ? "[&>div]:bg-success" : section.percentage >= 60 ? "[&>div]:bg-primary" : "[&>div]:bg-warning"}`}
-                      />
-                    </div>
+                {/* Question Tabs */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {coachingReportData.questions.map((q) => (
+                    <button
+                      key={q.id}
+                      onClick={() => setSelectedQuestionId(q.id)}
+                      className={`
+                        relative px-4 py-2 min-w-[50px] text-center rounded-sm text-sm font-medium transition-colors
+                        ${selectedQuestionId === q.id 
+                          ? "bg-primary text-primary-foreground" 
+                          : "bg-muted hover:bg-muted/80 text-foreground"
+                        }
+                      `}
+                    >
+                      {q.id}
+                      <span className="absolute -top-1 -right-1">
+                        {q.correct ? (
+                          <CheckCircle className="h-4 w-4 text-success" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-destructive" />
+                        )}
+                      </span>
+                    </button>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Question-wise Feedback</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Question</TableHead>
-                      <TableHead className="text-center">Result</TableHead>
-                      <TableHead>Comment</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {coachingReportData.questionFeedback.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{item.question}</TableCell>
-                        <TableCell className="text-center">
-                          {item.correct ? (
-                            <CheckCircle className="h-5 w-5 text-success mx-auto" />
-                          ) : (
-                            <XCircle className="h-5 w-5 text-destructive mx-auto" />
-                          )}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">{item.comment}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                {/* Selected Question Details */}
+                {selectedQuestion && (
+                  <div className="border border-border rounded-lg p-4 space-y-3">
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Question wording</span>
+                      <span className="text-foreground">{selectedQuestion.questionWording}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Topic</span>
+                      <span className="text-foreground">{selectedQuestion.topic}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Question type</span>
+                      <span className="text-foreground">{selectedQuestion.questionType}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Possible outcomes</span>
+                      <span className="text-foreground">{selectedQuestion.possibleOutcomes}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Outcome(s) chosen</span>
+                      <span className="text-foreground">{selectedQuestion.outcomeChosen}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Answer given</span>
+                      <span className="text-foreground">{selectedQuestion.answerGiven}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Actual score</span>
+                      <span className="text-foreground">{selectedQuestion.actualScore}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Maximum score</span>
+                      <span className="text-foreground">{selectedQuestion.maximumScore}</span>
+                    </div>
+                    <div className="grid grid-cols-[180px_1fr] gap-2 text-sm">
+                      <span className="font-medium text-muted-foreground">Feedback shown</span>
+                      <span className="text-foreground">{selectedQuestion.feedbackShown || "-"}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Page indicator */}
+                <div className="text-center mt-4 text-sm text-muted-foreground">
+                  {selectedQuestionId}/{coachingReportData.questions.length}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
