@@ -7,6 +7,8 @@ import { PrivilegeProvider } from "@/hooks/usePrivileges";
 import AdminDashboard from "./pages/AdminDashboard";
 import ScheduleDashboard from "./pages/ScheduleDashboard";
 import HeadshotApproval from "./pages/HeadshotApproval";
+import MarkerProjectsDashboard from "./pages/MarkerProjectsDashboard";
+import MarkerSchedulesDashboard from "./pages/MarkerSchedulesDashboard";
 import MarkerDashboard from "./pages/MarkerDashboard";
 import MarkerEvaluation from "./pages/MarkerEvaluation";
 import RoleManagement from "./pages/RoleManagement";
@@ -79,6 +81,22 @@ const App = () => (
           />
           <Route
             path="/marker"
+            element={
+              <ProtectedRoute allowedRoles={["marker"]}>
+                <MarkerProjectsDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marker/projects/:projectId/schedules"
+            element={
+              <ProtectedRoute allowedRoles={["marker"]}>
+                <MarkerSchedulesDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marker/projects/:projectId/schedules/:scheduleId/candidates"
             element={
               <ProtectedRoute allowedRoles={["marker"]}>
                 <MarkerDashboard />
