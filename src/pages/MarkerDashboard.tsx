@@ -14,68 +14,20 @@ import {
 import { Search, ClipboardList, CheckCircle2, Clock, ArrowLeft, LogOut, Calendar, AlertTriangle, LayoutList, CalendarDays } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format, isSameDay, parseISO } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { AdminHeader } from "@/components/admin/AdminHeader";
-import { usePrivileges } from "@/hooks/usePrivileges";
-
-interface AssignedCandidate {
-  id: string;
-  name: string;
-  email: string;
-  scheduleName: string;
-  assessmentName: string;
-  submittedAt: string;
-  evaluationStatus: "not_started" | "in_progress" | "completed";
-  totalScore?: number;
-  maxScore: number;
-  completionDate?: string;
-}
-
-const mockAssignedCandidates: AssignedCandidate[] = [
-  {
-    id: "c1",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    scheduleName: "Q1 2024 Assessment - Batch A",
-    assessmentName: "Advanced Programming Test",
-    submittedAt: "2024-03-15T10:30:00",
-    evaluationStatus: "not_started",
-    maxScore: 100,
-    completionDate: "2024-12-10",
-  },
-  {
-    id: "c2",
-    name: "Sarah Johnson",
-    email: "sarah.j@example.com",
-    scheduleName: "Q1 2024 Assessment - Batch A",
-    assessmentName: "Advanced Programming Test",
-    submittedAt: "2024-03-15T11:45:00",
-    evaluationStatus: "in_progress",
-    totalScore: 45,
-    maxScore: 100,
-    completionDate: "2024-12-05",
-  },
-  {
-    id: "c3",
-    name: "Mike Chen",
-    email: "mike.chen@example.com",
-    scheduleName: "Q1 2024 Assessment - Batch B",
-    assessmentName: "Data Structures Exam",
-    submittedAt: "2024-03-14T14:20:00",
-    evaluationStatus: "completed",
-    totalScore: 87,
-    maxScore: 100,
-    completionDate: "2024-12-01",
-  },
-];
+import { mockMarkerCandidates, mockMarkerSchedules, mockMarkerProjects } from "@/data/markerMockData";
 
 const MarkerDashboard = () => {
   const navigate = useNavigate();
-  const { hasPrivilege } = usePrivileges();
+  const { projectId, scheduleId } = useParams<{ projectId: string; scheduleId: string }>();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "calendar">("table");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+
+  const project = mockMarkerProjects.find((p) => p.id === projectId);
+  const schedule = mockMarkerSchedules.find((s) => s.scheduleId === scheduleId);
+  const candidates = mockMarkerCandidates.filter((c) => c.scheduleId === scheduleId);
 
   const handleLogout = () => {
     localStorage.removeItem("userRole");
@@ -85,17 +37,16 @@ const MarkerDashboard = () => {
     navigate("/login");
   };
 
-  const filteredCandidates = mockAssignedCandidates.filter((candidate) =>
+  const filteredCandidates = candidates.filter((candidate) =>
     candidate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    candidate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    candidate.scheduleName.toLowerCase().includes(searchQuery.toLowerCase())
+    candidate.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const stats = {
-    total: mockAssignedCandidates.length,
-    notStarted: mockAssignedCandidates.filter(c => c.evaluationStatus === "not_started").length,
-    inProgress: mockAssignedCandidates.filter(c => c.evaluationStatus === "in_progress").length,
-    completed: mockAssignedCandidates.filter(c => c.evaluationStatus === "completed").length,
+    total: candidates.length,
+    notStarted: candidates.filter(c => c.evaluationStatus === "not_started").length,
+    inProgress: candidates.filter(c => c.evaluationStatus === "in_progress").length,
+    completed: candidates.filter(c => c.evaluationStatus === "completed").length,
   };
 
   const getStatusBadge = (status: string) => {
@@ -160,7 +111,7 @@ const MarkerDashboard = () => {
   };
 
   // Get candidates with deadlines for calendar view
-  const candidatesWithDeadlines = mockAssignedCandidates.filter(c => c.completionDate);
+  const candidatesWithDeadlines = candidates.filter(c => c.completionDate);
   
   // Get dates that have deadlines
   const datesWithDeadlines = candidatesWithDeadlines.map(c => parseISO(c.completionDate!));
@@ -181,38 +132,45 @@ const MarkerDashboard = () => {
     hasDeadline: "bg-primary/20 font-bold hover:bg-primary/30",
   };
 
+  if (!project || !schedule) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-2">Schedule Not Found</h1>
+          <Button onClick={() => navigate("/marker")}>Back to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      {hasPrivilege("dashboard.admin") ? (
-        <AdminHeader />
-      ) : (
-        <header className="border-b border-border bg-card">
-          <div className="container mx-auto px-6 py-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/admin")}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Admin
-                </Button>
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground">Marker Dashboard</h1>
-                  <p className="text-sm text-muted-foreground">
-                    Evaluate assigned candidates
-                  </p>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
+      <header className="border-b border-border bg-card">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(`/marker/projects/${projectId}/schedules`)}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
               </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">{schedule.scheduleName}</h1>
+                <p className="text-sm text-muted-foreground">
+                  {schedule.assessmentName} • {project.name}
+                </p>
+              </div>
             </div>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
           </div>
-        </header>
-      )}
+        </div>
+      </header>
 
       <main className="container mx-auto px-6 py-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
