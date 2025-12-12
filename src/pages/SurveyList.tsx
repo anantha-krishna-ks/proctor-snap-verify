@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, FileText, Settings, Search, MoreHorizontal, ClipboardList } from "lucide-react";
+import { ArrowLeft, Plus, ClipboardList, Search, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,21 +19,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { mockForms, mockConfigurations } from "@/data/formsMockData";
+import { mockSurveys } from "@/data/surveyMockData";
 import { format } from "date-fns";
-import CreateConfigurationSheet from "@/components/CreateConfigurationSheet";
-import type { FormConfiguration } from "@/types/forms";
 
-const FormsDashboard = () => {
+const SurveyList = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [configSheetOpen, setConfigSheetOpen] = useState(false);
-  const [configurations, setConfigurations] = useState(mockConfigurations);
 
-  const filteredForms = mockForms.filter(
-    (form) =>
-      form.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      form.code.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredSurveys = mockSurveys.filter((survey) =>
+    survey.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getStatusBadge = (status: string) => {
@@ -58,14 +52,14 @@ const FormsDashboard = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/admin")}
+              onClick={() => navigate("/forms")}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Forms Dashboard</h1>
+              <h1 className="text-2xl font-bold text-foreground">Surveys</h1>
               <p className="text-sm text-muted-foreground">
-                Manage your question papers and configurations
+                Manage your feedback surveys
               </p>
             </div>
           </div>
@@ -78,30 +72,32 @@ const FormsDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Forms</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Total Surveys</CardTitle>
+              <ClipboardList className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockForms.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Configurations</CardTitle>
-              <Settings className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{configurations.length}</div>
+              <div className="text-2xl font-bold">{mockSurveys.length}</div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Published</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+              <ClipboardList className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {mockForms.filter((f) => f.status === "published").length}
+                {mockSurveys.filter((s) => s.status === "published").length}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Draft</CardTitle>
+              <ClipboardList className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {mockSurveys.filter((s) => s.status === "draft").length}
               </div>
             </CardContent>
           </Card>
@@ -112,67 +108,43 @@ const FormsDashboard = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search forms..."
+              placeholder="Search surveys..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setConfigSheetOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Configuration
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/forms/configurations")}
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Manage Configurations
-            </Button>
-            <Button onClick={() => navigate("/forms/create")}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Form
-            </Button>
-            <Button variant="outline" onClick={() => navigate("/surveys")}>
-              <ClipboardList className="h-4 w-4 mr-2" />
-              Surveys
-            </Button>
-          </div>
+          <Button onClick={() => navigate("/surveys/create")}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Survey
+          </Button>
         </div>
 
-        {/* Forms Table */}
+        {/* Surveys Table */}
         <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Form Name</TableHead>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Configuration</TableHead>
-                  <TableHead>Questions</TableHead>
-                  <TableHead>Total Marks</TableHead>
+                  <TableHead>Survey Name</TableHead>
+                  <TableHead>Items</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
                   <TableHead>Updated</TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredForms.map((form) => (
-                  <TableRow key={form.id}>
-                    <TableCell className="font-medium">{form.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{form.code}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{form.configurationName}</Badge>
-                    </TableCell>
-                    <TableCell>{form.totalQuestions}</TableCell>
-                    <TableCell>{form.totalMarks}</TableCell>
-                    <TableCell>{getStatusBadge(form.status)}</TableCell>
+                {filteredSurveys.map((survey) => (
+                  <TableRow key={survey.id}>
+                    <TableCell className="font-medium">{survey.name}</TableCell>
+                    <TableCell>{survey.items.length}</TableCell>
+                    <TableCell>{getStatusBadge(survey.status)}</TableCell>
                     <TableCell className="text-muted-foreground">
-                      {format(new Date(form.updatedAt), "MMM d, yyyy")}
+                      {format(new Date(survey.createdAt), "MMM d, yyyy")}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {format(new Date(survey.updatedAt), "MMM d, yyyy")}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -193,10 +165,10 @@ const FormsDashboard = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-                {filteredForms.length === 0 && (
+                {filteredSurveys.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No forms found
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      No surveys found
                     </TableCell>
                   </TableRow>
                 )}
@@ -205,16 +177,8 @@ const FormsDashboard = () => {
           </CardContent>
         </Card>
       </main>
-
-      <CreateConfigurationSheet
-        open={configSheetOpen}
-        onOpenChange={setConfigSheetOpen}
-        onConfigurationCreated={(newConfig) => {
-          setConfigurations((prev) => [...prev, newConfig]);
-        }}
-      />
     </div>
   );
 };
 
-export default FormsDashboard;
+export default SurveyList;
