@@ -1,3 +1,10 @@
+export interface Repository {
+  id: string;
+  name: string;
+  formCount: number;
+  createdAt: string;
+}
+
 export interface FormConfiguration {
   id: string;
   name: string;
@@ -56,12 +63,16 @@ export interface Form {
   id: string;
   name: string;
   code: string;
+  repositoryId: string;
   configurationId: string;
   configurationName: string;
+  model: string;
   items: FormItem[];
   totalMarks: number;
   totalQuestions: number;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'published' | 'archived' | 'completed';
+  scheduled: number;
+  version: number;
   createdAt: string;
   updatedAt: string;
 }
