@@ -1,23 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  ArrowLeft, 
   Plus, 
   ClipboardList, 
   Search, 
   MoreHorizontal, 
   FileText, 
   Settings,
-  ChevronDown,
-  Layers,
   CheckCircle2,
   Clock,
-  Archive,
-  Users
+  Archive
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -34,8 +29,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { mockSurveys } from "@/data/surveyMockData";
-import { mockForms, mockConfigurations } from "@/data/formsMockData";
 import { format } from "date-fns";
 
 const SurveyList = () => {
@@ -74,152 +70,67 @@ const SurveyList = () => {
     }
   };
 
-  const stats = {
-    totalForms: mockForms.length,
-    configurations: mockConfigurations.length,
-    totalSurveys: mockSurveys.length,
-    published: mockSurveys.filter((s) => s.status === "published").length,
-    draft: mockSurveys.filter((s) => s.status === "draft").length,
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-background flex flex-col">
+      <DashboardHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+
+      <div className="flex flex-1">
+        <AdminSidebar />
+
+        <main className="flex-1 p-6">
+          {/* Title and Actions */}
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate("/admin")}
-                className="shrink-0"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              
-              {/* Module Selector Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="gap-2 text-xl font-semibold hover:bg-transparent px-0">
-                    <Layers className="h-5 w-5 text-warning" />
-                    <span>Surveys</span>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56 bg-popover">
-                  <DropdownMenuItem 
-                    onClick={() => navigate("/forms")}
-                    className="gap-3 py-3"
-                  >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                      <FileText className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Forms</p>
-                      <p className="text-xs text-muted-foreground">{stats.totalForms} forms</p>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => navigate("/forms/configurations")}
-                    className="gap-3 py-3"
-                  >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10">
-                      <Settings className="h-4 w-4 text-accent" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Configurations</p>
-                      <p className="text-xs text-muted-foreground">{stats.configurations} configs</p>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={() => navigate("/surveys")}
-                    className="gap-3 py-3"
-                  >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-warning/10">
-                      <ClipboardList className="h-4 w-4 text-warning" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Surveys</p>
-                      <p className="text-xs text-muted-foreground">{stats.totalSurveys} surveys</p>
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <h1 className="text-2xl font-semibold text-foreground">Surveys</h1>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/forms")}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <FileText className="h-4 w-4 mr-1" />
+                  Forms
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/forms/configurations")}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Settings className="h-4 w-4 mr-1" />
+                  Configurations
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/surveys")}
+                  className="text-primary bg-primary/10"
+                >
+                  <ClipboardList className="h-4 w-4 mr-1" />
+                  Surveys
+                </Button>
+              </div>
             </div>
-
-            <Button onClick={() => navigate("/surveys/create")} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Create Survey
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button onClick={() => navigate("/surveys/create")}>
+                <Plus className="h-4 w-4 mr-1" />
+                Create Survey
+              </Button>
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search surveys"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-          <Card className="bg-card border-border/50 hover:border-border transition-colors">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Surveys</p>
-                  <p className="text-3xl font-bold text-foreground">{stats.totalSurveys}</p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center">
-                  <ClipboardList className="h-6 w-6 text-warning" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border/50 hover:border-border transition-colors">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Published</p>
-                  <p className="text-3xl font-bold text-success">{stats.published}</p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-success/10 flex items-center justify-center">
-                  <CheckCircle2 className="h-6 w-6 text-success" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-card border-border/50 hover:border-border transition-colors">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Draft</p>
-                  <p className="text-3xl font-bold text-foreground">{stats.draft}</p>
-                </div>
-                <div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-muted-foreground" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Search */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search surveys..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-card"
-            />
-          </div>
-        </div>
-
-        {/* Surveys Table */}
-        <Card className="border-border/50 overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Surveys Table */}
+          <div className="bg-card rounded-lg border border-border overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30 hover:bg-muted/30">
@@ -293,8 +204,21 @@ const SurveyList = () => {
               </TableBody>
             </Table>
           </div>
-        </Card>
-      </main>
+
+          {/* Footer */}
+          <div className="mt-8 text-center text-xs text-muted-foreground">
+            Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd{" "}
+            <a
+              href="https://www.excelsoftcorp.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              https://www.excelsoftcorp.com
+            </a>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
