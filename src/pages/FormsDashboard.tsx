@@ -13,7 +13,9 @@ import {
   ChevronLeft,
   ChevronsLeft,
   ChevronsRight,
-  PlayCircle
+  PlayCircle,
+  Settings,
+  ClipboardList
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -210,19 +212,23 @@ const FormsDashboard = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button className="bg-primary hover:bg-primary/90">
+                    <Plus className="h-4 w-4 mr-1" />
                     Create New
                     <ChevronDown className="h-4 w-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-popover">
                   <DropdownMenuItem onClick={() => navigate("/forms/create")}>
-                    New Form
+                    <PlayCircle className="h-4 w-4 mr-2" />
+                    Form
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/forms/configurations")}>
-                    New Configuration
+                    <Settings className="h-4 w-4 mr-2" />
+                    Configuration
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/surveys/create")}>
-                    New Survey
+                    <ClipboardList className="h-4 w-4 mr-2" />
+                    Survey
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
