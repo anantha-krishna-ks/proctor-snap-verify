@@ -23,9 +23,18 @@ import {
   Clock,
   AlertTriangle,
   CalendarDays,
+  Home,
 } from "lucide-react";
 import { toast } from "sonner";
 import { mockMarkerProjects, mockMarkerSchedules } from "@/data/markerMockData";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const MarkerSchedulesDashboard = () => {
   const navigate = useNavigate();
@@ -137,6 +146,26 @@ const MarkerSchedulesDashboard = () => {
               Logout
             </Button>
           </div>
+        </div>
+        <div className="mt-4">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/marker" className="flex items-center gap-1">
+                  <Home className="h-3.5 w-3.5" />
+                  Home
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/marker">Products</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{project.name}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
       </header>
 

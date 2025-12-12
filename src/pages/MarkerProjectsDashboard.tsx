@@ -5,9 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Search, LogOut, FolderOpen, Users, CheckCircle2, Clock } from "lucide-react";
+import { Search, LogOut, FolderOpen, Users, CheckCircle2, Clock, Home } from "lucide-react";
 import { toast } from "sonner";
 import { mockMarkerProjects } from "@/data/markerMockData";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const MarkerProjectsDashboard = () => {
   const navigate = useNavigate();
@@ -50,6 +58,22 @@ const MarkerProjectsDashboard = () => {
               Logout
             </Button>
           </div>
+        </div>
+        <div className="mt-4">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/marker" className="flex items-center gap-1">
+                  <Home className="h-3.5 w-3.5" />
+                  Home
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Products</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
       </header>
 

@@ -11,12 +11,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, ClipboardList, CheckCircle2, Clock, ArrowLeft, LogOut, Calendar, AlertTriangle, LayoutList, CalendarDays } from "lucide-react";
+import { Search, ClipboardList, CheckCircle2, Clock, ArrowLeft, LogOut, Calendar, AlertTriangle, LayoutList, CalendarDays, Home } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format, isSameDay, parseISO } from "date-fns";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { mockMarkerCandidates, mockMarkerSchedules, mockMarkerProjects } from "@/data/markerMockData";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const MarkerDashboard = () => {
   const navigate = useNavigate();
@@ -169,6 +177,32 @@ const MarkerDashboard = () => {
               Logout
             </Button>
           </div>
+        </div>
+        <div className="mt-4">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/marker" className="flex items-center gap-1">
+                  <Home className="h-3.5 w-3.5" />
+                  Home
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/marker">Products</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href={`/marker/projects/${projectId}/schedules`}>
+                  {project.name}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{schedule.scheduleName}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
       </header>
 
