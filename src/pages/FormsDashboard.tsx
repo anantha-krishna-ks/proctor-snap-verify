@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Plus, 
-  Search, 
-  MoreVertical, 
+import {
+  Plus,
+  Search,
+  MoreVertical,
   Folder,
   FolderOpen,
   ChevronRight,
@@ -24,7 +24,7 @@ import {
   FileText,
   GripVertical,
   ChevronUp,
-  X
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,21 +36,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,7 +49,7 @@ import { format } from "date-fns";
 
 interface TestSequenceStep {
   id: string;
-  type: 'system-check' | 'form' | 'survey' | 'agreement';
+  type: "system-check" | "form" | "survey" | "agreement";
   name: string;
   order: number;
   config?: {
@@ -89,9 +76,9 @@ const FormsDashboard = () => {
   // Test Sequence State
   const [testSequenceSteps, setTestSequenceSteps] = useState<TestSequenceStep[]>([
     {
-      id: '1',
-      type: 'system-check',
-      name: 'System Check',
+      id: "1",
+      type: "system-check",
+      name: "System Check",
       order: 1,
       config: {
         popBlocker: true,
@@ -99,47 +86,37 @@ const FormsDashboard = () => {
         browser: true,
         microphone: false,
         screenShare: false,
-      }
-    }
+      },
+    },
   ]);
-  const [expandedSteps, setExpandedSteps] = useState<string[]>(['1']);
+  const [expandedSteps, setExpandedSteps] = useState<string[]>(["1"]);
 
   const toggleRepoExpand = (repoId: string) => {
-    setExpandedRepos(prev => 
-      prev.includes(repoId) 
-        ? prev.filter(id => id !== repoId)
-        : [...prev, repoId]
-    );
+    setExpandedRepos((prev) => (prev.includes(repoId) ? prev.filter((id) => id !== repoId) : [...prev, repoId]));
   };
 
   const toggleStepExpand = (stepId: string) => {
-    setExpandedSteps(prev => 
-      prev.includes(stepId) 
-        ? prev.filter(id => id !== stepId)
-        : [...prev, stepId]
-    );
+    setExpandedSteps((prev) => (prev.includes(stepId) ? prev.filter((id) => id !== stepId) : [...prev, stepId]));
   };
 
   const filteredForms = mockForms.filter(
     (form) =>
       form.repositoryId === selectedRepository &&
       (form.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       form.code.toLowerCase().includes(searchQuery.toLowerCase()))
+        form.code.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   const filteredConfigurations = mockConfigurations.filter(
     (config) =>
-      config.repositoryId === selectedRepository &&
-      config.name.toLowerCase().includes(searchQuery.toLowerCase())
+      config.repositoryId === selectedRepository && config.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const filteredSurveys = mockSurveys.filter(
     (survey) =>
-      survey.repositoryId === selectedRepository &&
-      survey.name.toLowerCase().includes(searchQuery.toLowerCase())
+      survey.repositoryId === selectedRepository && survey.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const selectedRepoData = mockRepositories.find(r => r.id === selectedRepository);
+  const selectedRepoData = mockRepositories.find((r) => r.id === selectedRepository);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -159,61 +136,62 @@ const FormsDashboard = () => {
   };
 
   const totalPages = Math.ceil(filteredForms.length / parseInt(rowsPerPage));
-
   const updateSystemCheckConfig = (stepId: string, key: string, value: boolean) => {
-    setTestSequenceSteps(prev => prev.map(step => {
-      if (step.id === stepId && step.type === 'system-check') {
-        return {
-          ...step,
-          config: {
-            ...step.config,
-            [key]: value
-          }
-        };
-      }
-      return step;
-    }));
+    setTestSequenceSteps((prev) =>
+      prev.map((step) => {
+        if (step.id === stepId && step.type === "system-check") {
+          return {
+            ...step,
+            config: {
+              ...step.config,
+              [key]: value,
+            },
+          };
+        }
+        return step;
+      }),
+    );
   };
 
-  const addStep = (type: 'form' | 'survey' | 'agreement') => {
+  const addStep = (type: "form" | "survey" | "agreement") => {
     const newStep: TestSequenceStep = {
       id: Date.now().toString(),
       type,
-      name: type === 'form' ? 'Form' : type === 'survey' ? 'Survey' : 'Agreement',
+      name: type === "form" ? "Form" : type === "survey" ? "Survey" : "Agreement",
       order: testSequenceSteps.length + 1,
-      formIds: type === 'form' ? [] : undefined,
-      surveyId: type === 'survey' ? '' : undefined,
-      agreementText: type === 'agreement' ? '' : undefined,
+      formIds: type === "form" ? [] : undefined,
+      surveyId: type === "survey" ? "" : undefined,
+      agreementText: type === "agreement" ? "" : undefined,
     };
-    setTestSequenceSteps(prev => [...prev, newStep]);
-    setExpandedSteps(prev => [...prev, newStep.id]);
+    setTestSequenceSteps((prev) => [...prev, newStep]);
+    setExpandedSteps((prev) => [...prev, newStep.id]);
   };
 
   const removeStep = (stepId: string) => {
-    setTestSequenceSteps(prev => prev.filter(step => step.id !== stepId));
+    setTestSequenceSteps((prev) => prev.filter((step) => step.id !== stepId));
   };
 
-  const moveStep = (stepId: string, direction: 'up' | 'down') => {
-    const index = testSequenceSteps.findIndex(s => s.id === stepId);
-    if ((direction === 'up' && index === 0) || (direction === 'down' && index === testSequenceSteps.length - 1)) {
+  const moveStep = (stepId: string, direction: "up" | "down") => {
+    const index = testSequenceSteps.findIndex((s) => s.id === stepId);
+    if ((direction === "up" && index === 0) || (direction === "down" && index === testSequenceSteps.length - 1)) {
       return;
     }
     const newSteps = [...testSequenceSteps];
-    const swapIndex = direction === 'up' ? index - 1 : index + 1;
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
     [newSteps[index], newSteps[swapIndex]] = [newSteps[swapIndex], newSteps[index]];
-    newSteps.forEach((step, i) => step.order = i + 1);
+    newSteps.forEach((step, i) => (step.order = i + 1));
     setTestSequenceSteps(newSteps);
   };
 
   const getStepIcon = (type: string) => {
     switch (type) {
-      case 'system-check':
+      case "system-check":
         return <Monitor className="h-5 w-5 text-primary" />;
-      case 'form':
+      case "form":
         return <PlayCircle className="h-5 w-5 text-primary" />;
-      case 'survey':
+      case "survey":
         return <ClipboardList className="h-5 w-5 text-primary" />;
-      case 'agreement':
+      case "agreement":
         return <FileText className="h-5 w-5 text-primary" />;
       default:
         return <FileText className="h-5 w-5 text-primary" />;
@@ -222,7 +200,7 @@ const FormsDashboard = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'forms':
+      case "forms":
         return (
           <>
             {/* Toolbar */}
@@ -255,7 +233,7 @@ const FormsDashboard = () => {
                     className="pl-9 bg-background"
                   />
                 </div>
-                
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button className="bg-primary hover:bg-primary/90">
@@ -279,7 +257,7 @@ const FormsDashboard = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                
+
                 <Button variant="ghost" size="icon" className="h-9 w-9">
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -333,8 +311,8 @@ const FormsDashboard = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredForms.map((form) => (
-                    <TableRow 
-                      key={form.id} 
+                    <TableRow
+                      key={form.id}
                       className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
                     >
                       <TableCell>
@@ -346,19 +324,13 @@ const FormsDashboard = () => {
                           <span className="font-medium text-foreground">{form.name}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {form.model}
-                      </TableCell>
+                      <TableCell className="text-muted-foreground">{form.model}</TableCell>
                       <TableCell>{getStatusBadge(form.status)}</TableCell>
-                      <TableCell className="text-center text-foreground">
-                        {form.scheduled}
-                      </TableCell>
+                      <TableCell className="text-center text-foreground">{form.scheduled}</TableCell>
                       <TableCell className="text-foreground">
                         {format(new Date(form.updatedAt), "dd-MM-yyyy")}
                       </TableCell>
-                      <TableCell className="text-center text-foreground">
-                        {form.version}
-                      </TableCell>
+                      <TableCell className="text-center text-foreground">{form.version}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -371,9 +343,7 @@ const FormsDashboard = () => {
                             <DropdownMenuItem>Duplicate</DropdownMenuItem>
                             <DropdownMenuItem>Preview</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
-                              Delete
-                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -385,8 +355,8 @@ const FormsDashboard = () => {
                         <div className="flex flex-col items-center gap-2">
                           <Folder className="h-8 w-8 text-muted-foreground/50" />
                           <p className="text-muted-foreground">No assessments found in this repository</p>
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => navigate("/forms/create")}
                             className="mt-2"
@@ -403,7 +373,7 @@ const FormsDashboard = () => {
           </>
         );
 
-      case 'configuration':
+      case "configuration":
         return (
           <>
             <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
@@ -444,7 +414,9 @@ const FormsDashboard = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
-                    <TableHead className="w-12"><Checkbox /></TableHead>
+                    <TableHead className="w-12">
+                      <Checkbox />
+                    </TableHead>
                     <TableHead className="font-semibold text-foreground">CONFIGURATION NAME</TableHead>
                     <TableHead className="font-semibold text-foreground">STATUS</TableHead>
                     <TableHead className="font-semibold text-foreground">MODIFIED DATE</TableHead>
@@ -454,17 +426,28 @@ const FormsDashboard = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredConfigurations.map((config) => (
-                    <TableRow key={config.id} className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border">
-                      <TableCell><Checkbox /></TableCell>
+                    <TableRow
+                      key={config.id}
+                      className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
+                    >
+                      <TableCell>
+                        <Checkbox />
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Settings className="h-4 w-4 text-primary" />
                           <span className="font-medium text-foreground">{config.name}</span>
-                          {config.isDefault && <Badge variant="secondary" className="text-xs">Default</Badge>}
+                          {config.isDefault && (
+                            <Badge variant="secondary" className="text-xs">
+                              Default
+                            </Badge>
+                          )}
                         </div>
                       </TableCell>
-                      <TableCell>{getStatusBadge('active')}</TableCell>
-                      <TableCell className="text-foreground">{format(new Date(config.updatedAt), "dd-MM-yyyy")}</TableCell>
+                      <TableCell>{getStatusBadge("active")}</TableCell>
+                      <TableCell className="text-foreground">
+                        {format(new Date(config.updatedAt), "dd-MM-yyyy")}
+                      </TableCell>
                       <TableCell className="text-center text-foreground">{config.version}</TableCell>
                       <TableCell>
                         <DropdownMenu>
@@ -489,7 +472,7 @@ const FormsDashboard = () => {
           </>
         );
 
-      case 'survey':
+      case "survey":
         return (
           <>
             <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
@@ -530,7 +513,9 @@ const FormsDashboard = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
-                    <TableHead className="w-12"><Checkbox /></TableHead>
+                    <TableHead className="w-12">
+                      <Checkbox />
+                    </TableHead>
                     <TableHead className="font-semibold text-foreground">SURVEY NAME</TableHead>
                     <TableHead className="font-semibold text-foreground">STATUS</TableHead>
                     <TableHead className="font-semibold text-foreground">QUESTIONS</TableHead>
@@ -541,8 +526,13 @@ const FormsDashboard = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredSurveys.map((survey) => (
-                    <TableRow key={survey.id} className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border">
-                      <TableCell><Checkbox /></TableCell>
+                    <TableRow
+                      key={survey.id}
+                      className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
+                    >
+                      <TableCell>
+                        <Checkbox />
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <ClipboardList className="h-4 w-4 text-primary" />
@@ -551,7 +541,9 @@ const FormsDashboard = () => {
                       </TableCell>
                       <TableCell>{getStatusBadge(survey.status)}</TableCell>
                       <TableCell className="text-center text-foreground">{survey.items.length}</TableCell>
-                      <TableCell className="text-foreground">{format(new Date(survey.updatedAt), "dd-MM-yyyy")}</TableCell>
+                      <TableCell className="text-foreground">
+                        {format(new Date(survey.updatedAt), "dd-MM-yyyy")}
+                      </TableCell>
                       <TableCell className="text-center text-foreground">{survey.version}</TableCell>
                       <TableCell>
                         <DropdownMenu>
@@ -576,14 +568,16 @@ const FormsDashboard = () => {
           </>
         );
 
-      case 'test-sequence':
+      case "test-sequence":
         return (
           <div className="flex-1 flex flex-col">
             {/* Toolbar */}
             <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <h2 className="text-lg font-semibold text-foreground">Test Sequence Builder</h2>
-                <Badge variant="secondary" className="text-xs">{testSequenceSteps.length} steps</Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {testSequenceSteps.length} steps
+                </Badge>
               </div>
               <div className="flex items-center gap-2">
                 <DropdownMenu>
@@ -595,23 +589,21 @@ const FormsDashboard = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-popover">
-                    <DropdownMenuItem onClick={() => addStep('form')}>
+                    <DropdownMenuItem onClick={() => addStep("form")}>
                       <PlayCircle className="h-4 w-4 mr-2" />
                       Form
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addStep('survey')}>
+                    <DropdownMenuItem onClick={() => addStep("survey")}>
                       <ClipboardList className="h-4 w-4 mr-2" />
                       Survey
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addStep('agreement')}>
+                    <DropdownMenuItem onClick={() => addStep("agreement")}>
                       <FileText className="h-4 w-4 mr-2" />
                       Agreement
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Button variant="outline">
-                  Save Sequence
-                </Button>
+                <Button variant="outline">Save Sequence</Button>
               </div>
             </div>
 
@@ -631,27 +623,27 @@ const FormsDashboard = () => {
                           <CardTitle className="text-base font-medium">{step.name}</CardTitle>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8"
-                            onClick={() => moveStep(step.id, 'up')}
+                            onClick={() => moveStep(step.id, "up")}
                             disabled={index === 0}
                           >
                             <ChevronUp className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8"
-                            onClick={() => moveStep(step.id, 'down')}
+                            onClick={() => moveStep(step.id, "down")}
                             disabled={index === testSequenceSteps.length - 1}
                           >
                             <ChevronDown className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8"
                             onClick={() => toggleStepExpand(step.id)}
                           >
@@ -661,10 +653,10 @@ const FormsDashboard = () => {
                               <ChevronRight className="h-4 w-4" />
                             )}
                           </Button>
-                          {step.type !== 'system-check' && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                          {step.type !== "system-check" && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-8 w-8 text-destructive hover:text-destructive"
                               onClick={() => removeStep(step.id)}
                             >
@@ -674,73 +666,85 @@ const FormsDashboard = () => {
                         </div>
                       </div>
                     </CardHeader>
-                    
+
                     {expandedSteps.includes(step.id) && (
                       <CardContent className="pt-0 pb-4 px-4">
-                        {step.type === 'system-check' && (
+                        {step.type === "system-check" && (
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pl-8">
                             <div className="flex items-center justify-between space-x-2 p-3 rounded-lg bg-muted/50">
                               <div className="flex items-center gap-2">
                                 <Shield className="h-4 w-4 text-muted-foreground" />
-                                <Label htmlFor="pop-blocker" className="text-sm">Pop Blocker</Label>
+                                <Label htmlFor="pop-blocker" className="text-sm">
+                                  Pop Blocker
+                                </Label>
                               </div>
                               <Switch
                                 id="pop-blocker"
                                 checked={step.config?.popBlocker || false}
-                                onCheckedChange={(checked) => updateSystemCheckConfig(step.id, 'popBlocker', checked)}
+                                onCheckedChange={(checked) => updateSystemCheckConfig(step.id, "popBlocker", checked)}
                               />
                             </div>
                             <div className="flex items-center justify-between space-x-2 p-3 rounded-lg bg-muted/50">
                               <div className="flex items-center gap-2">
                                 <Camera className="h-4 w-4 text-muted-foreground" />
-                                <Label htmlFor="camera" className="text-sm">Camera</Label>
+                                <Label htmlFor="camera" className="text-sm">
+                                  Camera
+                                </Label>
                               </div>
                               <Switch
                                 id="camera"
                                 checked={step.config?.camera || false}
-                                onCheckedChange={(checked) => updateSystemCheckConfig(step.id, 'camera', checked)}
+                                onCheckedChange={(checked) => updateSystemCheckConfig(step.id, "camera", checked)}
                               />
                             </div>
                             <div className="flex items-center justify-between space-x-2 p-3 rounded-lg bg-muted/50">
                               <div className="flex items-center gap-2">
                                 <Globe className="h-4 w-4 text-muted-foreground" />
-                                <Label htmlFor="browser" className="text-sm">Browser</Label>
+                                <Label htmlFor="browser" className="text-sm">
+                                  Browser
+                                </Label>
                               </div>
                               <Switch
                                 id="browser"
                                 checked={step.config?.browser || false}
-                                onCheckedChange={(checked) => updateSystemCheckConfig(step.id, 'browser', checked)}
+                                onCheckedChange={(checked) => updateSystemCheckConfig(step.id, "browser", checked)}
                               />
                             </div>
                             <div className="flex items-center justify-between space-x-2 p-3 rounded-lg bg-muted/50">
                               <div className="flex items-center gap-2">
                                 <Mic className="h-4 w-4 text-muted-foreground" />
-                                <Label htmlFor="microphone" className="text-sm">Microphone</Label>
+                                <Label htmlFor="microphone" className="text-sm">
+                                  Microphone
+                                </Label>
                               </div>
                               <Switch
                                 id="microphone"
                                 checked={step.config?.microphone || false}
-                                onCheckedChange={(checked) => updateSystemCheckConfig(step.id, 'microphone', checked)}
+                                onCheckedChange={(checked) => updateSystemCheckConfig(step.id, "microphone", checked)}
                               />
                             </div>
                             <div className="flex items-center justify-between space-x-2 p-3 rounded-lg bg-muted/50">
                               <div className="flex items-center gap-2">
                                 <Monitor className="h-4 w-4 text-muted-foreground" />
-                                <Label htmlFor="screen-share" className="text-sm">Screen Share</Label>
+                                <Label htmlFor="screen-share" className="text-sm">
+                                  Screen Share
+                                </Label>
                               </div>
                               <Switch
                                 id="screen-share"
                                 checked={step.config?.screenShare || false}
-                                onCheckedChange={(checked) => updateSystemCheckConfig(step.id, 'screenShare', checked)}
+                                onCheckedChange={(checked) => updateSystemCheckConfig(step.id, "screenShare", checked)}
                               />
                             </div>
                           </div>
                         )}
-                        
-                        {step.type === 'form' && (
+
+                        {step.type === "form" && (
                           <div className="pl-8 space-y-3">
                             <div className="flex items-center justify-between">
-                              <Label className="text-sm text-muted-foreground">Select forms to include in this step</Label>
+                              <Label className="text-sm text-muted-foreground">
+                                Select forms to include in this step
+                              </Label>
                               <Button variant="outline" size="sm">
                                 <Plus className="h-4 w-4 mr-1" />
                                 Add Form
@@ -749,12 +753,14 @@ const FormsDashboard = () => {
                             <div className="border border-dashed border-border rounded-lg p-6 text-center">
                               <PlayCircle className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
                               <p className="text-sm text-muted-foreground">No forms added yet</p>
-                              <p className="text-xs text-muted-foreground mt-1">Click "Add Form" to select forms from the repository</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Click "Add Form" to select forms from the repository
+                              </p>
                             </div>
                           </div>
                         )}
-                        
-                        {step.type === 'survey' && (
+
+                        {step.type === "survey" && (
                           <div className="pl-8 space-y-3">
                             <Label className="text-sm text-muted-foreground">Select a survey for this step</Label>
                             <Select>
@@ -771,8 +777,8 @@ const FormsDashboard = () => {
                             </Select>
                           </div>
                         )}
-                        
-                        {step.type === 'agreement' && (
+
+                        {step.type === "agreement" && (
                           <div className="pl-8 space-y-3">
                             <Label className="text-sm text-muted-foreground">Agreement Text</Label>
                             <textarea
@@ -785,7 +791,7 @@ const FormsDashboard = () => {
                     )}
                   </Card>
                 ))}
-                
+
                 {testSequenceSteps.length === 0 && (
                   <div className="text-center py-12">
                     <Monitor className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
@@ -849,7 +855,7 @@ const FormsDashboard = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="p-2">
             {mockRepositories.map((repo) => (
               <div key={repo.id}>
@@ -859,9 +865,7 @@ const FormsDashboard = () => {
                     toggleRepoExpand(repo.id);
                   }}
                   className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left transition-colors ${
-                    selectedRepository === repo.id 
-                      ? "bg-primary/10 text-primary" 
-                      : "hover:bg-muted text-foreground"
+                    selectedRepository === repo.id ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"
                   }`}
                 >
                   {expandedRepos.includes(repo.id) ? (
@@ -888,41 +892,41 @@ const FormsDashboard = () => {
           <div className="border-b border-border bg-card">
             <div className="flex">
               <button
-                onClick={() => setActiveTab('forms')}
+                onClick={() => setActiveTab("forms")}
                 className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'forms'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                  activeTab === "forms"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Forms
               </button>
               <button
-                onClick={() => setActiveTab('configuration')}
+                onClick={() => setActiveTab("configuration")}
                 className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'configuration'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                  activeTab === "configuration"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Configuration
               </button>
               <button
-                onClick={() => setActiveTab('survey')}
+                onClick={() => setActiveTab("survey")}
                 className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'survey'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                  activeTab === "survey"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Survey
               </button>
               <button
-                onClick={() => setActiveTab('test-sequence')}
+                onClick={() => setActiveTab("test-sequence")}
                 className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'test-sequence'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                  activeTab === "test-sequence"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
                 Test Sequence
@@ -931,15 +935,15 @@ const FormsDashboard = () => {
           </div>
 
           {/* Tab Content */}
-          <div className="flex-1 flex flex-col">
-            {renderTabContent()}
-          </div>
+          <div className="flex-1 flex flex-col">{renderTabContent()}</div>
 
           {/* Pagination - Only for list views */}
-          {activeTab !== 'test-sequence' && (
+          {activeTab !== "test-sequence" && (
             <div className="p-4 border-t border-border bg-card flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>1-{Math.min(parseInt(rowsPerPage), filteredForms.length)} of {filteredForms.length}</span>
+                <span>
+                  1-{Math.min(parseInt(rowsPerPage), filteredForms.length)} of {filteredForms.length}
+                </span>
                 <span className="ml-4">Rows per page:</span>
                 <Select value={rowsPerPage} onValueChange={setRowsPerPage}>
                   <SelectTrigger className="w-16 h-8 bg-background">
