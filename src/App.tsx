@@ -17,6 +17,8 @@ import CreateForm from "./pages/CreateForm";
 import ConfigurationsList from "./pages/ConfigurationsList";
 import CreateConfiguration from "./pages/CreateConfiguration";
 import ReportsDashboard from "./pages/ReportsDashboard";
+import SurveyList from "./pages/SurveyList";
+import CreateSurvey from "./pages/CreateSurvey";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -148,6 +150,22 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <ReportsDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/surveys"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <SurveyList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/surveys/create"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <CreateSurvey />
               </ProtectedRoute>
             }
           />
