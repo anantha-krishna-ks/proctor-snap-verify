@@ -889,44 +889,44 @@ const FormsDashboard = () => {
         {/* Main Content */}
         <main className="flex-1 flex flex-col">
           {/* Tabs */}
-          <div className="border-b border-border bg-card">
-            <div className="flex">
+          <div className="bg-muted/50 px-2 pt-2">
+            <div className="flex gap-1">
               <button
                 onClick={() => setActiveTab("forms")}
-                className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
                   activeTab === "forms"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                    ? "bg-card text-foreground shadow-sm border border-border border-b-0"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 Forms
               </button>
               <button
                 onClick={() => setActiveTab("configuration")}
-                className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
                   activeTab === "configuration"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                    ? "bg-card text-foreground shadow-sm border border-border border-b-0"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 Configuration
               </button>
               <button
                 onClick={() => setActiveTab("survey")}
-                className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
                   activeTab === "survey"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                    ? "bg-card text-foreground shadow-sm border border-border border-b-0"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 Survey
               </button>
               <button
                 onClick={() => setActiveTab("test-sequence")}
-                className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
                   activeTab === "test-sequence"
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground"
+                    ? "bg-card text-foreground shadow-sm border border-border border-b-0"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 Test Sequence
