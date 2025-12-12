@@ -2,11 +2,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Plus, 
-  ClipboardList, 
   Search, 
-  MoreHorizontal, 
-  FileText, 
-  Settings,
+  MoreVertical, 
+  Folder,
+  FolderOpen,
+  ChevronRight,
+  ChevronDown,
+  Trash2,
+  Edit,
+  ChevronLeft,
+  ChevronsLeft,
+  ChevronsRight,
+  ClipboardList,
   CheckCircle2,
   Clock,
   Archive
@@ -29,145 +36,277 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { DashboardHeader } from "@/components/admin/DashboardHeader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { mockRepositories } from "@/data/formsMockData";
 import { mockSurveys } from "@/data/surveyMockData";
 import { format } from "date-fns";
 
 const SurveyList = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRepository, setSelectedRepository] = useState(mockRepositories[0]?.id || "");
+  const [expandedRepos, setExpandedRepos] = useState<string[]>([mockRepositories[0]?.id || ""]);
+  const [rowsPerPage, setRowsPerPage] = useState("25");
 
-  const filteredSurveys = mockSurveys.filter((survey) =>
-    survey.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const toggleRepoExpand = (repoId: string) => {
+    setExpandedRepos(prev => 
+      prev.includes(repoId) 
+        ? prev.filter(id => id !== repoId)
+        : [...prev, repoId]
+    );
+  };
+
+  const filteredSurveys = mockSurveys.filter(
+    (survey) =>
+      survey.repositoryId === selectedRepository &&
+      survey.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const getSurveyCount = (repoId: string) => {
+    return mockSurveys.filter(s => s.repositoryId === repoId).length;
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "published":
         return (
-          <Badge className="bg-success/10 text-success border-success/20 hover:bg-success/20">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
-            Published
-          </Badge>
+          <div className="flex items-center gap-1">
+            <CheckCircle2 className="h-3 w-3 text-success" />
+            <span className="text-foreground">Published</span>
+          </div>
         );
       case "draft":
         return (
-          <Badge variant="secondary" className="border border-border">
-            <Clock className="h-3 w-3 mr-1" />
-            Draft
-          </Badge>
+          <div className="flex items-center gap-1">
+            <Clock className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground">Draft</span>
+          </div>
         );
       case "archived":
         return (
-          <Badge variant="outline" className="text-muted-foreground">
-            <Archive className="h-3 w-3 mr-1" />
-            Archived
-          </Badge>
+          <div className="flex items-center gap-1">
+            <Archive className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground">Archived</span>
+          </div>
         );
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return <span>{status}</span>;
     }
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <DashboardHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      {/* Header */}
+      <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">S</span>
+            </div>
+            <div>
+              <span className="font-semibold text-foreground">Saras</span>
+              <span className="text-[10px] text-muted-foreground block -mt-1">TEST & ASSESSMENT</span>
+            </div>
+          </div>
+          <div className="ml-6">
+            <span className="text-xs text-muted-foreground">Manage Surveys</span>
+            <h1 className="text-lg font-semibold text-foreground -mt-0.5">Manage Surveys</h1>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-foreground">NSE Admin</span>
+          <div className="w-8 h-8 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+            <span className="text-primary text-sm font-medium">NA</span>
+          </div>
+        </div>
+      </header>
 
       <div className="flex flex-1">
-        <AdminSidebar />
-
-        <main className="flex-1 p-6">
-          {/* Title and Actions */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-semibold text-foreground">Surveys</h1>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/forms")}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <FileText className="h-4 w-4 mr-1" />
-                  Forms
+        {/* Repository Sidebar */}
+        <aside className="w-80 border-r border-border bg-card">
+          <div className="p-4 border-b border-border">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-foreground">Repositories</span>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <Plus className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/forms/configurations")}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <Settings className="h-4 w-4 mr-1" />
-                  Configurations
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <Edit className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/surveys")}
-                  className="text-primary bg-primary/10"
-                >
-                  <ClipboardList className="h-4 w-4 mr-1" />
-                  Surveys
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <Trash2 className="h-4 w-4" />
                 </Button>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button onClick={() => navigate("/surveys/create")}>
-                <Plus className="h-4 w-4 mr-1" />
-                Create Survey
-              </Button>
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search surveys"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
               </div>
             </div>
           </div>
+          
+          <div className="p-2">
+            {mockRepositories.map((repo) => (
+              <div key={repo.id}>
+                <button
+                  onClick={() => {
+                    setSelectedRepository(repo.id);
+                    toggleRepoExpand(repo.id);
+                  }}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left transition-colors ${
+                    selectedRepository === repo.id 
+                      ? "bg-primary/10 text-primary" 
+                      : "hover:bg-muted text-foreground"
+                  }`}
+                >
+                  {expandedRepos.includes(repo.id) ? (
+                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                  )}
+                  {expandedRepos.includes(repo.id) ? (
+                    <FolderOpen className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                  ) : (
+                    <Folder className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                  )}
+                  <span className="flex-1 truncate">{repo.name}</span>
+                  <span className="text-xs text-muted-foreground">({getSurveyCount(repo.id)})</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </aside>
 
-          {/* Surveys Table */}
-          <div className="bg-card rounded-lg border border-border overflow-hidden">
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col">
+          {/* Toolbar */}
+          <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
+                Repository
+              </Badge>
+              <Select value={selectedRepository} onValueChange={setSelectedRepository}>
+                <SelectTrigger className="w-64 bg-background">
+                  <SelectValue placeholder="Select repository" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  {mockRepositories.map((repo) => (
+                    <SelectItem key={repo.id} value={repo.id}>
+                      {repo.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by survey name"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-background"
+                />
+              </div>
+              
+              <Button 
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => navigate("/surveys/create")}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Create Survey
+              </Button>
+              
+              <Button variant="ghost" size="icon" className="h-9 w-9">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-9 w-9">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="flex-1 overflow-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/30 hover:bg-muted/30">
-                  <TableHead className="font-semibold">Survey Name</TableHead>
-                  <TableHead className="font-semibold text-center">Items</TableHead>
-                  <TableHead className="font-semibold">Status</TableHead>
-                  <TableHead className="font-semibold">Created</TableHead>
-                  <TableHead className="font-semibold">Updated</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
+                <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
+                  <TableHead className="w-12">
+                    <Checkbox />
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      SURVEY NAME
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground text-center">ITEMS</TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      STATUS
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      CREATED DATE
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      MODIFIED DATE
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      VERSION
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredSurveys.map((survey) => (
                   <TableRow 
-                    key={survey.id}
-                    className="hover:bg-muted/50 cursor-pointer transition-colors"
+                    key={survey.id} 
+                    className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
                   >
-                    <TableCell className="font-medium text-foreground">
-                      {survey.name}
+                    <TableCell>
+                      <Checkbox />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <ClipboardList className="h-4 w-4 text-primary" />
+                        <span className="font-medium text-foreground">{survey.name}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge variant="outline" className="font-normal">
-                        {survey.items.length} items
+                        {survey.items.length}
                       </Badge>
                     </TableCell>
                     <TableCell>{getStatusBadge(survey.status)}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {format(new Date(survey.createdAt), "MMM d, yyyy")}
+                    <TableCell className="text-foreground">
+                      {format(new Date(survey.createdAt), "dd-MM-yyyy")}
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {format(new Date(survey.updatedAt), "MMM d, yyyy")}
+                    <TableCell className="text-foreground">
+                      {format(new Date(survey.updatedAt), "dd-MM-yyyy")}
+                    </TableCell>
+                    <TableCell className="text-center text-foreground">
+                      {survey.version}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
+                            <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-popover">
@@ -185,10 +324,10 @@ const SurveyList = () => {
                 ))}
                 {filteredSurveys.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
+                    <TableCell colSpan={8} className="text-center py-12">
                       <div className="flex flex-col items-center gap-2">
                         <ClipboardList className="h-8 w-8 text-muted-foreground/50" />
-                        <p className="text-muted-foreground">No surveys found</p>
+                        <p className="text-muted-foreground">No surveys found in this repository</p>
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -205,8 +344,43 @@ const SurveyList = () => {
             </Table>
           </div>
 
+          {/* Pagination */}
+          <div className="p-4 border-t border-border bg-card flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>1-{Math.min(parseInt(rowsPerPage), filteredSurveys.length)} of {filteredSurveys.length}</span>
+              <span className="ml-4">Rows per page:</span>
+              <Select value={rowsPerPage} onValueChange={setRowsPerPage}>
+                <SelectTrigger className="w-16 h-8 bg-background">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Button variant="outline" size="icon" className="h-8 w-8" disabled>
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" className="h-8 w-8" disabled>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="px-3 text-sm text-foreground">1/1</span>
+              <Button variant="outline" size="icon" className="h-8 w-8" disabled>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" className="h-8 w-8" disabled>
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
           {/* Footer */}
-          <div className="mt-8 text-center text-xs text-muted-foreground">
+          <div className="py-3 text-center text-xs text-muted-foreground border-t border-border">
             Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd{" "}
             <a
               href="https://www.excelsoftcorp.com"

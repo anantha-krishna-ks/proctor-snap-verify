@@ -8,8 +8,11 @@ export interface Repository {
 export interface FormConfiguration {
   id: string;
   name: string;
+  repositoryId: string;
   isDefault: boolean;
   createdAt: string;
+  updatedAt: string;
+  version: number;
   // Exam Rules
   examRules: {
     duration: number; // in minutes
@@ -80,8 +83,11 @@ export interface Form {
 export const defaultConfiguration: FormConfiguration = {
   id: 'default',
   name: 'Default Configuration',
+  repositoryId: 'repo-1',
   isDefault: true,
   createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  version: 1,
   examRules: {
     duration: 60,
     language: 'English',

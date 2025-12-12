@@ -27,8 +27,11 @@ export const mockConfigurations: FormConfiguration[] = [
   {
     id: 'config-1',
     name: 'Strict Exam Mode',
+    repositoryId: 'repo-1',
     isDefault: false,
     createdAt: '2024-01-15T10:00:00Z',
+    updatedAt: '2024-01-20T10:00:00Z',
+    version: 2,
     examRules: {
       duration: 120,
       language: 'English',
@@ -50,8 +53,11 @@ export const mockConfigurations: FormConfiguration[] = [
   {
     id: 'config-2',
     name: 'Practice Test Mode',
+    repositoryId: 'repo-1',
     isDefault: false,
     createdAt: '2024-02-20T14:30:00Z',
+    updatedAt: '2024-02-25T14:30:00Z',
+    version: 1,
     examRules: {
       duration: 90,
       language: 'English',
@@ -68,6 +74,32 @@ export const mockConfigurations: FormConfiguration[] = [
       fullScreenMode: false,
       shuffleQuestions: false,
       shuffleOptions: false,
+    },
+  },
+  {
+    id: 'config-3',
+    name: 'Certification Exam',
+    repositoryId: 'repo-3',
+    isDefault: false,
+    createdAt: '2024-03-01T09:00:00Z',
+    updatedAt: '2024-03-10T09:00:00Z',
+    version: 3,
+    examRules: {
+      duration: 180,
+      language: 'English',
+      allowBackNavigation: true,
+      enableSectionTimers: true,
+      allowPauseResume: false,
+      showItemFeedback: false,
+    },
+    examInstructions: '<p>This is a certification exam.</p>',
+    security: {
+      startPaused: true,
+      preventCopyPaste: true,
+      disableRightClick: true,
+      fullScreenMode: true,
+      shuffleQuestions: true,
+      shuffleOptions: true,
     },
   },
 ];
