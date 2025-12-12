@@ -7,9 +7,11 @@ export interface SurveyItem {
 export interface Survey {
   id: string;
   name: string;
+  repositoryId: string;
   instructions: string;
   items: SurveyItem[];
   status: 'draft' | 'published' | 'archived';
+  version: number;
   createdAt: string;
   updatedAt: string;
 }

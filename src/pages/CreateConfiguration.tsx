@@ -23,7 +23,10 @@ const CreateConfiguration = () => {
   
   const [config, setConfig] = useState<Omit<FormConfiguration, 'id' | 'createdAt'>>({
     name: "",
+    repositoryId: "",
     isDefault: false,
+    updatedAt: new Date().toISOString(),
+    version: 1,
     examRules: {
       duration: 60,
       language: "English",
