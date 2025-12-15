@@ -25,6 +25,7 @@ import {
   GripVertical,
   ChevronUp,
   X,
+  FileSignature,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,22 @@ import { Label } from "@/components/ui/label";
 import { mockForms, mockRepositories, mockConfigurations } from "@/data/formsMockData";
 import { mockSurveys } from "@/data/surveyMockData";
 import { format } from "date-fns";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
+interface Agreement {
+  id: string;
+  name: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface TestSequenceStep {
   id: string;
@@ -90,6 +107,27 @@ const FormsDashboard = () => {
     },
   ]);
   const [expandedSteps, setExpandedSteps] = useState<string[]>(["1"]);
+
+  // Agreement State
+  const [agreements, setAgreements] = useState<Agreement[]>([
+    {
+      id: "1",
+      name: "Terms and Conditions",
+      content: "By proceeding with this assessment, you agree to the following terms and conditions...",
+      createdAt: "2024-01-15",
+      updatedAt: "2024-02-20",
+    },
+    {
+      id: "2",
+      name: "Privacy Policy",
+      content: "Your privacy is important to us. This policy outlines how we collect and use your data...",
+      createdAt: "2024-01-10",
+      updatedAt: "2024-03-01",
+    },
+  ]);
+  const [agreementDialogOpen, setAgreementDialogOpen] = useState(false);
+  const [editingAgreement, setEditingAgreement] = useState<Agreement | null>(null);
+  const [agreementForm, setAgreementForm] = useState({ name: "", content: "" });
 
   const toggleRepoExpand = (repoId: string) => {
     setExpandedRepos((prev) => (prev.includes(repoId) ? prev.filter((id) => id !== repoId) : [...prev, repoId]));
@@ -197,6 +235,51 @@ const FormsDashboard = () => {
         return <FileText className="h-5 w-5 text-primary" />;
     }
   };
+
+  // Agreement handlers
+  const openAddAgreement = () => {
+    setEditingAgreement(null);
+    setAgreementForm({ name: "", content: "" });
+    setAgreementDialogOpen(true);
+  };
+
+  const openEditAgreement = (agreement: Agreement) => {
+    setEditingAgreement(agreement);
+    setAgreementForm({ name: agreement.name, content: agreement.content });
+    setAgreementDialogOpen(true);
+  };
+
+  const handleSaveAgreement = () => {
+    if (!agreementForm.name.trim()) return;
+    
+    if (editingAgreement) {
+      setAgreements((prev) =>
+        prev.map((a) =>
+          a.id === editingAgreement.id
+            ? { ...a, name: agreementForm.name, content: agreementForm.content, updatedAt: new Date().toISOString().split("T")[0] }
+            : a
+        )
+      );
+    } else {
+      const newAgreement: Agreement = {
+        id: Date.now().toString(),
+        name: agreementForm.name,
+        content: agreementForm.content,
+        createdAt: new Date().toISOString().split("T")[0],
+        updatedAt: new Date().toISOString().split("T")[0],
+      };
+      setAgreements((prev) => [...prev, newAgreement]);
+    }
+    setAgreementDialogOpen(false);
+  };
+
+  const handleDeleteAgreement = (id: string) => {
+    setAgreements((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const filteredAgreements = agreements.filter((agreement) =>
+    agreement.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -804,6 +887,152 @@ const FormsDashboard = () => {
           </div>
         );
 
+      case "agreement":
+        return (
+          <>
+            {/* Toolbar */}
+            <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <FileSignature className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Agreements</h2>
+                <Badge variant="secondary" className="text-xs">
+                  {agreements.length} total
+                </Badge>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search agreements"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 bg-background"
+                  />
+                </div>
+                <Button className="bg-primary hover:bg-primary/90" onClick={openAddAgreement}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Agreement
+                </Button>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="flex-1 overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
+                    <TableHead className="w-12">
+                      <Checkbox />
+                    </TableHead>
+                    <TableHead className="font-semibold text-foreground">AGREEMENT NAME</TableHead>
+                    <TableHead className="font-semibold text-foreground">CREATED DATE</TableHead>
+                    <TableHead className="font-semibold text-foreground">MODIFIED DATE</TableHead>
+                    <TableHead className="w-12"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAgreements.map((agreement) => (
+                    <TableRow
+                      key={agreement.id}
+                      className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
+                    >
+                      <TableCell>
+                        <Checkbox />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <FileSignature className="h-4 w-4 text-primary" />
+                          <span className="font-medium text-foreground">{agreement.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-foreground">
+                        {format(new Date(agreement.createdAt), "dd-MM-yyyy")}
+                      </TableCell>
+                      <TableCell className="text-foreground">
+                        {format(new Date(agreement.updatedAt), "dd-MM-yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-popover">
+                            <DropdownMenuItem onClick={() => openEditAgreement(agreement)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => handleDeleteAgreement(agreement.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {filteredAgreements.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-2">
+                          <FileSignature className="h-8 w-8 text-muted-foreground/50" />
+                          <p className="text-muted-foreground">No agreements found</p>
+                          <Button variant="outline" size="sm" onClick={openAddAgreement} className="mt-2">
+                            Create your first agreement
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Agreement Dialog */}
+            <Dialog open={agreementDialogOpen} onOpenChange={setAgreementDialogOpen}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{editingAgreement ? "Edit Agreement" : "Add Agreement"}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="agreement-name">Name</Label>
+                    <Input
+                      id="agreement-name"
+                      placeholder="Enter agreement name"
+                      value={agreementForm.name}
+                      onChange={(e) => setAgreementForm((prev) => ({ ...prev, name: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="agreement-content">Content</Label>
+                    <Textarea
+                      id="agreement-content"
+                      placeholder="Enter the agreement content..."
+                      className="min-h-[200px] resize-y"
+                      value={agreementForm.content}
+                      onChange={(e) => setAgreementForm((prev) => ({ ...prev, content: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setAgreementDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveAgreement} disabled={!agreementForm.name.trim()}>
+                    {editingAgreement ? "Save Changes" : "Add Agreement"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </>
+        );
+
       default:
         return null;
     }
@@ -930,6 +1159,16 @@ const FormsDashboard = () => {
                 }`}
               >
                 Test Sequence
+              </button>
+              <button
+                onClick={() => setActiveTab("agreement")}
+                className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
+                  activeTab === "agreement"
+                    ? "bg-card text-foreground shadow-sm border border-border border-b-0"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                Agreement
               </button>
             </div>
           </div>
