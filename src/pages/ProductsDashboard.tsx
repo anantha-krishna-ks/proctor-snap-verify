@@ -14,10 +14,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import AddProductSheet from "@/components/AddProductSheet";
 
 const ProductsDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
 
   const filteredProjects = mockProjects.filter(
     (project) =>
@@ -56,7 +58,7 @@ const ProductsDashboard = () => {
                   <List className="h-4 w-4" />
                 </Button>
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setIsAddProductOpen(true)}>
                 <Plus className="h-4 w-4" />
                 Add Product
               </Button>
@@ -71,6 +73,11 @@ const ProductsDashboard = () => {
               </div>
             </div>
           </div>
+
+          <AddProductSheet
+            open={isAddProductOpen}
+            onOpenChange={setIsAddProductOpen}
+          />
 
           {/* Grid View */}
           {viewMode === "grid" && (
