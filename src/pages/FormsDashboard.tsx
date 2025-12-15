@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   DndContext,
   closestCenter,
@@ -45,6 +45,7 @@ import {
   FileSignature,
   Eye,
   Pencil,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,7 +105,9 @@ interface TestSequenceStep {
 
 const FormsDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("forms");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "forms";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRepository, setSelectedRepository] = useState(mockRepositories[0]?.id || "");
   const [expandedRepos, setExpandedRepos] = useState<string[]>([mockRepositories[0]?.id || ""]);
@@ -539,15 +542,21 @@ const handleDragEnd = (event: DragEndEvent) => {
                 <div className="relative w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search configurations"
+                    placeholder="Search by configuration name"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9 bg-background"
                   />
                 </div>
-                <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate("/forms/configurations")}>
+                <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate("/forms/configurations/create")}>
                   <Plus className="h-4 w-4 mr-1" />
                   Create Configuration
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -558,10 +567,32 @@ const handleDragEnd = (event: DragEndEvent) => {
                     <TableHead className="w-12">
                       <Checkbox />
                     </TableHead>
-                    <TableHead className="font-semibold text-foreground">CONFIGURATION NAME</TableHead>
-                    <TableHead className="font-semibold text-foreground">STATUS</TableHead>
-                    <TableHead className="font-semibold text-foreground">MODIFIED DATE</TableHead>
-                    <TableHead className="font-semibold text-foreground">VERSION</TableHead>
+                    <TableHead className="font-semibold text-foreground">
+                      <div className="flex items-center gap-1">
+                        CONFIGURATION NAME
+                        <ChevronDown className="h-3 w-3" />
+                      </div>
+                    </TableHead>
+                    <TableHead className="font-semibold text-foreground">DURATION</TableHead>
+                    <TableHead className="font-semibold text-foreground">LANGUAGE</TableHead>
+                    <TableHead className="font-semibold text-foreground">
+                      <div className="flex items-center gap-1">
+                        SECURITY
+                        <ChevronDown className="h-3 w-3" />
+                      </div>
+                    </TableHead>
+                    <TableHead className="font-semibold text-foreground">
+                      <div className="flex items-center gap-1">
+                        MODIFIED DATE
+                        <ChevronDown className="h-3 w-3" />
+                      </div>
+                    </TableHead>
+                    <TableHead className="font-semibold text-foreground">
+                      <div className="flex items-center gap-1">
+                        VERSION
+                        <ChevronDown className="h-3 w-3" />
+                      </div>
+                    </TableHead>
                     <TableHead className="w-12"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -579,13 +610,39 @@ const handleDragEnd = (event: DragEndEvent) => {
                           <Settings className="h-4 w-4 text-primary" />
                           <span className="font-medium text-foreground">{config.name}</span>
                           {config.isDefault && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge className="bg-success/10 text-success border-success/20 text-xs">
                               Default
                             </Badge>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>{getStatusBadge("active")}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {config.examRules.duration} min
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-foreground">
+                        {config.examRules.language}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {config.security.fullScreenMode && (
+                            <Badge variant="outline" className="text-xs">Full Screen</Badge>
+                          )}
+                          {config.security.shuffleQuestions && (
+                            <Badge variant="outline" className="text-xs">Shuffle</Badge>
+                          )}
+                          {config.security.preventCopyPaste && (
+                            <Badge variant="outline" className="text-xs">No Copy</Badge>
+                          )}
+                          {!config.security.fullScreenMode &&
+                            !config.security.shuffleQuestions &&
+                            !config.security.preventCopyPaste && (
+                              <span className="text-xs text-muted-foreground italic">None</span>
+                            )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-foreground">
                         {format(new Date(config.updatedAt), "dd-MM-yyyy")}
                       </TableCell>
@@ -600,13 +657,35 @@ const handleDragEnd = (event: DragEndEvent) => {
                           <DropdownMenuContent align="end" className="bg-popover">
                             <DropdownMenuItem>Edit</DropdownMenuItem>
                             <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                            {!config.isDefault && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                              </>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
+                  {filteredConfigurations.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-2">
+                          <Settings className="h-8 w-8 text-muted-foreground/50" />
+                          <p className="text-muted-foreground">No configurations found in this repository</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate("/forms/configurations/create")}
+                            className="mt-2"
+                          >
+                            Create your first configuration
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
