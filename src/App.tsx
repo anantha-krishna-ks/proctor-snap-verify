@@ -14,7 +14,7 @@ import MarkerEvaluation from "./pages/MarkerEvaluation";
 import RoleManagement from "./pages/RoleManagement";
 import FormsDashboard from "./pages/FormsDashboard";
 import CreateForm from "./pages/CreateForm";
-import ConfigurationsList from "./pages/ConfigurationsList";
+
 import CreateConfiguration from "./pages/CreateConfiguration";
 import ReportsDashboard from "./pages/ReportsDashboard";
 import SurveyList from "./pages/SurveyList";
@@ -131,11 +131,7 @@ const App = () => (
           />
           <Route
             path="/forms/configurations"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <ConfigurationsList />
-              </ProtectedRoute>
-            }
+            element={<Navigate to="/forms?tab=configuration" replace />}
           />
           <Route
             path="/forms/configurations/create"
