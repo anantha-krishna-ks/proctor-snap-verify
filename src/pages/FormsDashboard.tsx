@@ -48,6 +48,7 @@ import { mockForms, mockRepositories, mockConfigurations } from "@/data/formsMoc
 import { mockSurveys } from "@/data/surveyMockData";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import {
   Dialog,
   DialogContent,
@@ -1010,13 +1011,11 @@ const FormsDashboard = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="agreement-content">Content</Label>
-                    <Textarea
-                      id="agreement-content"
-                      placeholder="Enter the agreement content..."
-                      className="min-h-[200px] resize-y"
+                    <Label>Content</Label>
+                    <RichTextEditor
                       value={agreementForm.content}
-                      onChange={(e) => setAgreementForm((prev) => ({ ...prev, content: e.target.value }))}
+                      onChange={(value) => setAgreementForm((prev) => ({ ...prev, content: value }))}
+                      placeholder="Enter the agreement content..."
                     />
                   </div>
                 </div>
