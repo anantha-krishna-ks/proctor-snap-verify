@@ -76,6 +76,7 @@ interface Agreement {
   id: string;
   name: string;
   content: string;
+  repositoryId: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -149,6 +150,7 @@ const [agreements, setAgreements] = useState<Agreement[]>([
     id: "1",
     name: "Terms and Conditions",
     content: "By proceeding with this assessment, you agree to the following terms and conditions...",
+    repositoryId: "repo-1",
     createdAt: "2024-01-15",
     updatedAt: "2024-02-20",
   },
@@ -156,6 +158,7 @@ const [agreements, setAgreements] = useState<Agreement[]>([
     id: "2",
     name: "Privacy Policy",
     content: "Your privacy is important to us. This policy outlines how we collect and use your data...",
+    repositoryId: "repo-1",
     createdAt: "2024-01-10",
     updatedAt: "2024-03-01",
   },
@@ -394,6 +397,7 @@ const handleDragEnd = (event: DragEndEvent) => {
         id: Date.now().toString(),
         name: agreementForm.name,
         content: agreementForm.content,
+        repositoryId: selectedRepositoryId,
         createdAt: new Date().toISOString().split("T")[0],
         updatedAt: new Date().toISOString().split("T")[0],
       };
@@ -407,6 +411,7 @@ const handleDragEnd = (event: DragEndEvent) => {
   };
 
   const filteredAgreements = agreements.filter((agreement) =>
+    agreement.repositoryId === selectedRepositoryId &&
     agreement.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
