@@ -14,9 +14,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-  useSortable,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import {
   Plus,
   Search,
@@ -34,14 +32,7 @@ import {
   Settings,
   ClipboardList,
   Monitor,
-  Camera,
-  Globe,
-  Shield,
-  Mic,
   FileText,
-  GripVertical,
-  ChevronUp,
-  X,
   FileSignature,
   Eye,
   Pencil,
@@ -77,6 +68,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { RepositoryDialogs } from "@/components/RepositoryDialogs";
+import { SortableStepCard } from "@/components/SortableStepCard";
 import type { Repository } from "@/types/forms";
 import { toast } from "sonner";
 
@@ -284,6 +276,7 @@ const handleDragEnd = (event: DragEndEvent) => {
   };
 
   const totalPages = Math.ceil(filteredForms.length / parseInt(rowsPerPage));
+  
   const updateSystemCheckConfig = (stepId: string, key: string, value: boolean) => {
     setTestSequenceSteps((prev) =>
       prev.map((step) => {
@@ -298,6 +291,29 @@ const handleDragEnd = (event: DragEndEvent) => {
         }
         return step;
       }),
+    );
+  };
+
+  const updateFormIds = (stepId: string, formId: string, checked: boolean) => {
+    setTestSequenceSteps((prev) =>
+      prev.map((s) => {
+        if (s.id === stepId) {
+          const currentIds = s.formIds || [];
+          const newIds = checked
+            ? [...currentIds, formId]
+            : currentIds.filter((id) => id !== formId);
+          return { ...s, formIds: newIds };
+        }
+        return s;
+      })
+    );
+  };
+
+  const updateFormSelectionMode = (stepId: string, mode: "in-order" | "random") => {
+    setTestSequenceSteps((prev) =>
+      prev.map((s) =>
+        s.id === stepId ? { ...s, formSelectionMode: mode } : s
+      )
     );
   };
 
@@ -891,244 +907,20 @@ const handleDragEnd = (event: DragEndEvent) => {
                   strategy={verticalListSortingStrategy}
                 >
                   <div className="space-y-3 max-w-4xl mx-auto">
-                    {testSequenceSteps.map((step, index) => {
-                      const {
-                        attributes,
-                        listeners,
-                        setNodeRef,
-                        transform,
-                        transition,
-                        isDragging,
-                      } = useSortable({ id: step.id });
-
-                      const style = {
-                        transform: CSS.Transform.toString(transform),
-                        transition,
-                        opacity: isDragging ? 0.5 : 1,
-                        zIndex: isDragging ? 1000 : "auto" as const,
-                      };
-
-                      return (
-                        <div key={step.id} ref={setNodeRef} style={style} {...attributes}>
-                          <Card className="border border-border">
-                            <CardHeader className="py-3 px-4">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <div
-                                    {...listeners}
-                                    className="cursor-grab active:cursor-grabbing touch-none"
-                                  >
-                                    <GripVertical className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
-                                  </div>
-                                  <Badge variant="outline" className="text-xs font-mono">
-                                    Step {step.order}
-                                  </Badge>
-                                  {getStepIcon(step.type)}
-                                  <CardTitle className="text-base font-medium">{step.name}</CardTitle>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => toggleStepExpand(step.id)}
-                                  >
-                                    {expandedSteps.includes(step.id) ? (
-                                      <ChevronDown className="h-4 w-4" />
-                                    ) : (
-                                      <ChevronRight className="h-4 w-4" />
-                                    )}
-                                  </Button>
-                                  {step.type !== "system-check" && (
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 text-destructive hover:text-destructive"
-                                      onClick={() => removeStep(step.id)}
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                            </CardHeader>
-
-                            {expandedSteps.includes(step.id) && (
-                              <CardContent className="pt-0 pb-4 px-4">
-                                {step.type === "system-check" && (
-                                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pl-8">
-                                    <div className="flex items-center justify-between space-x-2 p-3 rounded-lg bg-muted/50">
-                                      <div className="flex items-center gap-2">
-                                        <Shield className="h-4 w-4 text-muted-foreground" />
-                                        <Label htmlFor="pop-blocker" className="text-sm">
-                                          Pop Blocker
-                                        </Label>
-                                      </div>
-                                      <Switch
-                                        id="pop-blocker"
-                                        checked={step.config?.popBlocker || false}
-                                        onCheckedChange={(checked) => updateSystemCheckConfig(step.id, "popBlocker", checked)}
-                                      />
-                                    </div>
-                                    <div className="flex items-center justify-between space-x-2 p-3 rounded-lg bg-muted/50">
-                                      <div className="flex items-center gap-2">
-                                        <Camera className="h-4 w-4 text-muted-foreground" />
-                                        <Label htmlFor="camera" className="text-sm">
-                                          Camera
-                                        </Label>
-                                      </div>
-                                      <Switch
-                                        id="camera"
-                                        checked={step.config?.camera || false}
-                                        onCheckedChange={(checked) => updateSystemCheckConfig(step.id, "camera", checked)}
-                                      />
-                                    </div>
-                                    <div className="flex items-center justify-between space-x-2 p-3 rounded-lg bg-muted/50">
-                                      <div className="flex items-center gap-2">
-                                        <Globe className="h-4 w-4 text-muted-foreground" />
-                                        <Label htmlFor="browser" className="text-sm">
-                                          Browser
-                                        </Label>
-                                      </div>
-                                      <Switch
-                                        id="browser"
-                                        checked={step.config?.browser || false}
-                                        onCheckedChange={(checked) => updateSystemCheckConfig(step.id, "browser", checked)}
-                                      />
-                                    </div>
-                                    <div className="flex items-center justify-between space-x-2 p-3 rounded-lg bg-muted/50">
-                                      <div className="flex items-center gap-2">
-                                        <Mic className="h-4 w-4 text-muted-foreground" />
-                                        <Label htmlFor="microphone" className="text-sm">
-                                          Microphone
-                                        </Label>
-                                      </div>
-                                      <Switch
-                                        id="microphone"
-                                        checked={step.config?.microphone || false}
-                                        onCheckedChange={(checked) => updateSystemCheckConfig(step.id, "microphone", checked)}
-                                      />
-                                    </div>
-                                    <div className="flex items-center justify-between space-x-2 p-3 rounded-lg bg-muted/50">
-                                      <div className="flex items-center gap-2">
-                                        <Monitor className="h-4 w-4 text-muted-foreground" />
-                                        <Label htmlFor="screen-share" className="text-sm">
-                                          Screen Share
-                                        </Label>
-                                      </div>
-                                      <Switch
-                                        id="screen-share"
-                                        checked={step.config?.screenShare || false}
-                                        onCheckedChange={(checked) => updateSystemCheckConfig(step.id, "screenShare", checked)}
-                                      />
-                                    </div>
-                                  </div>
-                                )}
-
-                                {step.type === "form" && (
-                                  <div className="pl-8 space-y-3">
-                                    {(step.formIds?.length || 0) > 1 && (
-                                      <div className="flex items-center gap-3 mb-3">
-                                        <Label className="text-sm text-muted-foreground">Form Selection Order:</Label>
-                                        <Select
-                                          value={step.formSelectionMode || "in-order"}
-                                          onValueChange={(value: "in-order" | "random") => {
-                                            setTestSequenceSteps((prev) =>
-                                              prev.map((s) =>
-                                                s.id === step.id ? { ...s, formSelectionMode: value } : s
-                                              )
-                                            );
-                                          }}
-                                        >
-                                          <SelectTrigger className="w-40 bg-background">
-                                            <SelectValue />
-                                          </SelectTrigger>
-                                          <SelectContent className="bg-popover">
-                                            <SelectItem value="in-order">In Order</SelectItem>
-                                            <SelectItem value="random">Random</SelectItem>
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
-                                    )}
-                                    <Label className="text-sm text-muted-foreground">
-                                      Select forms to include in this step
-                                    </Label>
-                                    <div className="border border-border rounded-lg max-h-[200px] overflow-y-auto">
-                                      {mockForms.map((form) => (
-                                        <div
-                                          key={form.id}
-                                          className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-muted/50"
-                                        >
-                                          <Checkbox
-                                            id={`form-${step.id}-${form.id}`}
-                                            checked={step.formIds?.includes(form.id) || false}
-                                            onCheckedChange={(checked) => {
-                                              setTestSequenceSteps((prev) =>
-                                                prev.map((s) => {
-                                                  if (s.id === step.id) {
-                                                    const currentIds = s.formIds || [];
-                                                    const newIds = checked
-                                                      ? [...currentIds, form.id]
-                                                      : currentIds.filter((id) => id !== form.id);
-                                                    return { ...s, formIds: newIds };
-                                                  }
-                                                  return s;
-                                                })
-                                              );
-                                            }}
-                                          />
-                                          <div className="flex items-center gap-2 flex-1">
-                                            <PlayCircle className="h-4 w-4 text-primary" />
-                                            <span className="text-sm font-medium text-foreground">{form.name}</span>
-                                          </div>
-                                          <Badge variant="secondary" className="text-xs">
-                                            {form.model}
-                                          </Badge>
-                                        </div>
-                                      ))}
-                                    </div>
-                                    {(step.formIds?.length || 0) > 0 && (
-                                      <p className="text-xs text-muted-foreground">
-                                        {step.formIds?.length} form{(step.formIds?.length || 0) > 1 ? "s" : ""} selected
-                                        {(step.formIds?.length || 0) > 1 && ` • ${step.formSelectionMode === "random" ? "Random" : "Sequential"} order`}
-                                      </p>
-                                    )}
-                                  </div>
-                                )}
-
-                                {step.type === "survey" && (
-                                  <div className="pl-8 space-y-3">
-                                    <Label className="text-sm text-muted-foreground">Select a survey for this step</Label>
-                                    <Select>
-                                      <SelectTrigger className="w-full bg-background">
-                                        <SelectValue placeholder="Choose a survey" />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-popover">
-                                        {mockSurveys.map((survey) => (
-                                          <SelectItem key={survey.id} value={survey.id}>
-                                            {survey.name}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                )}
-
-                                {step.type === "agreement" && (
-                                  <div className="pl-8 space-y-3">
-                                    <Label className="text-sm text-muted-foreground">Agreement Text</Label>
-                                    <textarea
-                                      className="w-full min-h-[120px] p-3 rounded-md border border-border bg-background text-foreground text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-                                      placeholder="Enter the agreement text that candidates must accept before proceeding..."
-                                    />
-                                  </div>
-                                )}
-                              </CardContent>
-                            )}
-                          </Card>
-                        </div>
-                      );
-                    })}
+                    {testSequenceSteps.map((step) => (
+                      <SortableStepCard
+                        key={step.id}
+                        step={step}
+                        isExpanded={expandedSteps.includes(step.id)}
+                        onToggleExpand={toggleStepExpand}
+                        onRemoveStep={removeStep}
+                        onUpdateSystemCheckConfig={updateSystemCheckConfig}
+                        onUpdateFormIds={updateFormIds}
+                        onUpdateFormSelectionMode={updateFormSelectionMode}
+                        forms={mockForms}
+                        surveys={mockSurveys}
+                      />
+                    ))}
 
                     {testSequenceSteps.length === 0 && (
                       <div className="text-center py-12">
