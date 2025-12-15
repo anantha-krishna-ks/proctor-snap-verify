@@ -64,7 +64,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { mockForms, mockRepositories, mockConfigurations } from "@/data/formsMockData";
+import { mockForms, mockRepositories as initialMockRepositories, mockConfigurations } from "@/data/formsMockData";
 import { mockSurveys } from "@/data/surveyMockData";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
@@ -76,6 +76,9 @@ import {
   SheetTitle,
   SheetFooter,
 } from "@/components/ui/sheet";
+import { RepositoryDialogs } from "@/components/RepositoryDialogs";
+import type { Repository } from "@/types/forms";
+import { toast } from "sonner";
 
 interface Agreement {
   id: string;
@@ -109,11 +112,19 @@ const FormsDashboard = () => {
   const initialTab = searchParams.get("tab") || "forms";
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRepository, setSelectedRepository] = useState(mockRepositories[0]?.id || "");
-  const [expandedRepos, setExpandedRepos] = useState<string[]>([mockRepositories[0]?.id || ""]);
+  
+  // Repository state
+  const [repositories, setRepositories] = useState<Repository[]>(initialMockRepositories);
+  const [selectedRepositoryId, setSelectedRepositoryId] = useState(initialMockRepositories[0]?.id || "");
+  const [expandedRepos, setExpandedRepos] = useState<string[]>([initialMockRepositories[0]?.id || ""]);
   const [rowsPerPage, setRowsPerPage] = useState("25");
   const [currentPage, setCurrentPage] = useState(1);
-
+  
+  // Repository dialog state
+  const [createRepoDialogOpen, setCreateRepoDialogOpen] = useState(false);
+  const [renameRepoDialogOpen, setRenameRepoDialogOpen] = useState(false);
+  const [deleteRepoDialogOpen, setDeleteRepoDialogOpen] = useState(false);
+  const [selectedRepoForAction, setSelectedRepoForAction] = useState<Repository | null>(null);
   // Test Sequence State
   const [testSequenceSteps, setTestSequenceSteps] = useState<TestSequenceStep[]>([
     {
@@ -195,24 +206,65 @@ const handleDragEnd = (event: DragEndEvent) => {
     setExpandedSteps((prev) => (prev.includes(stepId) ? prev.filter((id) => id !== stepId) : [...prev, stepId]));
   };
 
+  // Repository CRUD handlers
+  const handleCreateRepository = (name: string) => {
+    const newRepo: Repository = {
+      id: `repo-${Date.now()}`,
+      name,
+      formCount: 0,
+      createdAt: new Date().toISOString(),
+    };
+    setRepositories((prev) => [...prev, newRepo]);
+    setSelectedRepositoryId(newRepo.id);
+    setExpandedRepos((prev) => [...prev, newRepo.id]);
+    toast.success(`Repository "${name}" created successfully`);
+  };
+
+  const handleRenameRepository = (id: string, name: string) => {
+    setRepositories((prev) =>
+      prev.map((repo) => (repo.id === id ? { ...repo, name } : repo))
+    );
+    toast.success(`Repository renamed to "${name}"`);
+  };
+
+  const handleDeleteRepository = (id: string) => {
+    const repo = repositories.find((r) => r.id === id);
+    setRepositories((prev) => prev.filter((r) => r.id !== id));
+    if (selectedRepositoryId === id) {
+      const remaining = repositories.filter((r) => r.id !== id);
+      setSelectedRepositoryId(remaining[0]?.id || "");
+    }
+    toast.success(`Repository "${repo?.name}" deleted`);
+  };
+
+  const openRenameDialog = (repo: Repository) => {
+    setSelectedRepoForAction(repo);
+    setRenameRepoDialogOpen(true);
+  };
+
+  const openDeleteDialog = (repo: Repository) => {
+    setSelectedRepoForAction(repo);
+    setDeleteRepoDialogOpen(true);
+  };
+
   const filteredForms = mockForms.filter(
     (form) =>
-      form.repositoryId === selectedRepository &&
+      form.repositoryId === selectedRepositoryId &&
       (form.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         form.code.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   const filteredConfigurations = mockConfigurations.filter(
     (config) =>
-      config.repositoryId === selectedRepository && config.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      config.repositoryId === selectedRepositoryId && config.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const filteredSurveys = mockSurveys.filter(
     (survey) =>
-      survey.repositoryId === selectedRepository && survey.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      survey.repositoryId === selectedRepositoryId && survey.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const selectedRepoData = mockRepositories.find((r) => r.id === selectedRepository);
+  const selectedRepoData = repositories.find((r) => r.id === selectedRepositoryId);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -353,12 +405,12 @@ const handleDragEnd = (event: DragEndEvent) => {
                 <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
                   Repository
                 </Badge>
-                <Select value={selectedRepository} onValueChange={setSelectedRepository}>
+                <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
                   <SelectTrigger className="w-64 bg-background">
                     <SelectValue placeholder="Select repository" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover">
-                    {mockRepositories.map((repo) => (
+                    {repositories.map((repo) => (
                       <SelectItem key={repo.id} value={repo.id}>
                         {repo.name}
                       </SelectItem>
@@ -525,12 +577,12 @@ const handleDragEnd = (event: DragEndEvent) => {
                 <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
                   Repository
                 </Badge>
-                <Select value={selectedRepository} onValueChange={setSelectedRepository}>
+                <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
                   <SelectTrigger className="w-64 bg-background">
                     <SelectValue placeholder="Select repository" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover">
-                    {mockRepositories.map((repo) => (
+                    {repositories.map((repo) => (
                       <SelectItem key={repo.id} value={repo.id}>
                         {repo.name}
                       </SelectItem>
@@ -700,12 +752,12 @@ const handleDragEnd = (event: DragEndEvent) => {
                 <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
                   Repository
                 </Badge>
-                <Select value={selectedRepository} onValueChange={setSelectedRepository}>
+                <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
                   <SelectTrigger className="w-64 bg-background">
                     <SelectValue placeholder="Select repository" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover">
-                    {mockRepositories.map((repo) => (
+                    {repositories.map((repo) => (
                       <SelectItem key={repo.id} value={repo.id}>
                         {repo.name}
                       </SelectItem>
@@ -1304,13 +1356,39 @@ const handleDragEnd = (event: DragEndEvent) => {
             <div className="flex items-center justify-between">
               <span className="font-medium text-foreground">Repositories</span>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7"
+                  onClick={() => setCreateRepoDialogOpen(true)}
+                  title="Create repository"
+                >
                   <Plus className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7"
+                  onClick={() => {
+                    const repo = repositories.find(r => r.id === selectedRepositoryId);
+                    if (repo) openRenameDialog(repo);
+                  }}
+                  disabled={!selectedRepositoryId}
+                  title="Rename selected repository"
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-7 w-7">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7"
+                  onClick={() => {
+                    const repo = repositories.find(r => r.id === selectedRepositoryId);
+                    if (repo) openDeleteDialog(repo);
+                  }}
+                  disabled={!selectedRepositoryId || repositories.length <= 1}
+                  title="Delete selected repository"
+                >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -1318,15 +1396,15 @@ const handleDragEnd = (event: DragEndEvent) => {
           </div>
 
           <div className="p-2">
-            {mockRepositories.map((repo) => (
-              <div key={repo.id}>
+            {repositories.map((repo) => (
+              <div key={repo.id} className="group">
                 <button
                   onClick={() => {
-                    setSelectedRepository(repo.id);
+                    setSelectedRepositoryId(repo.id);
                     toggleRepoExpand(repo.id);
                   }}
                   className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left transition-colors ${
-                    selectedRepository === repo.id ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"
+                    selectedRepositoryId === repo.id ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"
                   }`}
                 >
                   {expandedRepos.includes(repo.id) ? (
@@ -1341,6 +1419,38 @@ const handleDragEnd = (event: DragEndEvent) => {
                   )}
                   <span className="flex-1 truncate">{repo.name}</span>
                   <span className="text-xs text-muted-foreground">({repo.formCount})</span>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <MoreVertical className="h-3 w-3" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-popover">
+                      <DropdownMenuItem onClick={(e) => {
+                        e.stopPropagation();
+                        openRenameDialog(repo);
+                      }}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Rename
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteDialog(repo);
+                        }}
+                        disabled={repositories.length <= 1}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </button>
               </div>
             ))}
@@ -1461,6 +1571,21 @@ const handleDragEnd = (event: DragEndEvent) => {
           </div>
         </main>
       </div>
+
+      {/* Repository CRUD Dialogs */}
+      <RepositoryDialogs
+        repositories={repositories}
+        createDialogOpen={createRepoDialogOpen}
+        setCreateDialogOpen={setCreateRepoDialogOpen}
+        renameDialogOpen={renameRepoDialogOpen}
+        setRenameDialogOpen={setRenameRepoDialogOpen}
+        deleteDialogOpen={deleteRepoDialogOpen}
+        setDeleteDialogOpen={setDeleteRepoDialogOpen}
+        selectedRepository={selectedRepoForAction}
+        onCreateRepository={handleCreateRepository}
+        onRenameRepository={handleRenameRepository}
+        onDeleteRepository={handleDeleteRepository}
+      />
     </div>
   );
 };
