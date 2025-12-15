@@ -26,6 +26,8 @@ import {
   ChevronUp,
   X,
   FileSignature,
+  Eye,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -129,6 +131,7 @@ const FormsDashboard = () => {
   const [agreementDialogOpen, setAgreementDialogOpen] = useState(false);
   const [editingAgreement, setEditingAgreement] = useState<Agreement | null>(null);
   const [agreementForm, setAgreementForm] = useState({ name: "", content: "" });
+  const [agreementPreviewMode, setAgreementPreviewMode] = useState(false);
 
   const toggleRepoExpand = (repoId: string) => {
     setExpandedRepos((prev) => (prev.includes(repoId) ? prev.filter((id) => id !== repoId) : [...prev, repoId]));
@@ -241,12 +244,14 @@ const FormsDashboard = () => {
   const openAddAgreement = () => {
     setEditingAgreement(null);
     setAgreementForm({ name: "", content: "" });
+    setAgreementPreviewMode(false);
     setAgreementDialogOpen(true);
   };
 
   const openEditAgreement = (agreement: Agreement) => {
     setEditingAgreement(agreement);
     setAgreementForm({ name: agreement.name, content: agreement.content });
+    setAgreementPreviewMode(false);
     setAgreementDialogOpen(true);
   };
 
@@ -1011,12 +1016,41 @@ const FormsDashboard = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Content</Label>
-                    <RichTextEditor
-                      value={agreementForm.content}
-                      onChange={(value) => setAgreementForm((prev) => ({ ...prev, content: value }))}
-                      placeholder="Enter the agreement content..."
-                    />
+                    <div className="flex items-center justify-between">
+                      <Label>Content</Label>
+                      <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
+                        <Button
+                          variant={!agreementPreviewMode ? "secondary" : "ghost"}
+                          size="sm"
+                          className="h-7 px-3 text-xs"
+                          onClick={() => setAgreementPreviewMode(false)}
+                        >
+                          <Pencil className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant={agreementPreviewMode ? "secondary" : "ghost"}
+                          size="sm"
+                          className="h-7 px-3 text-xs"
+                          onClick={() => setAgreementPreviewMode(true)}
+                        >
+                          <Eye className="h-3 w-3 mr-1" />
+                          Preview
+                        </Button>
+                      </div>
+                    </div>
+                    {!agreementPreviewMode ? (
+                      <RichTextEditor
+                        value={agreementForm.content}
+                        onChange={(value) => setAgreementForm((prev) => ({ ...prev, content: value }))}
+                        placeholder="Enter the agreement content..."
+                      />
+                    ) : (
+                      <div 
+                        className="min-h-[200px] p-4 border border-input rounded-md bg-muted/30 prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: agreementForm.content || '<p class="text-muted-foreground">No content to preview</p>' }}
+                      />
+                    )}
                   </div>
                 </div>
                 <DialogFooter>
