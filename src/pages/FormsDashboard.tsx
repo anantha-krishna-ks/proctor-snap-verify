@@ -52,12 +52,12 @@ import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
 
 interface Agreement {
   id: string;
@@ -999,12 +999,12 @@ const FormsDashboard = () => {
               </Table>
             </div>
 
-            {/* Agreement Dialog */}
-            <Dialog open={agreementDialogOpen} onOpenChange={setAgreementDialogOpen}>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>{editingAgreement ? "Edit Agreement" : "Add Agreement"}</DialogTitle>
-                </DialogHeader>
+            {/* Agreement Sheet */}
+            <Sheet open={agreementDialogOpen} onOpenChange={setAgreementDialogOpen}>
+              <SheetContent className="sm:max-w-xl overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>{editingAgreement ? "Edit Agreement" : "Add Agreement"}</SheetTitle>
+                </SheetHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
                     <Label htmlFor="agreement-name">Name</Label>
@@ -1053,16 +1053,16 @@ const FormsDashboard = () => {
                     )}
                   </div>
                 </div>
-                <DialogFooter>
+                <SheetFooter className="gap-2">
                   <Button variant="outline" onClick={() => setAgreementDialogOpen(false)}>
                     Cancel
                   </Button>
                   <Button onClick={handleSaveAgreement} disabled={!agreementForm.name.trim()}>
                     {editingAgreement ? "Save Changes" : "Add Agreement"}
                   </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                </SheetFooter>
+              </SheetContent>
+            </Sheet>
           </>
         );
 
