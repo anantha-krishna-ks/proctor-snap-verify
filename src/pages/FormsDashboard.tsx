@@ -80,6 +80,7 @@ interface TestSequenceStep {
     screenShare?: boolean;
   };
   formIds?: string[];
+  formSelectionMode?: "in-order" | "random";
   surveyId?: string;
   agreementText?: string;
 }
@@ -108,8 +109,16 @@ const FormsDashboard = () => {
         screenShare: false,
       },
     },
+    {
+      id: "2",
+      type: "form",
+      name: "Forms",
+      order: 2,
+      formIds: [],
+      formSelectionMode: "in-order",
+    },
   ]);
-  const [expandedSteps, setExpandedSteps] = useState<string[]>(["1"]);
+  const [expandedSteps, setExpandedSteps] = useState<string[]>(["1", "2"]);
 
   // Agreement State
   const [agreements, setAgreements] = useState<Agreement[]>([
@@ -199,9 +208,10 @@ const FormsDashboard = () => {
     const newStep: TestSequenceStep = {
       id: Date.now().toString(),
       type,
-      name: type === "form" ? "Form" : type === "survey" ? "Survey" : "Agreement",
+      name: type === "form" ? "Forms" : type === "survey" ? "Survey" : "Agreement",
       order: testSequenceSteps.length + 1,
       formIds: type === "form" ? [] : undefined,
+      formSelectionMode: type === "form" ? "in-order" : undefined,
       surveyId: type === "survey" ? "" : undefined,
       agreementText: type === "agreement" ? "" : undefined,
     };
@@ -830,22 +840,72 @@ const FormsDashboard = () => {
 
                         {step.type === "form" && (
                           <div className="pl-8 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <Label className="text-sm text-muted-foreground">
-                                Select forms to include in this step
-                              </Label>
-                              <Button variant="outline" size="sm">
-                                <Plus className="h-4 w-4 mr-1" />
-                                Add Form
-                              </Button>
+                            {(step.formIds?.length || 0) > 1 && (
+                              <div className="flex items-center gap-3 mb-3">
+                                <Label className="text-sm text-muted-foreground">Form Selection Order:</Label>
+                                <Select
+                                  value={step.formSelectionMode || "in-order"}
+                                  onValueChange={(value: "in-order" | "random") => {
+                                    setTestSequenceSteps((prev) =>
+                                      prev.map((s) =>
+                                        s.id === step.id ? { ...s, formSelectionMode: value } : s
+                                      )
+                                    );
+                                  }}
+                                >
+                                  <SelectTrigger className="w-40 bg-background">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-popover">
+                                    <SelectItem value="in-order">In Order</SelectItem>
+                                    <SelectItem value="random">Random</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            )}
+                            <Label className="text-sm text-muted-foreground">
+                              Select forms to include in this step
+                            </Label>
+                            <div className="border border-border rounded-lg max-h-[200px] overflow-y-auto">
+                              {mockForms.map((form) => (
+                                <div
+                                  key={form.id}
+                                  className="flex items-center gap-3 p-3 border-b border-border last:border-b-0 hover:bg-muted/50"
+                                >
+                                  <Checkbox
+                                    id={`form-${step.id}-${form.id}`}
+                                    checked={step.formIds?.includes(form.id) || false}
+                                    onCheckedChange={(checked) => {
+                                      setTestSequenceSteps((prev) =>
+                                        prev.map((s) => {
+                                          if (s.id === step.id) {
+                                            const currentIds = s.formIds || [];
+                                            const newIds = checked
+                                              ? [...currentIds, form.id]
+                                              : currentIds.filter((id) => id !== form.id);
+                                            return { ...s, formIds: newIds };
+                                          }
+                                          return s;
+                                        })
+                                      );
+                                    }}
+                                  />
+                                  <div className="flex items-center gap-2 flex-1">
+                                    <PlayCircle className="h-4 w-4 text-primary" />
+                                    <span className="text-sm font-medium text-foreground">{form.name}</span>
+                                  </div>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {form.model}
+                                  </Badge>
+                                </div>
+                              ))}
                             </div>
-                            <div className="border border-dashed border-border rounded-lg p-6 text-center">
-                              <PlayCircle className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
-                              <p className="text-sm text-muted-foreground">No forms added yet</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Click "Add Form" to select forms from the repository
+                            {(step.formIds?.length || 0) > 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                {step.formIds?.length} form{(step.formIds?.length || 0) > 1 ? "s" : ""} selected
+                                {(step.formIds?.length || 0) > 1 && ` • ${step.formSelectionMode === "random" ? "Random" : "Sequential"} order`}
                               </p>
-                            </div>
+                            )}
                           </div>
                         )}
 
