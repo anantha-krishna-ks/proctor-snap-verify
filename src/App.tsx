@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { PrivilegeProvider } from "@/hooks/usePrivileges";
 import AdminDashboard from "./pages/AdminDashboard";
+import ProductsDashboard from "./pages/ProductsDashboard";
 import ScheduleDashboard from "./pages/ScheduleDashboard";
 import HeadshotApproval from "./pages/HeadshotApproval";
 import MarkerProjectsDashboard from "./pages/MarkerProjectsDashboard";
@@ -54,6 +55,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/products"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ProductsDashboard />
               </ProtectedRoute>
             }
           />
