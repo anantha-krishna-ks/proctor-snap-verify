@@ -3,6 +3,11 @@ export interface ProjectRoleStats {
   totalUsers?: number;
   activeSchedules?: number;
   pendingApprovals?: number;
+  totalProducts?: number;
+  evaluationPending?: number;
+  itemApprovalPending?: number;
+  totalTests?: number;
+  upcomingSchedules?: number;
   
   // Marker stats
   assignedItems?: number;
@@ -43,6 +48,11 @@ export const mockProjects: Project[] = [
       totalUsers: 5,
       activeSchedules: 0,
       pendingApprovals: 0,
+      totalProducts: 2,
+      evaluationPending: 0,
+      itemApprovalPending: 0,
+      totalTests: 1,
+      upcomingSchedules: 0,
       assignedItems: 0,
       pendingEvaluations: 0,
       completedToday: 0,
@@ -65,6 +75,11 @@ export const mockProjects: Project[] = [
       totalUsers: 3,
       activeSchedules: 0,
       pendingApprovals: 2,
+      totalProducts: 5,
+      evaluationPending: 3,
+      itemApprovalPending: 2,
+      totalTests: 3,
+      upcomingSchedules: 1,
       assignedItems: 5,
       pendingEvaluations: 3,
       completedToday: 2,
@@ -87,6 +102,11 @@ export const mockProjects: Project[] = [
       totalUsers: 8,
       activeSchedules: 1,
       pendingApprovals: 3,
+      totalProducts: 8,
+      evaluationPending: 8,
+      itemApprovalPending: 3,
+      totalTests: 5,
+      upcomingSchedules: 2,
       assignedItems: 12,
       pendingEvaluations: 8,
       completedToday: 4,
@@ -110,6 +130,11 @@ export const mockProjects: Project[] = [
       totalUsers: 15,
       activeSchedules: 2,
       pendingApprovals: 5,
+      totalProducts: 12,
+      evaluationPending: 18,
+      itemApprovalPending: 5,
+      totalTests: 8,
+      upcomingSchedules: 3,
       assignedItems: 25,
       pendingEvaluations: 18,
       completedToday: 7,
@@ -133,6 +158,11 @@ export const mockProjects: Project[] = [
       totalUsers: 42,
       activeSchedules: 5,
       pendingApprovals: 12,
+      totalProducts: 25,
+      evaluationPending: 45,
+      itemApprovalPending: 12,
+      totalTests: 15,
+      upcomingSchedules: 8,
       assignedItems: 68,
       pendingEvaluations: 45,
       completedToday: 23,
@@ -156,6 +186,11 @@ export const mockProjects: Project[] = [
       totalUsers: 28,
       activeSchedules: 3,
       pendingApprovals: 7,
+      totalProducts: 15,
+      evaluationPending: 22,
+      itemApprovalPending: 7,
+      totalTests: 10,
+      upcomingSchedules: 5,
       assignedItems: 35,
       pendingEvaluations: 22,
       completedToday: 13,
