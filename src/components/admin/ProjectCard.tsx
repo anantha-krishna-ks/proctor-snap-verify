@@ -226,23 +226,28 @@ export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps
             <Calendar className="h-3 w-3" />
             <span>{project.scheduleCount}</span>
           </div>
-          {(userRoles.includes("author") || userRoles.includes("test_author")) && (
+          {(userRoles.includes("author") || userRoles.includes("test_author") || userRoles.includes("marker")) && (
             <>
-              <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
-                <Edit className="h-3 w-3" />
-                <span>{getStatValue("publishedItems")}</span>
-              </div>
-              <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
-                <FileText className="h-3 w-3" />
-                <span>{getStatValue("draftItems")}</span>
-              </div>
+              <span className="text-border">|</span>
+              {(userRoles.includes("author") || userRoles.includes("test_author")) && (
+                <>
+                  <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                    <Edit className="h-3 w-3" />
+                    <span>{getStatValue("publishedItems")}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                    <FileText className="h-3 w-3" />
+                    <span>{getStatValue("draftItems")}</span>
+                  </div>
+                </>
+              )}
+              {userRoles.includes("marker") && (
+                <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                  <ClipboardList className="h-3 w-3" />
+                  <span>{getStatValue("assignedItems")}</span>
+                </div>
+              )}
             </>
-          )}
-          {userRoles.includes("marker") && (
-            <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-              <ClipboardList className="h-3 w-3" />
-              <span>{getStatValue("assignedItems")}</span>
-            </div>
           )}
         </div>
       </CardContent>
