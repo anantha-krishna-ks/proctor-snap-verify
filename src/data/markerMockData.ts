@@ -21,6 +21,20 @@ export interface AssignedProject extends Project {
 // Projects assigned to the marker
 export const mockMarkerProjects: AssignedProject[] = [
   {
+    id: "3",
+    code: "TestingPayload",
+    name: "TestingPayload",
+    itemCount: 0,
+    testCount: 0,
+    scheduleCount: 2,
+    status: "active",
+    progress: 72,
+    lastActivity: "1 day ago",
+    totalCandidates: 12,
+    completedEvaluations: 4,
+    pendingEvaluations: 8,
+  },
+  {
     id: "4",
     code: "SM0001",
     name: "STOCK MARKET",
@@ -54,6 +68,28 @@ export const mockMarkerProjects: AssignedProject[] = [
 
 // Schedules within projects assigned to the marker
 export const mockMarkerSchedules: MarkerAssignment[] = [
+  {
+    projectId: "3",
+    scheduleId: "s0a",
+    scheduleName: "TestingPayload Assessment - Batch A",
+    assessmentName: "Testing Fundamentals",
+    candidateCount: 8,
+    completedCount: 2,
+    inProgressCount: 4,
+    notStartedCount: 2,
+    deadline: "2024-12-22",
+  },
+  {
+    projectId: "3",
+    scheduleId: "s0b",
+    scheduleName: "TestingPayload Assessment - Batch B",
+    assessmentName: "Advanced Testing Methods",
+    candidateCount: 4,
+    completedCount: 2,
+    inProgressCount: 1,
+    notStartedCount: 1,
+    deadline: "2024-12-28",
+  },
   {
     projectId: "4",
     scheduleId: "s1",
