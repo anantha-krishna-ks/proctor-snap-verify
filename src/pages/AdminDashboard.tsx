@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { ProjectCard } from "@/components/admin/ProjectCard";
+import { RoleStatsSummary } from "@/components/admin/RoleStatsSummary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, UserCog } from "lucide-react";
@@ -37,6 +38,15 @@ const AdminDashboard = () => {
     const roles = getUserRolesForProject(currentUserId, project.id);
     return roles.length > 0;
   });
+
+  // Get all unique roles the user has across all projects
+  const allUserRoles = useMemo(() => {
+    const roles = new Set<string>();
+    userProjects.forEach((project) => {
+      getUserRolesForProject(currentUserId, project.id).forEach((role) => roles.add(role));
+    });
+    return Array.from(roles);
+  }, [currentUserId, userProjects]);
 
   const filteredProjects = userProjects.filter(
     (project) =>
@@ -96,6 +106,9 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* Role Stats Summary */}
+          <RoleStatsSummary projects={userProjects} userRoles={allUserRoles} />
 
           {/* Project Grid - passing user's roles per project */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
