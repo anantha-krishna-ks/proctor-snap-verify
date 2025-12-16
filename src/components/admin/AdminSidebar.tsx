@@ -8,6 +8,7 @@ import {
   PenTool,
   Database,
   Settings,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,7 @@ const navItems = [
   { title: "Home", url: "/admin", icon: Home },
   { title: "Organization", url: "/admin/organization", icon: Building2 },
   { title: "Products", url: "/admin/products", icon: Package },
+  { title: "Forms", url: "/forms", icon: FileText },
   { title: "Roles", url: "/admin/roles", icon: Shield },
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Marker", url: "/marker", icon: PenTool },
