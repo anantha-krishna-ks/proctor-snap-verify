@@ -22,6 +22,7 @@ import ReportsDashboard from "./pages/ReportsDashboard";
 import SurveyList from "./pages/SurveyList";
 import CreateSurvey from "./pages/CreateSurvey";
 import Login from "./pages/Login";
+import ProjectLayoutShowcase from "./pages/ProjectLayoutShowcase";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -193,6 +194,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <CreateSurvey />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/project-layouts"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ProjectLayoutShowcase />
               </ProtectedRoute>
             }
           />
