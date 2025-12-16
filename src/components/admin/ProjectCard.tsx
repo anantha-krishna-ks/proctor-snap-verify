@@ -66,8 +66,8 @@ const ROLE_CONFIG: Record<string, {
       { key: "reviewPending", label: "In Review" },
     ],
     actions: [
-      { label: "Manage Items", path: "/author/projects/{id}/items", icon: FileText },
       { label: "View Forms", path: "/forms", icon: FolderOpen },
+      { label: "Manage Items", path: "/author/projects/{id}/items", icon: FileText },
     ],
   },
   test_author: {
@@ -80,8 +80,8 @@ const ROLE_CONFIG: Record<string, {
       { key: "reviewPending", label: "In Review" },
     ],
     actions: [
-      { label: "Manage Items", path: "/author/projects/{id}/items", icon: FileText },
       { label: "View Forms", path: "/forms", icon: FolderOpen },
+      { label: "Manage Items", path: "/author/projects/{id}/items", icon: FileText },
     ],
   },
   proctor: {
