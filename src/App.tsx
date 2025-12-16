@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { PrivilegeProvider } from "@/hooks/usePrivileges";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProductsDashboard from "./pages/ProductsDashboard";
-import ScheduleDashboard from "./pages/ScheduleDashboard";
+import SchedulingDashboard from "./pages/SchedulingDashboard";
+import CreateSchedule from "./pages/CreateSchedule";
 import HeadshotApproval from "./pages/HeadshotApproval";
 import MarkerProjectsDashboard from "./pages/MarkerProjectsDashboard";
 import MarkerSchedulesDashboard from "./pages/MarkerSchedulesDashboard";
@@ -85,7 +86,15 @@ const App = () => (
             path="/scheduling"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <ScheduleDashboard />
+                <SchedulingDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/scheduling/create"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <CreateSchedule />
               </ProtectedRoute>
             }
           />
