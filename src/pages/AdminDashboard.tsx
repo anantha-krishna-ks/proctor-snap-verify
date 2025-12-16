@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, UserCog } from "lucide-react";
 import { mockProjects } from "@/data/projectMockData";
+import { 
+  mockUsers, 
+  getCurrentUserId, 
+  setCurrentUserId, 
+  getUserRolesForProject 
+} from "@/data/userRolesMockData";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,30 +21,24 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
-const ROLES = [
-  { id: "admin", label: "Administrator", color: "bg-primary/10 text-primary" },
-  { id: "marker", label: "Marker", color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
-  { id: "author", label: "Author", color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
-  { id: "test_author", label: "Test Author", color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
-  { id: "proctor", label: "Proctor", color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
-];
-
 const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentRole, setCurrentRole] = useState(() => localStorage.getItem("userRole") || "admin");
+  const [currentUserId, setCurrentUserIdState] = useState(() => getCurrentUserId());
 
-  const handleRoleChange = (roleId: string) => {
-    // Save original role on first switch
-    if (!localStorage.getItem("originalUserRole")) {
-      localStorage.setItem("originalUserRole", currentRole);
-    }
-    setCurrentRole(roleId);
-    localStorage.setItem("userRole", roleId);
+  const handleUserChange = (userId: string) => {
+    setCurrentUserId(userId);
+    setCurrentUserIdState(userId);
   };
 
-  const currentRoleData = ROLES.find(r => r.id === currentRole) || ROLES[0];
+  const currentUser = mockUsers.find(u => u.id === currentUserId) || mockUsers[0];
 
-  const filteredProjects = mockProjects.filter(
+  // Filter projects where user has at least one role
+  const userProjects = mockProjects.filter((project) => {
+    const roles = getUserRolesForProject(currentUserId, project.id);
+    return roles.length > 0;
+  });
+
+  const filteredProjects = userProjects.filter(
     (project) =>
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.code.toLowerCase().includes(searchQuery.toLowerCase())
@@ -54,30 +54,29 @@ const AdminDashboard = () => {
         <main className="flex-1 p-6">
           {/* Title and Actions */}
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold text-foreground">Latest Products</h1>
+            <h1 className="text-2xl font-semibold text-foreground">My Projects</h1>
             <div className="flex items-center gap-3">
-              {/* Role Switcher */}
+              {/* User Switcher (for demo) */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2">
                     <UserCog className="h-4 w-4" />
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${currentRoleData.color}`}>
-                      {currentRoleData.label}
-                    </span>
+                    <span className="text-sm font-medium">{currentUser.name}</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-popover border border-border shadow-lg z-50">
-                  <DropdownMenuLabel>Switch Role View</DropdownMenuLabel>
+                <DropdownMenuContent align="end" className="w-56 bg-popover border border-border shadow-lg z-50">
+                  <DropdownMenuLabel>Switch User (Demo)</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {ROLES.map((role) => (
+                  {mockUsers.map((user) => (
                     <DropdownMenuItem
-                      key={role.id}
-                      onClick={() => handleRoleChange(role.id)}
-                      className={currentRole === role.id ? "bg-muted" : ""}
+                      key={user.id}
+                      onClick={() => handleUserChange(user.id)}
+                      className={currentUserId === user.id ? "bg-muted" : ""}
                     >
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${role.color}`}>
-                        {role.label}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{user.name}</span>
+                        <span className="text-xs text-muted-foreground">{user.email}</span>
+                      </div>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -98,10 +97,14 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Project Grid */}
+          {/* Project Grid - passing user's roles per project */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} userRoles={[currentRole]} />
+              <ProjectCard 
+                key={project.id} 
+                project={project} 
+                userRoles={getUserRolesForProject(currentUserId, project.id)} 
+              />
             ))}
           </div>
 
