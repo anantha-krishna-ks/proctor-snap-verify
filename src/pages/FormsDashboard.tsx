@@ -40,6 +40,15 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -1143,8 +1152,20 @@ const handleDragEnd = (event: DragEndEvent) => {
               <span className="text-[10px] text-muted-foreground block -mt-1">TEST & ASSESSMENT</span>
             </div>
           </div>
-          <div className="ml-6">
-            <span className="text-xs text-muted-foreground">Manage Assessments</span>
+          <div className="ml-6 flex flex-col">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/admin">Dashboard</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Forms</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
             <h1 className="text-lg font-semibold text-foreground -mt-0.5">Manage Assessments</h1>
           </div>
         </div>
