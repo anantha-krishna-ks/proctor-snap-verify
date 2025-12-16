@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { 
   FolderOpen, FileText, Calendar, MoreHorizontal, Image, 
-  Shield, UserCheck, Eye, Edit, Users
+  Shield, UserCheck, Eye, Edit, Users, Star, Clock, 
+  Play, Settings, ExternalLink
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -13,13 +17,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import type { Project } from "@/data/projectMockData";
+import { cn } from "@/lib/utils";
 
 interface ProjectCardProps {
   project: Project;
   userRoles?: string[];
+  isSelected?: boolean;
+  onSelect?: (id: string, selected: boolean) => void;
+  onTogglePin?: (id: string) => void;
 }
+
+const STATUS_CONFIG = {
+  active: { label: "Active", color: "bg-green-500", textColor: "text-green-600 dark:text-green-400" },
+  draft: { label: "Draft", color: "bg-yellow-500", textColor: "text-yellow-600 dark:text-yellow-400" },
+  completed: { label: "Completed", color: "bg-blue-500", textColor: "text-blue-600 dark:text-blue-400" },
+};
 
 const ROLE_CONFIG: Record<string, { 
   label: string; 
@@ -100,13 +119,17 @@ const ROLE_CONFIG: Record<string, {
   },
 };
 
-export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps) => {
+export const ProjectCard = ({ 
+  project, 
+  userRoles = ["admin"], 
+  isSelected = false,
+  onSelect,
+  onTogglePin
+}: ProjectCardProps) => {
   const navigate = useNavigate();
+  const [isHovered, setIsHovered] = useState(false);
 
-  const getStatValue = (key: string) => {
-    const stats = project.roleStats as Record<string, number | undefined>;
-    return stats?.[key] ?? 0;
-  };
+  const statusConfig = STATUS_CONFIG[project.status];
 
   const handleAction = (path: string) => {
     const resolvedPath = path.replace("{id}", project.id);
@@ -114,7 +137,6 @@ export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps
   };
 
   const handleCardClick = () => {
-    // Navigate to primary role's main action
     const primaryRole = userRoles[0];
     const config = ROLE_CONFIG[primaryRole];
     if (config?.actions[0]) {
@@ -122,29 +144,101 @@ export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps
     }
   };
 
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  const handlePinClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onTogglePin?.(project.id);
+  };
+
+  // Get primary actions for quick action buttons
+  const primaryRole = userRoles[0];
+  const primaryConfig = ROLE_CONFIG[primaryRole];
+  const quickActions = primaryConfig?.actions.slice(0, 2) || [];
+
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all">
+    <Card 
+      className={cn(
+        "overflow-hidden cursor-pointer transition-all duration-300 group",
+        "hover:shadow-xl hover:-translate-y-1",
+        isSelected && "ring-2 ring-primary",
+        project.isPinned && "border-primary/50"
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Image Section */}
       <div 
-        className="h-28 bg-muted flex items-center justify-center relative cursor-pointer"
+        className="h-32 bg-muted flex items-center justify-center relative overflow-hidden"
         onClick={handleCardClick}
       >
+        {/* Gradient overlay for better text visibility */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
+        
         {project.image ? (
           <img
             src={project.image}
             alt={project.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-muted-foreground">
-            <Image className="h-8 w-8 mb-1" />
+            <Image className="h-10 w-10 mb-1" />
             <span className="text-xs">No Image</span>
           </div>
         )}
         
-        {/* Role Badges - Top */}
-        <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-          {userRoles.map((role) => {
+        {/* Selection Checkbox - Top Left */}
+        <div 
+          className={cn(
+            "absolute top-2 left-2 z-20 transition-opacity duration-200",
+            isHovered || isSelected ? "opacity-100" : "opacity-0"
+          )}
+          onClick={handleCheckboxClick}
+        >
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={(checked) => onSelect?.(project.id, checked as boolean)}
+            className="h-5 w-5 bg-background/90 border-2"
+          />
+        </div>
+
+        {/* Pin Button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "absolute top-2 left-9 z-20 h-6 w-6 rounded-full transition-all duration-200",
+                project.isPinned 
+                  ? "bg-yellow-500/90 text-white opacity-100" 
+                  : "bg-background/80 opacity-0 group-hover:opacity-100"
+              )}
+              onClick={handlePinClick}
+            >
+              <Star className={cn("h-3 w-3", project.isPinned && "fill-current")} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{project.isPinned ? "Unpin" : "Pin to top"}</TooltipContent>
+        </Tooltip>
+
+        {/* Status Badge - Top Center */}
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20">
+          <Badge 
+            variant="secondary" 
+            className="bg-background/90 backdrop-blur-sm border-0 gap-1.5 px-2"
+          >
+            <span className={cn("w-2 h-2 rounded-full animate-pulse", statusConfig.color)} />
+            <span className="text-xs font-medium">{statusConfig.label}</span>
+          </Badge>
+        </div>
+        
+        {/* Role Badges - Bottom Left */}
+        <div className="absolute bottom-2 left-2 z-20 flex flex-wrap gap-1">
+          {userRoles.slice(0, 2).map((role) => {
             const config = ROLE_CONFIG[role];
             if (!config) return null;
             const IconComponent = config.icon;
@@ -152,23 +246,28 @@ export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps
               <Badge 
                 key={role} 
                 variant="secondary" 
-                className={`text-xs ${config.color} border`}
+                className={`text-xs ${config.color} border backdrop-blur-sm`}
               >
                 <IconComponent className="h-3 w-3 mr-1" />
                 {config.label}
               </Badge>
             );
           })}
+          {userRoles.length > 2 && (
+            <Badge variant="secondary" className="text-xs bg-background/80">
+              +{userRoles.length - 2}
+            </Badge>
+          )}
         </div>
 
-        {/* Actions Menu */}
-        <div className="absolute top-2 right-2">
+        {/* Actions Menu - Top Right */}
+        <div className="absolute top-2 right-2 z-20">
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <Button
                 variant="secondary"
                 size="icon"
-                className="h-7 w-7 rounded-full bg-background/80 backdrop-blur-sm"
+                className="h-7 w-7 rounded-full bg-background/90 backdrop-blur-sm hover:bg-background"
               >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
@@ -205,15 +304,27 @@ export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps
 
       {/* Content Section */}
       <CardContent className="p-3">
-        <div className="mb-2 cursor-pointer" onClick={handleCardClick}>
+        <div className="mb-2" onClick={handleCardClick}>
           <p className="text-xs text-muted-foreground truncate">Code: {project.code}</p>
           <h3 className="font-semibold text-foreground truncate text-sm" title={project.name}>
             {project.name}
           </h3>
         </div>
 
-        {/* Quick Stats Summary */}
-        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        {/* Progress Bar */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between text-xs mb-1">
+            <span className="text-muted-foreground">Progress</span>
+            <span className={cn("font-medium", statusConfig.textColor)}>{project.progress}%</span>
+          </div>
+          <Progress 
+            value={project.progress} 
+            className="h-1.5"
+          />
+        </div>
+
+        {/* Quick Stats */}
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-3">
           <div className="flex items-center gap-1">
             <FolderOpen className="h-3 w-3" />
             <span>{project.itemCount}</span>
@@ -226,6 +337,39 @@ export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps
             <Calendar className="h-3 w-3" />
             <span>{project.scheduleCount}</span>
           </div>
+        </div>
+
+        {/* Last Activity */}
+        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
+          <Clock className="h-3 w-3" />
+          <span>Updated {project.lastActivity}</span>
+        </div>
+
+        {/* Quick Action Buttons - Show on hover */}
+        <div 
+          className={cn(
+            "flex gap-2 transition-all duration-300 overflow-hidden",
+            isHovered ? "max-h-20 opacity-100" : "max-h-0 opacity-0"
+          )}
+        >
+          {quickActions.map((action, idx) => {
+            const ActionIcon = action.icon;
+            return (
+              <Button
+                key={action.label}
+                variant={idx === 0 ? "default" : "outline"}
+                size="sm"
+                className="flex-1 text-xs h-8"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAction(action.path);
+                }}
+              >
+                <ActionIcon className="h-3 w-3 mr-1" />
+                {action.label}
+              </Button>
+            );
+          })}
         </div>
       </CardContent>
     </Card>

@@ -33,6 +33,10 @@ export interface Project {
   itemCount: number;
   testCount: number;
   scheduleCount: number;
+  status: "active" | "draft" | "completed";
+  progress: number; // 0-100
+  lastActivity: string;
+  isPinned?: boolean;
   roleStats?: ProjectRoleStats;
 }
 
@@ -44,6 +48,10 @@ export const mockProjects: Project[] = [
     itemCount: 0,
     testCount: 0,
     scheduleCount: 0,
+    status: "draft",
+    progress: 15,
+    lastActivity: "2 hours ago",
+    isPinned: false,
     roleStats: {
       totalUsers: 5,
       activeSchedules: 0,
@@ -71,6 +79,10 @@ export const mockProjects: Project[] = [
     itemCount: 0,
     testCount: 0,
     scheduleCount: 0,
+    status: "active",
+    progress: 45,
+    lastActivity: "5 mins ago",
+    isPinned: true,
     roleStats: {
       totalUsers: 3,
       activeSchedules: 0,
@@ -98,6 +110,10 @@ export const mockProjects: Project[] = [
     itemCount: 0,
     testCount: 0,
     scheduleCount: 0,
+    status: "active",
+    progress: 72,
+    lastActivity: "1 day ago",
+    isPinned: false,
     roleStats: {
       totalUsers: 8,
       activeSchedules: 1,
@@ -126,6 +142,10 @@ export const mockProjects: Project[] = [
     itemCount: 10,
     testCount: 1,
     scheduleCount: 2,
+    status: "completed",
+    progress: 100,
+    lastActivity: "3 days ago",
+    isPinned: true,
     roleStats: {
       totalUsers: 15,
       activeSchedules: 2,
@@ -154,6 +174,10 @@ export const mockProjects: Project[] = [
     itemCount: 25,
     testCount: 3,
     scheduleCount: 5,
+    status: "active",
+    progress: 88,
+    lastActivity: "30 mins ago",
+    isPinned: false,
     roleStats: {
       totalUsers: 42,
       activeSchedules: 5,
@@ -182,6 +206,10 @@ export const mockProjects: Project[] = [
     itemCount: 15,
     testCount: 2,
     scheduleCount: 3,
+    status: "draft",
+    progress: 35,
+    lastActivity: "1 week ago",
+    isPinned: false,
     roleStats: {
       totalUsers: 28,
       activeSchedules: 3,

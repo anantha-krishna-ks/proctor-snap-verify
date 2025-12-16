@@ -5,8 +5,9 @@ import { ProjectCard } from "@/components/admin/ProjectCard";
 import { RoleStatsSummary } from "@/components/admin/RoleStatsSummary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, UserCog } from "lucide-react";
-import { mockProjects } from "@/data/projectMockData";
+import { Badge } from "@/components/ui/badge";
+import { Search, UserCog, Trash2, CheckSquare } from "lucide-react";
+import { mockProjects, Project } from "@/data/projectMockData";
 import { 
   mockUsers, 
   getCurrentUserId, 
@@ -21,20 +22,24 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentUserId, setCurrentUserIdState] = useState(() => getCurrentUserId());
+  const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
+  const [projects, setProjects] = useState<Project[]>(mockProjects);
 
   const handleUserChange = (userId: string) => {
     setCurrentUserId(userId);
     setCurrentUserIdState(userId);
+    setSelectedProjects(new Set());
   };
 
   const currentUser = mockUsers.find(u => u.id === currentUserId) || mockUsers[0];
 
   // Filter projects where user has at least one role
-  const userProjects = mockProjects.filter((project) => {
+  const userProjects = projects.filter((project) => {
     const roles = getUserRolesForProject(currentUserId, project.id);
     return roles.length > 0;
   });
@@ -48,11 +53,50 @@ const AdminDashboard = () => {
     return Array.from(roles);
   }, [currentUserId, userProjects]);
 
-  const filteredProjects = userProjects.filter(
-    (project) =>
-      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.code.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProjects = userProjects
+    .filter(
+      (project) =>
+        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.code.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    // Sort pinned projects to top
+    .sort((a, b) => {
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
+      return 0;
+    });
+
+  const handleSelectProject = (id: string, selected: boolean) => {
+    setSelectedProjects(prev => {
+      const next = new Set(prev);
+      if (selected) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      return next;
+    });
+  };
+
+  const handleTogglePin = (id: string) => {
+    setProjects(prev => prev.map(p => 
+      p.id === id ? { ...p, isPinned: !p.isPinned } : p
+    ));
+    const project = projects.find(p => p.id === id);
+    toast.success(project?.isPinned ? "Project unpinned" : "Project pinned to top");
+  };
+
+  const handleSelectAll = () => {
+    if (selectedProjects.size === filteredProjects.length) {
+      setSelectedProjects(new Set());
+    } else {
+      setSelectedProjects(new Set(filteredProjects.map(p => p.id)));
+    }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedProjects(new Set());
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -107,6 +151,27 @@ const AdminDashboard = () => {
             </div>
           </div>
 
+          {/* Selection Actions Bar */}
+          {selectedProjects.size > 0 && (
+            <div className="flex items-center gap-3 mb-4 p-3 bg-primary/5 rounded-lg border border-primary/20 animate-fade-in">
+              <Badge variant="secondary" className="bg-primary/10 text-primary">
+                {selectedProjects.size} selected
+              </Badge>
+              <Button variant="outline" size="sm" onClick={handleSelectAll}>
+                <CheckSquare className="h-4 w-4 mr-1" />
+                {selectedProjects.size === filteredProjects.length ? "Deselect All" : "Select All"}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleClearSelection}>
+                Clear Selection
+              </Button>
+              <div className="flex-1" />
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete Selected
+              </Button>
+            </div>
+          )}
+
           {/* Role Stats Summary */}
           <RoleStatsSummary projects={userProjects} userRoles={allUserRoles} />
 
@@ -116,7 +181,10 @@ const AdminDashboard = () => {
               <ProjectCard 
                 key={project.id} 
                 project={project} 
-                userRoles={getUserRolesForProject(currentUserId, project.id)} 
+                userRoles={getUserRolesForProject(currentUserId, project.id)}
+                isSelected={selectedProjects.has(project.id)}
+                onSelect={handleSelectProject}
+                onTogglePin={handleTogglePin}
               />
             ))}
           </div>
