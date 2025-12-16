@@ -111,7 +111,9 @@ export const ProjectCard = ({
   };
 
   const handleCardClick = () => {
-    const primaryRole = userRoles[0];
+    // Priority order for roles when clicking the card
+    const rolePriority = ["marker", "proctor", "admin", "author", "test_author"];
+    const primaryRole = rolePriority.find(role => userRoles.includes(role)) || userRoles[0];
     const config = ROLE_CONFIG[primaryRole];
     if (config?.actions[0]) {
       handleAction(config.actions[0].path);
