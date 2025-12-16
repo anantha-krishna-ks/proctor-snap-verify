@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   FolderOpen, FileText, Calendar, MoreHorizontal, Image, 
-  Shield, UserCheck, Eye, Edit, Users
+  Shield, UserCheck, Eye, Edit, Users, ClipboardList
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -213,7 +213,7 @@ export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps
         </div>
 
         {/* Quick Stats Summary */}
-        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <FolderOpen className="h-3 w-3" />
             <span>{project.itemCount}</span>
@@ -226,34 +226,23 @@ export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps
             <Calendar className="h-3 w-3" />
             <span>{project.scheduleCount}</span>
           </div>
-        </div>
-
-        {/* Role-specific Stats */}
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground pt-1 border-t border-border/50">
-          {userRoles.includes("author") && (
+          {(userRoles.includes("author") || userRoles.includes("test_author")) && (
             <>
-              <span className="text-purple-600 dark:text-purple-400">
-                Items: {getStatValue("publishedItems")}
-              </span>
-              <span className="text-purple-600 dark:text-purple-400">
-                Tests: {getStatValue("draftItems")}
-              </span>
-            </>
-          )}
-          {userRoles.includes("test_author") && (
-            <>
-              <span className="text-purple-600 dark:text-purple-400">
-                Items: {getStatValue("publishedItems")}
-              </span>
-              <span className="text-purple-600 dark:text-purple-400">
-                Tests: {getStatValue("draftItems")}
-              </span>
+              <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                <Edit className="h-3 w-3" />
+                <span>{getStatValue("publishedItems")}</span>
+              </div>
+              <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                <FileText className="h-3 w-3" />
+                <span>{getStatValue("draftItems")}</span>
+              </div>
             </>
           )}
           {userRoles.includes("marker") && (
-            <span className="text-blue-600 dark:text-blue-400">
-              Assignments: {getStatValue("assignedItems")}
-            </span>
+            <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+              <ClipboardList className="h-3 w-3" />
+              <span>{getStatValue("assignedItems")}</span>
+            </div>
           )}
         </div>
       </CardContent>
