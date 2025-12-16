@@ -5,7 +5,6 @@ import {
   Package,
   Shield,
   Users,
-  PenTool,
   Database,
   Settings,
 } from "lucide-react";
@@ -17,7 +16,6 @@ const navItems = [
   { title: "Products", url: "/admin/products", icon: Package },
   { title: "Roles", url: "/admin/roles", icon: Shield },
   { title: "Users", url: "/admin/users", icon: Users },
-  { title: "Marker", url: "/marker", icon: PenTool },
   { title: "Metadata", url: "/admin/metadata", icon: Database },
   { title: "Masters", url: "/admin/masters", icon: Settings },
 ];
