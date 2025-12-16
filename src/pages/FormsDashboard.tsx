@@ -37,6 +37,7 @@ import {
   Eye,
   Pencil,
   Clock,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1124,6 +1125,15 @@ const handleDragEnd = (event: DragEndEvent) => {
       {/* Header */}
       <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="h-8 w-8"
+            title="Go back"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">S</span>
