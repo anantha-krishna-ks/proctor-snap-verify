@@ -23,6 +23,25 @@ interface ProjectCardProps {
 export const ProjectCard = ({ project, userRole = "admin" }: ProjectCardProps) => {
   const navigate = useNavigate();
 
+  const handleCardClick = () => {
+    switch (userRole) {
+      case "marker":
+        navigate(`/marker/projects/${project.id}/schedules`);
+        break;
+      case "author":
+      case "test_author":
+        navigate(`/admin/products/${project.id}/items`);
+        break;
+      case "proctor":
+        navigate(`/scheduling`);
+        break;
+      case "admin":
+      default:
+        navigate(`/admin/products/${project.id}/items`);
+        break;
+    }
+  };
+
   const handleNavigate = (path: string) => {
     navigate(`/admin/products/${project.id}/${path}`);
   };
@@ -261,7 +280,10 @@ export const ProjectCard = ({ project, userRole = "admin" }: ProjectCardProps) =
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
+    <Card 
+      className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
+      onClick={handleCardClick}
+    >
       {/* Image Section */}
       <div className="h-32 bg-muted flex items-center justify-center relative">
         {project.image ? (
@@ -291,7 +313,7 @@ export const ProjectCard = ({ project, userRole = "admin" }: ProjectCardProps) =
             </h3>
           </div>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <Button
                 variant="ghost"
                 size="icon"
@@ -300,7 +322,7 @@ export const ProjectCard = ({ project, userRole = "admin" }: ProjectCardProps) =
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-popover">
+            <DropdownMenuContent align="end" className="bg-popover border border-border shadow-lg z-50">
               {getRoleSpecificActions()}
             </DropdownMenuContent>
           </DropdownMenu>

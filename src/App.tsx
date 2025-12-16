@@ -25,7 +25,7 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Protected Route wrapper
+// Protected Route wrapper - also checks switched role for testing
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) => {
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
   const userRole = localStorage.getItem("userRole");
@@ -34,8 +34,13 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode;
     return <Navigate to="/login" replace />;
   }
 
+  // Allow access if user's switched role matches allowed roles (for testing role switcher)
   if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
-    return <Navigate to="/login" replace />;
+    // Check if user is admin (admins can switch to any role for testing)
+    const originalRole = localStorage.getItem("originalUserRole") || userRole;
+    if (originalRole !== "admin" && !allowedRoles.includes(originalRole)) {
+      return <Navigate to="/login" replace />;
+    }
   }
 
   return <>{children}</>;
