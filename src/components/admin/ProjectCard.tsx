@@ -52,7 +52,7 @@ const ROLE_CONFIG: Record<string, {
       { key: "completedToday", label: "Done Today" },
     ],
     actions: [
-      { label: "View Schedules", path: "/marker/projects/{id}/schedules", icon: Calendar },
+      { label: "Start Evaluation", path: "/marker/projects/{id}/schedules", icon: UserCheck },
     ],
   },
   author: {
