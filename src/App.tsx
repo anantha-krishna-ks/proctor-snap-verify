@@ -15,7 +15,8 @@ import MarkerEvaluation from "./pages/MarkerEvaluation";
 import RoleManagement from "./pages/RoleManagement";
 import FormsDashboard from "./pages/FormsDashboard";
 import CreateForm from "./pages/CreateForm";
-
+import AuthorDashboard from "./pages/AuthorDashboard";
+import ItemsManagement from "./pages/ItemsManagement";
 import CreateConfiguration from "./pages/CreateConfiguration";
 import ReportsDashboard from "./pages/ReportsDashboard";
 import SurveyList from "./pages/SurveyList";
@@ -124,6 +125,22 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["marker"]}>
                 <MarkerEvaluation />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/author"
+            element={
+              <ProtectedRoute allowedRoles={["author", "test_author"]}>
+                <AuthorDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/author/projects/:projectId/items"
+            element={
+              <ProtectedRoute allowedRoles={["author", "test_author"]}>
+                <ItemsManagement />
               </ProtectedRoute>
             }
           />

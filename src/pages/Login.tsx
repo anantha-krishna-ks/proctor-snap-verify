@@ -46,6 +46,8 @@ const Login = () => {
     // Route based on role
     if (selectedRole === "marker") {
       navigate("/marker");
+    } else if (selectedRole === "author" || selectedRole === "test_author") {
+      navigate("/author");
     } else {
       navigate("/admin");
     }

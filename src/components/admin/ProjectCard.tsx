@@ -30,7 +30,7 @@ export const ProjectCard = ({ project, userRole = "admin" }: ProjectCardProps) =
         break;
       case "author":
       case "test_author":
-        navigate(`/admin/products/${project.id}/items`);
+        navigate(`/author/projects/${project.id}/items`);
         break;
       case "proctor":
         navigate(`/scheduling`);
@@ -197,7 +197,7 @@ export const ProjectCard = ({ project, userRole = "admin" }: ProjectCardProps) =
       case "test_author":
         return (
           <>
-            <DropdownMenuItem onClick={() => handleNavigate("items")}>
+            <DropdownMenuItem onClick={() => navigate(`/author/projects/${project.id}/items`)}>
               <Package className="h-4 w-4 mr-2" />
               Manage Items
             </DropdownMenuItem>
