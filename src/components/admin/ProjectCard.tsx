@@ -1,10 +1,9 @@
-import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   FolderOpen, FileText, Calendar, MoreHorizontal, Image, 
-  ChevronDown, ChevronUp, Shield, UserCheck, Eye, Edit, Users
+  Shield, UserCheck, Eye, Edit, Users
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -14,11 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { useNavigate } from "react-router-dom";
 import type { Project } from "@/data/projectMockData";
 
@@ -108,7 +102,6 @@ const ROLE_CONFIG: Record<string, {
 
 export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps) => {
   const navigate = useNavigate();
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const getStatValue = (key: string) => {
     const stats = project.roleStats as Record<string, number | undefined>;
@@ -235,57 +228,34 @@ export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps
           </div>
         </div>
 
-        {/* Expandable Role Details */}
-        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-          <CollapsibleTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full h-7 text-xs justify-between px-2 hover:bg-muted/50"
-            >
-              <span className="text-muted-foreground">
-                {isExpanded ? "Hide Details" : "View Role Details"}
+        {/* Role-specific Stats */}
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground pt-1 border-t border-border/50">
+          {userRoles.includes("author") && (
+            <>
+              <span className="text-purple-600 dark:text-purple-400">
+                Items: {getStatValue("publishedItems")}
               </span>
-              {isExpanded ? (
-                <ChevronUp className="h-3 w-3" />
-              ) : (
-                <ChevronDown className="h-3 w-3" />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-          
-          <CollapsibleContent className="pt-2 space-y-3">
-            {userRoles.map((role) => {
-              const config = ROLE_CONFIG[role];
-              if (!config) return null;
-              const IconComponent = config.icon;
-              
-              return (
-                <div 
-                  key={role} 
-                  className={`p-2 rounded-lg border ${config.color.split(' ').slice(0, 2).join(' ')} border-current/20`}
-                >
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <IconComponent className="h-3.5 w-3.5" />
-                    <span className="text-xs font-medium">{config.label}</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {config.stats.map((stat) => (
-                      <div key={stat.key} className="text-center">
-                        <div className="text-sm font-bold">
-                          {getStatValue(stat.key)}
-                        </div>
-                        <div className="text-[10px] text-current/70">
-                          {stat.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </CollapsibleContent>
-        </Collapsible>
+              <span className="text-purple-600 dark:text-purple-400">
+                Tests: {getStatValue("draftItems")}
+              </span>
+            </>
+          )}
+          {userRoles.includes("test_author") && (
+            <>
+              <span className="text-purple-600 dark:text-purple-400">
+                Items: {getStatValue("publishedItems")}
+              </span>
+              <span className="text-purple-600 dark:text-purple-400">
+                Tests: {getStatValue("draftItems")}
+              </span>
+            </>
+          )}
+          {userRoles.includes("marker") && (
+            <span className="text-blue-600 dark:text-blue-400">
+              Assignments: {getStatValue("assignedItems")}
+            </span>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
