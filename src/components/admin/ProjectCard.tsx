@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   FolderOpen, FileText, Calendar, MoreHorizontal, Image, 
-  Shield, UserCheck, Eye, Edit, Users, ClipboardList, 
-  Package, Clock, CheckSquare, BookOpen, CalendarClock
+  Shield, UserCheck, Eye, Edit, Users
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -227,53 +226,6 @@ export const ProjectCard = ({ project, userRoles = ["admin"] }: ProjectCardProps
             <Calendar className="h-3 w-3" />
             <span>{project.scheduleCount}</span>
           </div>
-          {(userRoles.includes("admin") || userRoles.includes("author") || userRoles.includes("test_author") || userRoles.includes("marker")) && (
-            <>
-              <span className="text-border">|</span>
-              {userRoles.includes("admin") && (
-                <>
-                  <div className="flex items-center gap-1 text-primary">
-                    <Package className="h-3 w-3" />
-                    <span>{getStatValue("totalProducts")}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-primary">
-                    <Clock className="h-3 w-3" />
-                    <span>{getStatValue("evaluationPending")}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-primary">
-                    <CheckSquare className="h-3 w-3" />
-                    <span>{getStatValue("itemApprovalPending")}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-primary">
-                    <BookOpen className="h-3 w-3" />
-                    <span>{getStatValue("totalTests")}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-primary">
-                    <CalendarClock className="h-3 w-3" />
-                    <span>{getStatValue("upcomingSchedules")}</span>
-                  </div>
-                </>
-              )}
-              {(userRoles.includes("author") || userRoles.includes("test_author")) && (
-                <>
-                  <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
-                    <Edit className="h-3 w-3" />
-                    <span>{getStatValue("publishedItems")}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
-                    <FileText className="h-3 w-3" />
-                    <span>{getStatValue("draftItems")}</span>
-                  </div>
-                </>
-              )}
-              {userRoles.includes("marker") && (
-                <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                  <ClipboardList className="h-3 w-3" />
-                  <span>{getStatValue("assignedItems")}</span>
-                </div>
-              )}
-            </>
-          )}
         </div>
       </CardContent>
     </Card>
