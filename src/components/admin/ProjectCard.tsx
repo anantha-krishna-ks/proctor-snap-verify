@@ -186,7 +186,7 @@ export const ProjectCard = ({ project, userRole = "admin" }: ProjectCardProps) =
               <ClipboardList className="h-4 w-4 mr-2" />
               Start Evaluation
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate(`/marker/schedules`)}>
+            <DropdownMenuItem onClick={() => navigate(`/marker/projects/${project.id}/schedules`)}>
               <CalendarDays className="h-4 w-4 mr-2" />
               View Schedules
             </DropdownMenuItem>
