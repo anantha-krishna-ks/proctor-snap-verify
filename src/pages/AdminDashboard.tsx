@@ -28,6 +28,10 @@ const AdminDashboard = () => {
   const [currentRole, setCurrentRole] = useState(() => localStorage.getItem("userRole") || "admin");
 
   const handleRoleChange = (roleId: string) => {
+    // Save original role on first switch
+    if (!localStorage.getItem("originalUserRole")) {
+      localStorage.setItem("originalUserRole", currentRole);
+    }
     setCurrentRole(roleId);
     localStorage.setItem("userRole", roleId);
   };
