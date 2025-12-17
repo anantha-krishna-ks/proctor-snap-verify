@@ -83,6 +83,9 @@ import {
 import { RepositoryDialogs } from "@/components/RepositoryDialogs";
 import { SortableStepCard } from "@/components/SortableStepCard";
 import { FormsSidebar } from "@/components/FormsSidebar";
+import { FormsDashboardContent } from "@/components/forms/FormsDashboardContent";
+import { FormCreationWizard } from "@/components/forms/FormCreationWizard";
+import { FormDetailView } from "@/components/forms/FormDetailView";
 import type { Repository } from "@/types/forms";
 import { toast } from "sonner";
 
@@ -178,6 +181,10 @@ const FormsDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isCreatingSequence, setIsCreatingSequence] = useState(false);
   const [editingSequenceId, setEditingSequenceId] = useState<string | null>(null);
+  
+  // Form view state
+  const [formViewState, setFormViewState] = useState<"dashboard" | "create" | "detail">("dashboard");
+  const [selectedFormId, setSelectedFormId] = useState<string | null>(null);
   
   const selectedProject = mockProjects.find(p => p.id === selectedProjectId);
   
@@ -750,6 +757,46 @@ const handleDragEnd = (event: DragEndEvent) => {
   };
 
   const renderTabContent = () => {
+    // Handle Forms view with sub-states
+    if (viewMode === "forms") {
+      if (formViewState === "create") {
+        return (
+          <FormCreationWizard
+            onBack={() => setFormViewState("dashboard")}
+            onSave={() => setFormViewState("dashboard")}
+          />
+        );
+      }
+      if (formViewState === "detail" && selectedFormId) {
+        return (
+          <FormDetailView
+            formId={selectedFormId}
+            onBack={() => {
+              setFormViewState("dashboard");
+              setSelectedFormId(null);
+            }}
+            onEdit={(id) => {
+              setSelectedFormId(id);
+              setFormViewState("create");
+            }}
+          />
+        );
+      }
+      return (
+        <FormsDashboardContent
+          onCreateForm={() => setFormViewState("create")}
+          onViewForm={(id) => {
+            setSelectedFormId(id);
+            setFormViewState("detail");
+          }}
+          onEditForm={(id) => {
+            setSelectedFormId(id);
+            setFormViewState("create");
+          }}
+        />
+      );
+    }
+
     // Handle different view modes
     if (viewMode === "test-sequence") {
       return renderTestSequenceContent();
@@ -787,7 +834,7 @@ const handleDragEnd = (event: DragEndEvent) => {
       );
     }
 
-    // Forms view content
+    // Legacy forms view content (kept for backwards compatibility)
     switch (activeTab) {
       case "forms":
         return (
@@ -1450,115 +1497,34 @@ const handleDragEnd = (event: DragEndEvent) => {
           selectedProjectId={selectedProjectId}
           onProjectChange={setSelectedProjectId}
           activeMenu={viewMode}
-          onMenuChange={(menu) => setViewMode(menu as ViewMode)}
+          onMenuChange={(menu) => {
+            setViewMode(menu as ViewMode);
+            setFormViewState("dashboard");
+            setSelectedFormId(null);
+          }}
         />
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col">
-          {/* Form View Tabs - Only show for Forms view */}
-          {viewMode === "forms" && (
-            <div className="bg-muted/50 px-2 pt-2">
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setActiveTab("forms")}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                    activeTab === "forms"
-                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  Forms
-                </button>
-                <button
-                  onClick={() => setActiveTab("configuration")}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                    activeTab === "configuration"
-                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  Configuration
-                </button>
-                <button
-                  onClick={() => setActiveTab("survey")}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                    activeTab === "survey"
-                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  Survey
-                </button>
-                <button
-                  onClick={() => setActiveTab("agreement")}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                    activeTab === "agreement"
-                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  Agreement
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Content Area */}
-          <div className="flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {/* Content Area - Full height for new form views */}
+          <div className="flex-1 flex flex-col overflow-hidden">
             {renderTabContent()}
           </div>
 
-          {/* Pagination - Only for Forms list views */}
-          {viewMode === "forms" && activeTab !== "test-sequence" && (
-            <div className="p-4 border-t border-border bg-card flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>
-                  1-{Math.min(parseInt(rowsPerPage), filteredForms.length)} of {filteredForms.length}
-                </span>
-                <span className="ml-4">Rows per page:</span>
-                <Select value={rowsPerPage} onValueChange={setRowsPerPage}>
-                  <SelectTrigger className="w-16 h-8 bg-background">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="25">25</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                    <SelectItem value="100">100</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center gap-1">
-                <Button variant="outline" size="icon" className="h-8 w-8" disabled>
-                  <ChevronsLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-8 w-8" disabled>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="px-3 text-sm text-foreground">1/1</span>
-                <Button variant="outline" size="icon" className="h-8 w-8" disabled>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-8 w-8" disabled>
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
-              </div>
+          {/* Footer - Only show when not in form dashboard/create/detail views */}
+          {viewMode !== "forms" && (
+            <div className="py-3 text-center text-xs text-muted-foreground border-t border-border">
+              Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd{" "}
+              <a
+                href="https://www.excelsoftcorp.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                https://www.excelsoftcorp.com
+              </a>
             </div>
           )}
-
-          {/* Footer */}
-          <div className="py-3 text-center text-xs text-muted-foreground border-t border-border">
-            Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd{" "}
-            <a
-              href="https://www.excelsoftcorp.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              https://www.excelsoftcorp.com
-            </a>
-          </div>
         </main>
       </div>
 
