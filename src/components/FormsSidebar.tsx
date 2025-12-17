@@ -45,15 +45,6 @@ export const FormsSidebar = ({
 }: FormsSidebarProps) => {
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
-  };
-
   return (
     <motion.aside 
       initial={{ x: -10, opacity: 0 }}
@@ -67,18 +58,11 @@ export const FormsSidebar = ({
           <DropdownMenuTrigger asChild>
             <motion.button 
               whileTap={{ scale: 0.98 }}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-muted transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-muted transition-colors"
             >
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-semibold text-xs">
-                  {selectedProject ? getInitials(selectedProject.name) : "?"}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {selectedProject?.name || "Select Project"}
-                </p>
-              </div>
+              <span className="text-sm font-medium text-foreground truncate">
+                {selectedProject?.name || "Select Project"}
+              </span>
               <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
             </motion.button>
           </DropdownMenuTrigger>
@@ -92,19 +76,11 @@ export const FormsSidebar = ({
                 key={project.id}
                 onClick={() => onProjectChange(project.id)}
                 className={cn(
-                  "flex items-center gap-2.5 cursor-pointer",
+                  "flex items-center justify-between cursor-pointer",
                   selectedProjectId === project.id && "bg-accent"
                 )}
               >
-                <div className={cn(
-                  "w-7 h-7 rounded-md flex items-center justify-center text-xs font-semibold",
-                  selectedProjectId === project.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                )}>
-                  {getInitials(project.name)}
-                </div>
-                <span className="flex-1 truncate text-sm">{project.name}</span>
+                <span className="truncate text-sm">{project.name}</span>
                 {selectedProjectId === project.id && (
                   <Check className="h-4 w-4 text-primary shrink-0" />
                 )}
