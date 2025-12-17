@@ -39,6 +39,7 @@ import {
   Clock,
   ArrowLeft,
   ListOrdered,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -146,12 +147,26 @@ const mockTestSequences = [
   { id: "seq4", name: "Quick Evaluation Pack", steps: 2, forms: 1, surveys: 1, createdAt: "2024-03-10", status: "active" },
 ];
 
+// Mock projects data
+const mockProjects = [
+  { id: "proj-1", name: "NSE Certification 2025", description: "National certification exams" },
+  { id: "proj-2", name: "Corporate Training Q1", description: "Employee skill assessments" },
+  { id: "proj-3", name: "University Entrance Exams", description: "Undergraduate admissions" },
+  { id: "proj-4", name: "Professional License Tests", description: "Industry certifications" },
+];
+
+type ViewMode = "form" | "test-sequence";
+
 const FormsDashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "forms";
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Project state
+  const [selectedProjectId, setSelectedProjectId] = useState(mockProjects[0]?.id || "");
+  const [viewMode, setViewMode] = useState<ViewMode>("form");
   
   // Repository state
   const [repositories, setRepositories] = useState<Repository[]>(initialMockRepositories);
@@ -161,6 +176,8 @@ const FormsDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isCreatingSequence, setIsCreatingSequence] = useState(false);
   const [editingSequenceId, setEditingSequenceId] = useState<string | null>(null);
+  
+  const selectedProject = mockProjects.find(p => p.id === selectedProjectId);
   
   // Repository dialog state
   const [createRepoDialogOpen, setCreateRepoDialogOpen] = useState(false);
@@ -479,7 +496,263 @@ const handleDragEnd = (event: DragEndEvent) => {
     agreement.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Render test sequence content
+  const renderTestSequenceContent = () => {
+    const filteredSequences = mockTestSequences.filter((seq) =>
+      seq.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (isCreatingSequence) {
+      return (
+        <div className="flex-1 flex flex-col">
+          {/* Toolbar */}
+          <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleBackToList}
+                className="gap-1"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <h2 className="text-lg font-semibold text-foreground">
+                {editingSequenceId ? "Edit Sequence" : "Create New Sequence"}
+              </h2>
+              <Badge variant="secondary" className="text-xs">
+                {testSequenceSteps.length} steps
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-primary hover:bg-primary/90">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Step
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-popover">
+                  <DropdownMenuItem onClick={() => addStep("form")}>
+                    <PlayCircle className="h-4 w-4 mr-2" />
+                    Form
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => addStep("survey")}>
+                    <ClipboardList className="h-4 w-4 mr-2" />
+                    Survey
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => addStep("agreement")}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Agreement
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  if (!sequenceName.trim()) {
+                    toast.error("Please enter a sequence name");
+                    return;
+                  }
+                  toast.success(editingSequenceId ? "Sequence updated successfully" : "Sequence saved successfully");
+                  handleBackToList();
+                }}
+              >
+                Save Sequence
+              </Button>
+            </div>
+          </div>
+
+          {/* Sequence Name Input */}
+          <div className="p-4 border-b border-border bg-muted/30">
+            <div className="max-w-4xl mx-auto">
+              <Label htmlFor="sequence-name" className="text-sm font-medium mb-2 block">
+                Sequence Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="sequence-name"
+                placeholder="Enter sequence name..."
+                value={sequenceName}
+                onChange={(e) => setSequenceName(e.target.value)}
+                className="max-w-md bg-background"
+                maxLength={100}
+              />
+            </div>
+          </div>
+
+          {/* Steps List */}
+          <div className="flex-1 overflow-auto p-4">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={testSequenceSteps.map((step) => step.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3 max-w-4xl mx-auto">
+                  {testSequenceSteps.map((step) => (
+                    <SortableStepCard
+                      key={step.id}
+                      step={step}
+                      isExpanded={expandedSteps.includes(step.id)}
+                      onToggleExpand={toggleStepExpand}
+                      onRemoveStep={removeStep}
+                      onUpdateSystemCheckConfig={updateSystemCheckConfig}
+                      onUpdateFormIds={updateFormIds}
+                      onUpdateFormSelectionMode={updateFormSelectionMode}
+                      forms={mockForms}
+                      surveys={mockSurveys}
+                    />
+                  ))}
+
+                  {testSequenceSteps.length === 0 && (
+                    <div className="text-center py-12">
+                      <Monitor className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-foreground mb-2">No steps configured</h3>
+                      <p className="text-muted-foreground mb-4">Add steps to build your test sequence</p>
+                    </div>
+                  )}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+        </div>
+      );
+    }
+
+    // List view (default)
+    return (
+      <div className="flex-1 flex flex-col">
+        {/* Toolbar */}
+        <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <ListOrdered className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Test Sequences</h2>
+            <Badge variant="secondary" className="text-xs">
+              {mockTestSequences.length} total
+            </Badge>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search sequences..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 bg-background"
+              />
+            </div>
+            <Button 
+              className="bg-primary hover:bg-primary/90"
+              onClick={handleCreateNewSequence}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Create Sequence
+            </Button>
+          </div>
+        </div>
+
+        {/* Sequences Table */}
+        <div className="flex-1 overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
+                <TableHead className="w-12">
+                  <Checkbox />
+                </TableHead>
+                <TableHead className="font-semibold text-foreground">SEQUENCE NAME</TableHead>
+                <TableHead className="text-center font-semibold text-foreground">STEPS</TableHead>
+                <TableHead className="text-center font-semibold text-foreground">FORMS</TableHead>
+                <TableHead className="text-center font-semibold text-foreground">SURVEYS</TableHead>
+                <TableHead className="font-semibold text-foreground">CREATED</TableHead>
+                <TableHead className="font-semibold text-foreground">STATUS</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredSequences.map((sequence) => (
+                <TableRow
+                  key={sequence.id}
+                  className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
+                >
+                  <TableCell>
+                    <Checkbox />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <ListOrdered className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-foreground">{sequence.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center text-foreground">{sequence.steps}</TableCell>
+                  <TableCell className="text-center text-foreground">{sequence.forms}</TableCell>
+                  <TableCell className="text-center text-foreground">{sequence.surveys}</TableCell>
+                  <TableCell className="text-foreground">{sequence.createdAt}</TableCell>
+                  <TableCell>
+                    <Badge variant={sequence.status === "active" ? "default" : "secondary"}>
+                      {sequence.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-popover">
+                        <DropdownMenuItem onClick={() => handleEditSequence(sequence.id)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditSequence(sequence.id)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {filteredSequences.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-12">
+                    <div className="flex flex-col items-center gap-2">
+                      <ListOrdered className="h-8 w-8 text-muted-foreground/50" />
+                      <p className="text-muted-foreground">No test sequences found</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleCreateNewSequence} 
+                        className="mt-2"
+                      >
+                        Create your first sequence
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
+  };
+
   const renderTabContent = () => {
+    // If viewMode is test-sequence, render the test sequence content
+    if (viewMode === "test-sequence") {
+      return renderTestSequenceContent();
+    }
+    
     switch (activeTab) {
       case "forms":
         return (
@@ -925,256 +1198,6 @@ const handleDragEnd = (event: DragEndEvent) => {
           </>
         );
 
-      case "test-sequence":
-        // Filter sequences by search
-        const filteredSequences = mockTestSequences.filter((seq) =>
-          seq.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-
-        if (isCreatingSequence) {
-          return (
-            <div className="flex-1 flex flex-col">
-              {/* Toolbar */}
-              <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={handleBackToList}
-                    className="gap-1"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Back
-                  </Button>
-                  <h2 className="text-lg font-semibold text-foreground">
-                    {editingSequenceId ? "Edit Sequence" : "Create New Sequence"}
-                  </h2>
-                  <Badge variant="secondary" className="text-xs">
-                    {testSequenceSteps.length} steps
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button className="bg-primary hover:bg-primary/90">
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add Step
-                        <ChevronDown className="h-4 w-4 ml-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-popover">
-                      <DropdownMenuItem onClick={() => addStep("form")}>
-                        <PlayCircle className="h-4 w-4 mr-2" />
-                        Form
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => addStep("survey")}>
-                        <ClipboardList className="h-4 w-4 mr-2" />
-                        Survey
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => addStep("agreement")}>
-                        <FileText className="h-4 w-4 mr-2" />
-                        Agreement
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      if (!sequenceName.trim()) {
-                        toast.error("Please enter a sequence name");
-                        return;
-                      }
-                      toast.success(editingSequenceId ? "Sequence updated successfully" : "Sequence saved successfully");
-                      handleBackToList();
-                    }}
-                  >
-                    Save Sequence
-                  </Button>
-                </div>
-              </div>
-
-              {/* Sequence Name Input */}
-              <div className="p-4 border-b border-border bg-muted/30">
-                <div className="max-w-4xl mx-auto">
-                  <Label htmlFor="sequence-name" className="text-sm font-medium mb-2 block">
-                    Sequence Name <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="sequence-name"
-                    placeholder="Enter sequence name..."
-                    value={sequenceName}
-                    onChange={(e) => setSequenceName(e.target.value)}
-                    className="max-w-md bg-background"
-                    maxLength={100}
-                  />
-                </div>
-              </div>
-
-              {/* Steps List */}
-              <div className="flex-1 overflow-auto p-4">
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={testSequenceSteps.map((step) => step.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="space-y-3 max-w-4xl mx-auto">
-                      {testSequenceSteps.map((step) => (
-                        <SortableStepCard
-                          key={step.id}
-                          step={step}
-                          isExpanded={expandedSteps.includes(step.id)}
-                          onToggleExpand={toggleStepExpand}
-                          onRemoveStep={removeStep}
-                          onUpdateSystemCheckConfig={updateSystemCheckConfig}
-                          onUpdateFormIds={updateFormIds}
-                          onUpdateFormSelectionMode={updateFormSelectionMode}
-                          forms={mockForms}
-                          surveys={mockSurveys}
-                        />
-                      ))}
-
-                      {testSequenceSteps.length === 0 && (
-                        <div className="text-center py-12">
-                          <Monitor className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                          <h3 className="text-lg font-medium text-foreground mb-2">No steps configured</h3>
-                          <p className="text-muted-foreground mb-4">Add steps to build your test sequence</p>
-                        </div>
-                      )}
-                    </div>
-                  </SortableContext>
-                </DndContext>
-              </div>
-            </div>
-          );
-        }
-
-        // List view (default)
-        return (
-          <div className="flex-1 flex flex-col">
-            {/* Toolbar */}
-            <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <ListOrdered className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Test Sequences</h2>
-                <Badge variant="secondary" className="text-xs">
-                  {mockTestSequences.length} total
-                </Badge>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search sequences..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 bg-background"
-                  />
-                </div>
-                <Button 
-                  className="bg-primary hover:bg-primary/90"
-                  onClick={handleCreateNewSequence}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Create Sequence
-                </Button>
-              </div>
-            </div>
-
-            {/* Sequences Table */}
-            <div className="flex-1 overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
-                    <TableHead className="w-12">
-                      <Checkbox />
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">SEQUENCE NAME</TableHead>
-                    <TableHead className="text-center font-semibold text-foreground">STEPS</TableHead>
-                    <TableHead className="text-center font-semibold text-foreground">FORMS</TableHead>
-                    <TableHead className="text-center font-semibold text-foreground">SURVEYS</TableHead>
-                    <TableHead className="font-semibold text-foreground">CREATED</TableHead>
-                    <TableHead className="font-semibold text-foreground">STATUS</TableHead>
-                    <TableHead className="w-12"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSequences.map((sequence) => (
-                    <TableRow
-                      key={sequence.id}
-                      className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
-                    >
-                      <TableCell>
-                        <Checkbox />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <ListOrdered className="h-4 w-4 text-primary" />
-                          <span className="font-medium text-foreground">{sequence.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center text-foreground">{sequence.steps}</TableCell>
-                      <TableCell className="text-center text-foreground">{sequence.forms}</TableCell>
-                      <TableCell className="text-center text-foreground">{sequence.surveys}</TableCell>
-                      <TableCell className="text-foreground">{sequence.createdAt}</TableCell>
-                      <TableCell>
-                        <Badge variant={sequence.status === "active" ? "default" : "secondary"}>
-                          {sequence.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-popover">
-                            <DropdownMenuItem onClick={() => handleEditSequence(sequence.id)}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              View
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditSequence(sequence.id)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {filteredSequences.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-12">
-                        <div className="flex flex-col items-center gap-2">
-                          <ListOrdered className="h-8 w-8 text-muted-foreground/50" />
-                          <p className="text-muted-foreground">No test sequences found</p>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={handleCreateNewSequence} 
-                            className="mt-2"
-                          >
-                            Create your first sequence
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        );
-
       case "agreement":
         return (
           <>
@@ -1376,21 +1399,60 @@ const handleDragEnd = (event: DragEndEvent) => {
               <span className="text-[10px] text-muted-foreground block -mt-1">TEST & ASSESSMENT</span>
             </div>
           </div>
-          <div className="ml-6 flex flex-col">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink asChild>
-                    <Link to="/admin">Dashboard</Link>
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Forms</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-            <h1 className="text-lg font-semibold text-foreground -mt-0.5">Manage Assessments</h1>
+          
+          {/* Project Switcher */}
+          <div className="ml-6 flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="h-9 gap-2 min-w-[200px] justify-between">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    <span className="font-medium">{selectedProject?.name || "Select Project"}</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[280px] bg-popover">
+                {mockProjects.map((project) => (
+                  <DropdownMenuItem
+                    key={project.id}
+                    onClick={() => setSelectedProjectId(project.id)}
+                    className={selectedProjectId === project.id ? "bg-primary/10" : ""}
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium">{project.name}</span>
+                      <span className="text-xs text-muted-foreground">{project.description}</span>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* View Mode Selector */}
+            <div className="flex items-center bg-muted rounded-lg p-1">
+              <button
+                onClick={() => setViewMode("form")}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-2 ${
+                  viewMode === "form"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <PlayCircle className="h-4 w-4" />
+                Form
+              </button>
+              <button
+                onClick={() => setViewMode("test-sequence")}
+                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-2 ${
+                  viewMode === "test-sequence"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <ListOrdered className="h-4 w-4" />
+                Test Sequence
+              </button>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -1402,176 +1464,172 @@ const handleDragEnd = (event: DragEndEvent) => {
       </header>
 
       <div className="flex flex-1">
-        {/* Repository Sidebar */}
-        <aside className="w-80 border-r border-border bg-card">
-          <div className="p-4 border-b border-border">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-foreground">Repositories</span>
-              <div className="flex items-center gap-1">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7"
-                  onClick={() => setCreateRepoDialogOpen(true)}
-                  title="Create repository"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7"
-                  onClick={() => {
-                    const repo = repositories.find(r => r.id === selectedRepositoryId);
-                    if (repo) openRenameDialog(repo);
-                  }}
-                  disabled={!selectedRepositoryId}
-                  title="Rename selected repository"
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7"
-                  onClick={() => {
-                    const repo = repositories.find(r => r.id === selectedRepositoryId);
-                    if (repo) openDeleteDialog(repo);
-                  }}
-                  disabled={!selectedRepositoryId || repositories.length <= 1}
-                  title="Delete selected repository"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+        {/* Repository Sidebar - Only show for Form view */}
+        {viewMode === "form" && (
+          <aside className="w-80 border-r border-border bg-card">
+            <div className="p-4 border-b border-border">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-foreground">Repositories</span>
+                <div className="flex items-center gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7"
+                    onClick={() => setCreateRepoDialogOpen(true)}
+                    title="Create repository"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7"
+                    onClick={() => {
+                      const repo = repositories.find(r => r.id === selectedRepositoryId);
+                      if (repo) openRenameDialog(repo);
+                    }}
+                    disabled={!selectedRepositoryId}
+                    title="Rename selected repository"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-7 w-7"
+                    onClick={() => {
+                      const repo = repositories.find(r => r.id === selectedRepositoryId);
+                      if (repo) openDeleteDialog(repo);
+                    }}
+                    disabled={!selectedRepositoryId || repositories.length <= 1}
+                    title="Delete selected repository"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="p-2">
-            {repositories.map((repo) => (
-              <div key={repo.id} className="group">
-                <button
-                  onClick={() => {
-                    setSelectedRepositoryId(repo.id);
-                    toggleRepoExpand(repo.id);
-                  }}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left transition-colors ${
-                    selectedRepositoryId === repo.id ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"
-                  }`}
-                >
-                  {expandedRepos.includes(repo.id) ? (
-                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 flex-shrink-0" />
-                  )}
-                  {expandedRepos.includes(repo.id) ? (
-                    <FolderOpen className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                  ) : (
-                    <Folder className="h-4 w-4 text-amber-500 flex-shrink-0" />
-                  )}
-                  <span className="flex-1 truncate">{repo.name}</span>
-                  <span className="text-xs text-muted-foreground">({repo.formCount})</span>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <MoreVertical className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-popover">
-                      <DropdownMenuItem onClick={(e) => {
-                        e.stopPropagation();
-                        openRenameDialog(repo);
-                      }}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Rename
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem 
-                        className="text-destructive"
-                        onClick={(e) => {
+            <div className="p-2">
+              {repositories.map((repo) => (
+                <div key={repo.id} className="group">
+                  <button
+                    onClick={() => {
+                      setSelectedRepositoryId(repo.id);
+                      toggleRepoExpand(repo.id);
+                    }}
+                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-left transition-colors ${
+                      selectedRepositoryId === repo.id ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"
+                    }`}
+                  >
+                    {expandedRepos.includes(repo.id) ? (
+                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 flex-shrink-0" />
+                    )}
+                    {expandedRepos.includes(repo.id) ? (
+                      <FolderOpen className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                    ) : (
+                      <Folder className="h-4 w-4 text-amber-500 flex-shrink-0" />
+                    )}
+                    <span className="flex-1 truncate">{repo.name}</span>
+                    <span className="text-xs text-muted-foreground">({repo.formCount})</span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <MoreVertical className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-popover">
+                        <DropdownMenuItem onClick={(e) => {
                           e.stopPropagation();
-                          openDeleteDialog(repo);
-                        }}
-                        disabled={repositories.length <= 1}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </button>
-              </div>
-            ))}
-          </div>
-        </aside>
+                          openRenameDialog(repo);
+                        }}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Rename
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDeleteDialog(repo);
+                          }}
+                          disabled={repositories.length <= 1}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </aside>
+        )}
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col">
-          {/* Tabs */}
-          <div className="bg-muted/50 px-2 pt-2">
-            <div className="flex gap-1">
-              <button
-                onClick={() => setActiveTab("forms")}
-                className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                  activeTab === "forms"
-                    ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                Forms
-              </button>
-              <button
-                onClick={() => setActiveTab("configuration")}
-                className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                  activeTab === "configuration"
-                    ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                Configuration
-              </button>
-              <button
-                onClick={() => setActiveTab("survey")}
-                className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                  activeTab === "survey"
-                    ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                Survey
-              </button>
-              <button
-                onClick={() => setActiveTab("test-sequence")}
-                className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                  activeTab === "test-sequence"
-                    ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                Test Sequence
-              </button>
-              <button
-                onClick={() => setActiveTab("agreement")}
-                className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                  activeTab === "agreement"
-                    ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                Agreement
-              </button>
+          {/* Form View Tabs - Only show for Form view */}
+          {viewMode === "form" && (
+            <div className="bg-muted/50 px-2 pt-2">
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setActiveTab("forms")}
+                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
+                    activeTab === "forms"
+                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  Forms
+                </button>
+                <button
+                  onClick={() => setActiveTab("configuration")}
+                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
+                    activeTab === "configuration"
+                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  Configuration
+                </button>
+                <button
+                  onClick={() => setActiveTab("survey")}
+                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
+                    activeTab === "survey"
+                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  Survey
+                </button>
+                <button
+                  onClick={() => setActiveTab("agreement")}
+                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
+                    activeTab === "agreement"
+                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  Agreement
+                </button>
+              </div>
             </div>
+          )}
+
+          {/* Content Area */}
+          <div className="flex-1 flex flex-col">
+            {viewMode === "form" ? renderTabContent() : renderTabContent()}
           </div>
 
-          {/* Tab Content */}
-          <div className="flex-1 flex flex-col">{renderTabContent()}</div>
-
-          {/* Pagination - Only for list views */}
-          {activeTab !== "test-sequence" && (
+          {/* Pagination - Only for Form list views */}
+          {viewMode === "form" && activeTab !== "test-sequence" && (
             <div className="p-4 border-t border-border bg-card flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span>
