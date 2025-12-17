@@ -788,24 +788,13 @@ const handleDragEnd = (event: DragEndEvent) => {
     if (viewMode === "forms") {
       return (
         <>
-          {/* Toolbar */}
           <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
-                Repository
+              <PlayCircle className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Forms</h2>
+              <Badge variant="secondary" className="text-xs">
+                {filteredForms.length} total
               </Badge>
-              <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
-                <SelectTrigger className="w-64 bg-background">
-                  <SelectValue placeholder="Select repository" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover">
-                  {repositories.map((repo) => (
-                    <SelectItem key={repo.id} value={repo.id}>
-                      {repo.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             <div className="flex items-center gap-3">
@@ -946,21 +935,11 @@ const handleDragEnd = (event: DragEndEvent) => {
         <>
           <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
-                Repository
+              <Settings className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Configuration</h2>
+              <Badge variant="secondary" className="text-xs">
+                {filteredConfigurations.length} total
               </Badge>
-              <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
-                <SelectTrigger className="w-64 bg-background">
-                  <SelectValue placeholder="Select repository" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover">
-                  {repositories.map((repo) => (
-                    <SelectItem key={repo.id} value={repo.id}>
-                      {repo.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
             <div className="flex items-center gap-3">
               <div className="relative w-64">
@@ -1123,21 +1102,11 @@ const handleDragEnd = (event: DragEndEvent) => {
         <>
           <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
-                Repository
+              <ClipboardList className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Survey</h2>
+              <Badge variant="secondary" className="text-xs">
+                {filteredSurveys.length} total
               </Badge>
-              <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
-                <SelectTrigger className="w-64 bg-background">
-                  <SelectValue placeholder="Select repository" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover">
-                  {repositories.map((repo) => (
-                    <SelectItem key={repo.id} value={repo.id}>
-                      {repo.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
             <div className="flex items-center gap-3">
               <div className="relative w-64">

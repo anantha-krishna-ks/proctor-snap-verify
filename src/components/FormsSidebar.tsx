@@ -32,11 +32,14 @@ interface FormsSidebarProps {
   onMenuChange: (menu: string) => void;
 }
 
-const menuItems = [
+const contentMenuItems = [
   { id: "forms", title: "Forms", icon: PlayCircle },
   { id: "survey", title: "Survey", icon: ClipboardList },
   { id: "configuration", title: "Configuration", icon: Settings },
   { id: "agreement", title: "Agreement", icon: FileSignature },
+];
+
+const assessmentMenuItems = [
   { id: "test-sequence", title: "Test Sequence", icon: ListOrdered },
   { id: "blueprint", title: "Blueprint", icon: FileStack },
   { id: "assessment", title: "Assessment", icon: GraduationCap },
@@ -98,8 +101,9 @@ export const FormsSidebar = ({
 
       {/* Menu Items */}
       <nav className="flex-1 p-2">
+        {/* Content Group */}
         <div className="space-y-0.5">
-          {menuItems.map((item, index) => {
+          {contentMenuItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = activeMenu === item.id;
 
@@ -109,6 +113,38 @@ export const FormsSidebar = ({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
+                whileHover={{ x: 2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onMenuChange(item.id)}
+                className={cn(
+                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span>{item.title}</span>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        {/* Separator */}
+        <div className="my-3 mx-2 border-t border-border" />
+
+        {/* Assessment Group */}
+        <div className="space-y-0.5">
+          {assessmentMenuItems.map((item, index) => {
+            const Icon = item.icon;
+            const isActive = activeMenu === item.id;
+
+            return (
+              <motion.button
+                key={item.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: (index + contentMenuItems.length) * 0.05 }}
                 whileHover={{ x: 2 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onMenuChange(item.id)}
