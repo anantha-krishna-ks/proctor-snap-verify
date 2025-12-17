@@ -33,16 +33,16 @@ interface FormsSidebarProps {
 }
 
 const contentMenuItems = [
-  { id: "forms", title: "Forms", icon: PlayCircle },
-  { id: "survey", title: "Survey", icon: ClipboardList },
-  { id: "configuration", title: "Configuration", icon: Settings },
-  { id: "agreement", title: "Agreement", icon: FileSignature },
+  { id: "blueprint", title: "Blueprint", icon: FileStack },
+  { id: "forms", title: "Form", icon: PlayCircle },
+  { id: "assessment", title: "Assessment", icon: GraduationCap },
+  { id: "test-sequence", title: "Test Sequence", icon: ListOrdered },
 ];
 
-const assessmentMenuItems = [
-  { id: "test-sequence", title: "Test Sequence", icon: ListOrdered },
-  { id: "blueprint", title: "Blueprint", icon: FileStack },
-  { id: "assessment", title: "Assessment", icon: GraduationCap },
+const settingsMenuItems = [
+  { id: "configuration", title: "Configuration", icon: Settings },
+  { id: "survey", title: "Survey", icon: ClipboardList },
+  { id: "agreement", title: "Agreement", icon: FileSignature },
 ];
 
 export const FormsSidebar = ({
@@ -135,7 +135,7 @@ export const FormsSidebar = ({
 
         {/* Assessment Group */}
         <div className="space-y-0.5">
-          {assessmentMenuItems.map((item, index) => {
+          {settingsMenuItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = activeMenu === item.id;
 
