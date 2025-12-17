@@ -6,6 +6,9 @@ import {
   GraduationCap,
   ChevronDown,
   Check,
+  ClipboardList,
+  Settings,
+  FileSignature,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -31,6 +34,9 @@ interface FormsSidebarProps {
 
 const menuItems = [
   { id: "forms", title: "Forms", icon: PlayCircle },
+  { id: "survey", title: "Survey", icon: ClipboardList },
+  { id: "configuration", title: "Configuration", icon: Settings },
+  { id: "agreement", title: "Agreement", icon: FileSignature },
   { id: "test-sequence", title: "Test Sequence", icon: ListOrdered },
   { id: "blueprint", title: "Blueprint", icon: FileStack },
   { id: "assessment", title: "Assessment", icon: GraduationCap },
