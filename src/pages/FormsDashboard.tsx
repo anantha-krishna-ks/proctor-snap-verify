@@ -110,44 +110,40 @@ interface TestSequenceStep {
   agreementText?: string;
 }
 
-// Mock test sequences data
+// Mock test sequences data with detailed steps
+const mockTestSequencesData: Record<string, TestSequenceStep[]> = {
+  seq1: [
+    { id: "s1-1", type: "system-check", name: "System Check", order: 1, config: { popBlocker: true, camera: true, browser: true, microphone: true, screenShare: false } },
+    { id: "s1-2", type: "agreement", name: "Terms Agreement", order: 2, agreementText: "I agree to the exam terms and conditions." },
+    { id: "s1-3", type: "form", name: "Math Assessment", order: 3, formIds: ["form-1"], formSelectionMode: "in-order" },
+    { id: "s1-4", type: "form", name: "Science Assessment", order: 4, formIds: ["form-2"], formSelectionMode: "in-order" },
+    { id: "s1-5", type: "survey", name: "Feedback Survey", order: 5, surveyId: "survey-1" },
+  ],
+  seq2: [
+    { id: "s2-1", type: "system-check", name: "System Check", order: 1, config: { popBlocker: true, camera: true, browser: false, microphone: false, screenShare: false } },
+    { id: "s2-2", type: "form", name: "English Test", order: 2, formIds: ["form-1", "form-2"], formSelectionMode: "random" },
+    { id: "s2-3", type: "form", name: "Reading Comprehension", order: 3, formIds: ["form-3"], formSelectionMode: "in-order" },
+  ],
+  seq3: [
+    { id: "s3-1", type: "system-check", name: "System Check", order: 1, config: { popBlocker: true, camera: true, browser: true, microphone: true, screenShare: true } },
+    { id: "s3-2", type: "agreement", name: "NDA Agreement", order: 2, agreementText: "I agree to keep all test content confidential." },
+    { id: "s3-3", type: "form", name: "Advanced Math", order: 3, formIds: ["form-1"], formSelectionMode: "in-order" },
+    { id: "s3-4", type: "form", name: "Physics", order: 4, formIds: ["form-2"], formSelectionMode: "in-order" },
+    { id: "s3-5", type: "form", name: "Chemistry", order: 5, formIds: ["form-3"], formSelectionMode: "in-order" },
+    { id: "s3-6", type: "survey", name: "Mid Survey", order: 6, surveyId: "survey-1" },
+    { id: "s3-7", type: "survey", name: "Exit Survey", order: 7, surveyId: "survey-2" },
+  ],
+  seq4: [
+    { id: "s4-1", type: "form", name: "Quick Quiz", order: 1, formIds: ["form-1"], formSelectionMode: "in-order" },
+    { id: "s4-2", type: "survey", name: "Satisfaction Survey", order: 2, surveyId: "survey-1" },
+  ],
+};
+
 const mockTestSequences = [
-  {
-    id: "seq1",
-    name: "Complete Assessment Sequence",
-    steps: 5,
-    forms: 3,
-    surveys: 1,
-    createdAt: "2024-01-15",
-    status: "active",
-  },
-  {
-    id: "seq2",
-    name: "Basic Proctoring Flow",
-    steps: 3,
-    forms: 2,
-    surveys: 0,
-    createdAt: "2024-02-20",
-    status: "active",
-  },
-  {
-    id: "seq3",
-    name: "Advanced Test Series",
-    steps: 7,
-    forms: 5,
-    surveys: 2,
-    createdAt: "2024-03-01",
-    status: "draft",
-  },
-  {
-    id: "seq4",
-    name: "Quick Evaluation Pack",
-    steps: 2,
-    forms: 1,
-    surveys: 1,
-    createdAt: "2024-03-10",
-    status: "active",
-  },
+  { id: "seq1", name: "Complete Assessment Sequence", steps: 5, forms: 3, surveys: 1, createdAt: "2024-01-15", status: "active" },
+  { id: "seq2", name: "Basic Proctoring Flow", steps: 3, forms: 2, surveys: 0, createdAt: "2024-02-20", status: "active" },
+  { id: "seq3", name: "Advanced Test Series", steps: 7, forms: 5, surveys: 2, createdAt: "2024-03-01", status: "draft" },
+  { id: "seq4", name: "Quick Evaluation Pack", steps: 2, forms: 1, surveys: 1, createdAt: "2024-03-10", status: "active" },
 ];
 
 const FormsDashboard = () => {
@@ -164,37 +160,48 @@ const FormsDashboard = () => {
   const [rowsPerPage, setRowsPerPage] = useState("25");
   const [currentPage, setCurrentPage] = useState(1);
   const [isCreatingSequence, setIsCreatingSequence] = useState(false);
+  const [editingSequenceId, setEditingSequenceId] = useState<string | null>(null);
   
   // Repository dialog state
   const [createRepoDialogOpen, setCreateRepoDialogOpen] = useState(false);
   const [renameRepoDialogOpen, setRenameRepoDialogOpen] = useState(false);
   const [deleteRepoDialogOpen, setDeleteRepoDialogOpen] = useState(false);
   const [selectedRepoForAction, setSelectedRepoForAction] = useState<Repository | null>(null);
-  // Test Sequence State
-  const [testSequenceSteps, setTestSequenceSteps] = useState<TestSequenceStep[]>([
-    {
-      id: "1",
-      type: "system-check",
-      name: "System Check",
-      order: 1,
-      config: {
-        popBlocker: true,
-        camera: true,
-        browser: true,
-        microphone: false,
-        screenShare: false,
-      },
-    },
-    {
-      id: "2",
-      type: "form",
-      name: "Forms",
-      order: 2,
-      formIds: [],
-      formSelectionMode: "in-order",
-    },
-  ]);
+  
+  // Test Sequence State - default steps for new sequences
+  const defaultSteps: TestSequenceStep[] = [
+    { id: "1", type: "system-check", name: "System Check", order: 1, config: { popBlocker: true, camera: true, browser: true, microphone: false, screenShare: false } },
+    { id: "2", type: "form", name: "Forms", order: 2, formIds: [], formSelectionMode: "in-order" },
+  ];
+  const [testSequenceSteps, setTestSequenceSteps] = useState<TestSequenceStep[]>(defaultSteps);
   const [expandedSteps, setExpandedSteps] = useState<string[]>(["1", "2"]);
+
+  // Function to handle editing a sequence
+  const handleEditSequence = (sequenceId: string) => {
+    const sequenceSteps = mockTestSequencesData[sequenceId];
+    if (sequenceSteps) {
+      setTestSequenceSteps(sequenceSteps);
+      setExpandedSteps(sequenceSteps.map(s => s.id));
+      setEditingSequenceId(sequenceId);
+      setIsCreatingSequence(true);
+    }
+  };
+
+  // Function to handle creating a new sequence
+  const handleCreateNewSequence = () => {
+    setTestSequenceSteps(defaultSteps);
+    setExpandedSteps(["1", "2"]);
+    setEditingSequenceId(null);
+    setIsCreatingSequence(true);
+  };
+
+  // Function to go back to list
+  const handleBackToList = () => {
+    setIsCreatingSequence(false);
+    setEditingSequenceId(null);
+    setTestSequenceSteps(defaultSteps);
+    setExpandedSteps(["1", "2"]);
+  };
 
 // Agreement State
 const [agreements, setAgreements] = useState<Agreement[]>([
@@ -928,13 +935,18 @@ const handleDragEnd = (event: DragEndEvent) => {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    onClick={() => setIsCreatingSequence(false)}
+                    onClick={handleBackToList}
                     className="gap-1"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Back
                   </Button>
-                  <h2 className="text-lg font-semibold text-foreground">Test Sequence Builder</h2>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    {editingSequenceId 
+                      ? `Edit: ${mockTestSequences.find(s => s.id === editingSequenceId)?.name}`
+                      : "Create New Sequence"
+                    }
+                  </h2>
                   <Badge variant="secondary" className="text-xs">
                     {testSequenceSteps.length} steps
                   </Badge>
@@ -964,8 +976,8 @@ const handleDragEnd = (event: DragEndEvent) => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                   <Button variant="outline" onClick={() => {
-                    toast.success("Sequence saved successfully");
-                    setIsCreatingSequence(false);
+                    toast.success(editingSequenceId ? "Sequence updated successfully" : "Sequence saved successfully");
+                    handleBackToList();
                   }}>Save Sequence</Button>
                 </div>
               </div>
@@ -1036,7 +1048,7 @@ const handleDragEnd = (event: DragEndEvent) => {
                 </div>
                 <Button 
                   className="bg-primary hover:bg-primary/90"
-                  onClick={() => setIsCreatingSequence(true)}
+                  onClick={handleCreateNewSequence}
                 >
                   <Plus className="h-4 w-4 mr-1" />
                   Create Sequence
@@ -1093,11 +1105,11 @@ const handleDragEnd = (event: DragEndEvent) => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-popover">
-                            <DropdownMenuItem onClick={() => setIsCreatingSequence(true)}>
+                            <DropdownMenuItem onClick={() => handleEditSequence(sequence.id)}>
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setIsCreatingSequence(true)}>
+                            <DropdownMenuItem onClick={() => handleEditSequence(sequence.id)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -1120,7 +1132,7 @@ const handleDragEnd = (event: DragEndEvent) => {
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            onClick={() => setIsCreatingSequence(true)} 
+                            onClick={handleCreateNewSequence} 
                             className="mt-2"
                           >
                             Create your first sequence
