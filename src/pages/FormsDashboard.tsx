@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   DndContext,
   closestCenter,
@@ -64,7 +64,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -157,13 +157,10 @@ const mockProjects = [
   { id: "proj-4", name: "Professional License Tests", description: "Industry certifications" },
 ];
 
-type ViewMode = "forms" | "test-sequence" | "blueprint" | "assessment";
+type ViewMode = "forms" | "survey" | "configuration" | "agreement" | "test-sequence" | "blueprint" | "assessment";
 
 const FormsDashboard = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const initialTab = searchParams.get("tab") || "forms";
-  const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   
   // Project state
@@ -787,628 +784,613 @@ const handleDragEnd = (event: DragEndEvent) => {
       );
     }
 
-    // Forms view content
-    switch (activeTab) {
-      case "forms":
-        return (
-          <>
-            {/* Toolbar */}
-            <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
-                  Repository
-                </Badge>
-                <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
-                  <SelectTrigger className="w-64 bg-background">
-                    <SelectValue placeholder="Select repository" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    {repositories.map((repo) => (
-                      <SelectItem key={repo.id} value={repo.id}>
-                        {repo.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by assessment name"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 bg-background"
-                  />
-                </div>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="bg-primary hover:bg-primary/90">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Create New
-                      <ChevronDown className="h-4 w-4 ml-1" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-popover">
-                    <DropdownMenuItem onClick={() => navigate("/forms/create")}>
-                      <PlayCircle className="h-4 w-4 mr-2" />
-                      Form
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/forms/configurations")}>
-                      <Settings className="h-4 w-4 mr-2" />
-                      Configuration
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/surveys/create")}>
-                      <ClipboardList className="h-4 w-4 mr-2" />
-                      Survey
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Table */}
-            <div className="flex-1 overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
-                    <TableHead className="w-12">
-                      <Checkbox />
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      <div className="flex items-center gap-1">
-                        ASSESSMENT NAME
-                        <ChevronDown className="h-3 w-3" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">MODEL</TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      <div className="flex items-center gap-1">
-                        STATUS
-                        <ChevronDown className="h-3 w-3" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      <div className="flex items-center gap-1">
-                        SCHEDULED
-                        <ChevronDown className="h-3 w-3" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      <div className="flex items-center gap-1">
-                        MODIFIED DATE
-                        <ChevronDown className="h-3 w-3" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      <div className="flex items-center gap-1">
-                        VERSION
-                        <ChevronDown className="h-3 w-3" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="w-12"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredForms.map((form) => (
-                    <TableRow
-                      key={form.id}
-                      className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
-                    >
-                      <TableCell>
-                        <Checkbox />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <PlayCircle className="h-4 w-4 text-primary" />
-                          <span className="font-medium text-foreground">{form.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{form.model}</TableCell>
-                      <TableCell>{getStatusBadge(form.status)}</TableCell>
-                      <TableCell className="text-center text-foreground">{form.scheduled}</TableCell>
-                      <TableCell className="text-foreground">
-                        {format(new Date(form.updatedAt), "dd-MM-yyyy")}
-                      </TableCell>
-                      <TableCell className="text-center text-foreground">{form.version}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-popover">
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                            <DropdownMenuItem>Preview</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
+    // Forms view
+    if (viewMode === "forms") {
+      return (
+        <>
+          {/* Toolbar */}
+          <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
+                Repository
+              </Badge>
+              <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
+                <SelectTrigger className="w-64 bg-background">
+                  <SelectValue placeholder="Select repository" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  {repositories.map((repo) => (
+                    <SelectItem key={repo.id} value={repo.id}>
+                      {repo.name}
+                    </SelectItem>
                   ))}
-                  {filteredForms.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-12">
-                        <div className="flex flex-col items-center gap-2">
-                          <Folder className="h-8 w-8 text-muted-foreground/50" />
-                          <p className="text-muted-foreground">No assessments found in this repository</p>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigate("/forms/create")}
-                            className="mt-2"
-                          >
-                            Create your first assessment
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </>
-        );
-
-      case "configuration":
-        return (
-          <>
-            <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
-                  Repository
-                </Badge>
-                <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
-                  <SelectTrigger className="w-64 bg-background">
-                    <SelectValue placeholder="Select repository" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    {repositories.map((repo) => (
-                      <SelectItem key={repo.id} value={repo.id}>
-                        {repo.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by configuration name"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 bg-background"
-                  />
-                </div>
-                <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate("/forms/configurations/create")}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Create Configuration
-                </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="flex-1 overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
-                    <TableHead className="w-12">
-                      <Checkbox />
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      <div className="flex items-center gap-1">
-                        CONFIGURATION NAME
-                        <ChevronDown className="h-3 w-3" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">DURATION</TableHead>
-                    <TableHead className="font-semibold text-foreground">LANGUAGE</TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      <div className="flex items-center gap-1">
-                        SECURITY
-                        <ChevronDown className="h-3 w-3" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      <div className="flex items-center gap-1">
-                        MODIFIED DATE
-                        <ChevronDown className="h-3 w-3" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">
-                      <div className="flex items-center gap-1">
-                        VERSION
-                        <ChevronDown className="h-3 w-3" />
-                      </div>
-                    </TableHead>
-                    <TableHead className="w-12"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredConfigurations.map((config) => (
-                    <TableRow
-                      key={config.id}
-                      className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
-                    >
-                      <TableCell>
-                        <Checkbox />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Settings className="h-4 w-4 text-primary" />
-                          <span className="font-medium text-foreground">{config.name}</span>
-                          {config.isDefault && (
-                            <Badge className="bg-success/10 text-success border-success/20 text-xs">
-                              Default
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {config.examRules.duration} min
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-foreground">
-                        {config.examRules.language}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {config.security.fullScreenMode && (
-                            <Badge variant="outline" className="text-xs">Full Screen</Badge>
-                          )}
-                          {config.security.shuffleQuestions && (
-                            <Badge variant="outline" className="text-xs">Shuffle</Badge>
-                          )}
-                          {config.security.preventCopyPaste && (
-                            <Badge variant="outline" className="text-xs">No Copy</Badge>
-                          )}
-                          {!config.security.fullScreenMode &&
-                            !config.security.shuffleQuestions &&
-                            !config.security.preventCopyPaste && (
-                              <span className="text-xs text-muted-foreground italic">None</span>
-                            )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-foreground">
-                        {format(new Date(config.updatedAt), "dd-MM-yyyy")}
-                      </TableCell>
-                      <TableCell className="text-center text-foreground">{config.version}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-popover">
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                            {!config.isDefault && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {filteredConfigurations.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-12">
-                        <div className="flex flex-col items-center gap-2">
-                          <Settings className="h-8 w-8 text-muted-foreground/50" />
-                          <p className="text-muted-foreground">No configurations found in this repository</p>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => navigate("/forms/configurations/create")}
-                            className="mt-2"
-                          >
-                            Create your first configuration
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </>
-        );
-
-      case "survey":
-        return (
-          <>
-            <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
-                  Repository
-                </Badge>
-                <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
-                  <SelectTrigger className="w-64 bg-background">
-                    <SelectValue placeholder="Select repository" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    {repositories.map((repo) => (
-                      <SelectItem key={repo.id} value={repo.id}>
-                        {repo.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search surveys"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 bg-background"
-                  />
-                </div>
-                <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate("/surveys/create")}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Create Survey
-                </Button>
-              </div>
-            </div>
-            <div className="flex-1 overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
-                    <TableHead className="w-12">
-                      <Checkbox />
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">SURVEY NAME</TableHead>
-                    <TableHead className="font-semibold text-foreground">STATUS</TableHead>
-                    <TableHead className="font-semibold text-foreground">QUESTIONS</TableHead>
-                    <TableHead className="font-semibold text-foreground">MODIFIED DATE</TableHead>
-                    <TableHead className="font-semibold text-foreground">VERSION</TableHead>
-                    <TableHead className="w-12"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSurveys.map((survey) => (
-                    <TableRow
-                      key={survey.id}
-                      className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
-                    >
-                      <TableCell>
-                        <Checkbox />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <ClipboardList className="h-4 w-4 text-primary" />
-                          <span className="font-medium text-foreground">{survey.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(survey.status)}</TableCell>
-                      <TableCell className="text-center text-foreground">{survey.items.length}</TableCell>
-                      <TableCell className="text-foreground">
-                        {format(new Date(survey.updatedAt), "dd-MM-yyyy")}
-                      </TableCell>
-                      <TableCell className="text-center text-foreground">{survey.version}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-popover">
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </>
-        );
-
-      case "agreement":
-        return (
-          <>
-            {/* Toolbar */}
-            <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <FileSignature className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Agreements</h2>
-                <Badge variant="secondary" className="text-xs">
-                  {agreements.length} total
-                </Badge>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search agreements"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 bg-background"
-                  />
-                </div>
-                <Button className="bg-primary hover:bg-primary/90" onClick={openAddAgreement}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Agreement
-                </Button>
-              </div>
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Table */}
-            <div className="flex-1 overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
-                    <TableHead className="w-12">
-                      <Checkbox />
-                    </TableHead>
-                    <TableHead className="font-semibold text-foreground">AGREEMENT NAME</TableHead>
-                    <TableHead className="font-semibold text-foreground">CREATED DATE</TableHead>
-                    <TableHead className="font-semibold text-foreground">MODIFIED DATE</TableHead>
-                    <TableHead className="w-12"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAgreements.map((agreement) => (
-                    <TableRow
-                      key={agreement.id}
-                      className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
-                    >
-                      <TableCell>
-                        <Checkbox />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <FileSignature className="h-4 w-4 text-primary" />
-                          <span className="font-medium text-foreground">{agreement.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-foreground">
-                        {format(new Date(agreement.createdAt), "dd-MM-yyyy")}
-                      </TableCell>
-                      <TableCell className="text-foreground">
-                        {format(new Date(agreement.updatedAt), "dd-MM-yyyy")}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-popover">
-                            <DropdownMenuItem onClick={() => openEditAgreement(agreement)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => handleDeleteAgreement(agreement.id)}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {filteredAgreements.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-12">
-                        <div className="flex flex-col items-center gap-2">
-                          <FileSignature className="h-8 w-8 text-muted-foreground/50" />
-                          <p className="text-muted-foreground">No agreements found</p>
-                          <Button variant="outline" size="sm" onClick={openAddAgreement} className="mt-2">
-                            Create your first agreement
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by assessment name"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-background"
+                />
+              </div>
 
-            {/* Agreement Sheet */}
-            <Sheet open={agreementDialogOpen} onOpenChange={setAgreementDialogOpen}>
-              <SheetContent className="sm:max-w-xl overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>{editingAgreement ? "Edit Agreement" : "Add Agreement"}</SheetTitle>
-                </SheetHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="agreement-name">Name</Label>
-                    <Input
-                      id="agreement-name"
-                      placeholder="Enter agreement name"
-                      value={agreementForm.name}
-                      onChange={(e) => setAgreementForm((prev) => ({ ...prev, name: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label>Content</Label>
-                      <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
-                        <Button
-                          variant={!agreementPreviewMode ? "secondary" : "ghost"}
-                          size="sm"
-                          className="h-7 px-3 text-xs"
-                          onClick={() => setAgreementPreviewMode(false)}
-                        >
-                          <Pencil className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant={agreementPreviewMode ? "secondary" : "ghost"}
-                          size="sm"
-                          className="h-7 px-3 text-xs"
-                          onClick={() => setAgreementPreviewMode(true)}
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          Preview
-                        </Button>
-                      </div>
+              <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate("/forms/create")}>
+                <Plus className="h-4 w-4 mr-1" />
+                Create Form
+              </Button>
+
+              <Button variant="ghost" size="icon" className="h-9 w-9">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-9 w-9">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="flex-1 overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
+                  <TableHead className="w-12">
+                    <Checkbox />
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      ASSESSMENT NAME
+                      <ChevronDown className="h-3 w-3" />
                     </div>
-                    {!agreementPreviewMode ? (
-                      <RichTextEditor
-                        value={agreementForm.content}
-                        onChange={(value) => setAgreementForm((prev) => ({ ...prev, content: value }))}
-                        placeholder="Enter the agreement content..."
-                      />
-                    ) : (
-                      <div 
-                        className="min-h-[200px] p-4 border border-input rounded-md bg-muted/30 prose prose-sm max-w-none"
-                        dangerouslySetInnerHTML={{ __html: agreementForm.content || '<p class="text-muted-foreground">No content to preview</p>' }}
-                      />
-                    )}
-                  </div>
-                </div>
-                <SheetFooter className="gap-2">
-                  <Button variant="outline" onClick={() => setAgreementDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSaveAgreement} disabled={!agreementForm.name.trim()}>
-                    {editingAgreement ? "Save Changes" : "Add Agreement"}
-                  </Button>
-                </SheetFooter>
-              </SheetContent>
-            </Sheet>
-          </>
-        );
-
-      default:
-        return null;
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">MODEL</TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      STATUS
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      SCHEDULED
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      MODIFIED DATE
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      VERSION
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredForms.map((form) => (
+                  <TableRow
+                    key={form.id}
+                    className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
+                  >
+                    <TableCell>
+                      <Checkbox />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <PlayCircle className="h-4 w-4 text-primary" />
+                        <span className="font-medium text-foreground">{form.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{form.model}</TableCell>
+                    <TableCell>{getStatusBadge(form.status)}</TableCell>
+                    <TableCell className="text-center text-foreground">{form.scheduled}</TableCell>
+                    <TableCell className="text-foreground">
+                      {format(new Date(form.updatedAt), "dd-MM-yyyy")}
+                    </TableCell>
+                    <TableCell className="text-center text-foreground">{form.version}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-popover">
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                          <DropdownMenuItem>Preview</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredForms.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-2">
+                        <Folder className="h-8 w-8 text-muted-foreground/50" />
+                        <p className="text-muted-foreground">No assessments found in this repository</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate("/forms/create")}
+                          className="mt-2"
+                        >
+                          Create your first assessment
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+      );
     }
+
+    // Configuration view
+    if (viewMode === "configuration") {
+      return (
+        <>
+          <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
+                Repository
+              </Badge>
+              <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
+                <SelectTrigger className="w-64 bg-background">
+                  <SelectValue placeholder="Select repository" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  {repositories.map((repo) => (
+                    <SelectItem key={repo.id} value={repo.id}>
+                      {repo.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by configuration name"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-background"
+                />
+              </div>
+              <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate("/forms/configurations/create")}>
+                <Plus className="h-4 w-4 mr-1" />
+                Create Configuration
+              </Button>
+              <Button variant="ghost" size="icon" className="h-9 w-9">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-9 w-9">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
+                  <TableHead className="w-12">
+                    <Checkbox />
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      CONFIGURATION NAME
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">DURATION</TableHead>
+                  <TableHead className="font-semibold text-foreground">LANGUAGE</TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      SECURITY
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      MODIFIED DATE
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">
+                    <div className="flex items-center gap-1">
+                      VERSION
+                      <ChevronDown className="h-3 w-3" />
+                    </div>
+                  </TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredConfigurations.map((config) => (
+                  <TableRow
+                    key={config.id}
+                    className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
+                  >
+                    <TableCell>
+                      <Checkbox />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Settings className="h-4 w-4 text-primary" />
+                        <span className="font-medium text-foreground">{config.name}</span>
+                        {config.isDefault && (
+                          <Badge className="bg-success/10 text-success border-success/20 text-xs">
+                            Default
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {config.examRules.duration} min
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-foreground">
+                      {config.examRules.language}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {config.security.fullScreenMode && (
+                          <Badge variant="outline" className="text-xs">Full Screen</Badge>
+                        )}
+                        {config.security.shuffleQuestions && (
+                          <Badge variant="outline" className="text-xs">Shuffle</Badge>
+                        )}
+                        {config.security.preventCopyPaste && (
+                          <Badge variant="outline" className="text-xs">No Copy</Badge>
+                        )}
+                        {!config.security.fullScreenMode &&
+                          !config.security.shuffleQuestions &&
+                          !config.security.preventCopyPaste && (
+                            <span className="text-xs text-muted-foreground italic">None</span>
+                          )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-foreground">
+                      {format(new Date(config.updatedAt), "dd-MM-yyyy")}
+                    </TableCell>
+                    <TableCell className="text-center text-foreground">{config.version}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-popover">
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                          {!config.isDefault && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredConfigurations.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-2">
+                        <Settings className="h-8 w-8 text-muted-foreground/50" />
+                        <p className="text-muted-foreground">No configurations found in this repository</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate("/forms/configurations/create")}
+                          className="mt-2"
+                        >
+                          Create your first configuration
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+      );
+    }
+
+    // Survey view
+    if (viewMode === "survey") {
+      return (
+        <>
+          <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Badge variant="default" className="bg-primary text-primary-foreground px-4 py-1.5">
+                Repository
+              </Badge>
+              <Select value={selectedRepositoryId} onValueChange={setSelectedRepositoryId}>
+                <SelectTrigger className="w-64 bg-background">
+                  <SelectValue placeholder="Select repository" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  {repositories.map((repo) => (
+                    <SelectItem key={repo.id} value={repo.id}>
+                      {repo.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search surveys"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-background"
+                />
+              </div>
+              <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate("/surveys/create")}>
+                <Plus className="h-4 w-4 mr-1" />
+                Create Survey
+              </Button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
+                  <TableHead className="w-12">
+                    <Checkbox />
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">SURVEY NAME</TableHead>
+                  <TableHead className="font-semibold text-foreground">STATUS</TableHead>
+                  <TableHead className="font-semibold text-foreground">QUESTIONS</TableHead>
+                  <TableHead className="font-semibold text-foreground">MODIFIED DATE</TableHead>
+                  <TableHead className="font-semibold text-foreground">VERSION</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredSurveys.map((survey) => (
+                  <TableRow
+                    key={survey.id}
+                    className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
+                  >
+                    <TableCell>
+                      <Checkbox />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <ClipboardList className="h-4 w-4 text-primary" />
+                        <span className="font-medium text-foreground">{survey.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(survey.status)}</TableCell>
+                    <TableCell className="text-center text-foreground">{survey.items.length}</TableCell>
+                    <TableCell className="text-foreground">
+                      {format(new Date(survey.updatedAt), "dd-MM-yyyy")}
+                    </TableCell>
+                    <TableCell className="text-center text-foreground">{survey.version}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-popover">
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+      );
+    }
+
+    // Agreement view
+    if (viewMode === "agreement") {
+      return (
+        <>
+          {/* Toolbar */}
+          <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <FileSignature className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Agreements</h2>
+              <Badge variant="secondary" className="text-xs">
+                {agreements.length} total
+              </Badge>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search agreements"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-background"
+                />
+              </div>
+              <Button className="bg-primary hover:bg-primary/90" onClick={openAddAgreement}>
+                <Plus className="h-4 w-4 mr-1" />
+                Add Agreement
+              </Button>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="flex-1 overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
+                  <TableHead className="w-12">
+                    <Checkbox />
+                  </TableHead>
+                  <TableHead className="font-semibold text-foreground">AGREEMENT NAME</TableHead>
+                  <TableHead className="font-semibold text-foreground">CREATED DATE</TableHead>
+                  <TableHead className="font-semibold text-foreground">MODIFIED DATE</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAgreements.map((agreement) => (
+                  <TableRow
+                    key={agreement.id}
+                    className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
+                  >
+                    <TableCell>
+                      <Checkbox />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <FileSignature className="h-4 w-4 text-primary" />
+                        <span className="font-medium text-foreground">{agreement.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-foreground">
+                      {format(new Date(agreement.createdAt), "dd-MM-yyyy")}
+                    </TableCell>
+                    <TableCell className="text-foreground">
+                      {format(new Date(agreement.updatedAt), "dd-MM-yyyy")}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-popover">
+                          <DropdownMenuItem onClick={() => openEditAgreement(agreement)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDeleteAgreement(agreement.id)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filteredAgreements.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-2">
+                        <FileSignature className="h-8 w-8 text-muted-foreground/50" />
+                        <p className="text-muted-foreground">No agreements found</p>
+                        <Button variant="outline" size="sm" onClick={openAddAgreement} className="mt-2">
+                          Create your first agreement
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Agreement Sheet */}
+          <Sheet open={agreementDialogOpen} onOpenChange={setAgreementDialogOpen}>
+            <SheetContent className="sm:max-w-xl overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>{editingAgreement ? "Edit Agreement" : "Add Agreement"}</SheetTitle>
+              </SheetHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="agreement-name">Name</Label>
+                  <Input
+                    id="agreement-name"
+                    placeholder="Enter agreement name"
+                    value={agreementForm.name}
+                    onChange={(e) => setAgreementForm((prev) => ({ ...prev, name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Content</Label>
+                    <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
+                      <Button
+                        variant={!agreementPreviewMode ? "secondary" : "ghost"}
+                        size="sm"
+                        className="h-7 px-3 text-xs"
+                        onClick={() => setAgreementPreviewMode(false)}
+                      >
+                        <Pencil className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant={agreementPreviewMode ? "secondary" : "ghost"}
+                        size="sm"
+                        className="h-7 px-3 text-xs"
+                        onClick={() => setAgreementPreviewMode(true)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        Preview
+                      </Button>
+                    </div>
+                  </div>
+                  {!agreementPreviewMode ? (
+                    <RichTextEditor
+                      value={agreementForm.content}
+                      onChange={(value) => setAgreementForm((prev) => ({ ...prev, content: value }))}
+                      placeholder="Enter the agreement content..."
+                    />
+                  ) : (
+                    <div 
+                      className="min-h-[200px] p-4 border border-input rounded-md bg-muted/30 prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: agreementForm.content || '<p class="text-muted-foreground">No content to preview</p>' }}
+                    />
+                  )}
+                </div>
+              </div>
+              <SheetFooter className="gap-2">
+                <Button variant="outline" onClick={() => setAgreementDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveAgreement} disabled={!agreementForm.name.trim()}>
+                  {editingAgreement ? "Save Changes" : "Add Agreement"}
+                </Button>
+              </SheetFooter>
+            </SheetContent>
+          </Sheet>
+        </>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -1455,61 +1437,13 @@ const handleDragEnd = (event: DragEndEvent) => {
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col">
-          {/* Form View Tabs - Only show for Forms view */}
-          {viewMode === "forms" && (
-            <div className="bg-muted/50 px-2 pt-2">
-              <div className="flex gap-1">
-                <button
-                  onClick={() => setActiveTab("forms")}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                    activeTab === "forms"
-                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  Forms
-                </button>
-                <button
-                  onClick={() => setActiveTab("configuration")}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                    activeTab === "configuration"
-                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  Configuration
-                </button>
-                <button
-                  onClick={() => setActiveTab("survey")}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                    activeTab === "survey"
-                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  Survey
-                </button>
-                <button
-                  onClick={() => setActiveTab("agreement")}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-all ${
-                    activeTab === "agreement"
-                      ? "bg-card text-foreground shadow-sm border border-border border-b-0"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  Agreement
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Content Area */}
           <div className="flex-1 flex flex-col">
             {renderTabContent()}
           </div>
 
-          {/* Pagination - Only for Forms list views */}
-          {viewMode === "forms" && activeTab !== "test-sequence" && (
+          {/* Pagination - Only for list views */}
+          {(viewMode === "forms" || viewMode === "survey" || viewMode === "configuration" || viewMode === "agreement") && (
             <div className="p-4 border-t border-border bg-card flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span>
