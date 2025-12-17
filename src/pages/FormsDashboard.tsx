@@ -39,7 +39,8 @@ import {
   Clock,
   ArrowLeft,
   ListOrdered,
-  Building2,
+  FileStack,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -81,6 +82,7 @@ import {
 } from "@/components/ui/sheet";
 import { RepositoryDialogs } from "@/components/RepositoryDialogs";
 import { SortableStepCard } from "@/components/SortableStepCard";
+import { FormsSidebar } from "@/components/FormsSidebar";
 import type { Repository } from "@/types/forms";
 import { toast } from "sonner";
 
@@ -155,7 +157,7 @@ const mockProjects = [
   { id: "proj-4", name: "Professional License Tests", description: "Industry certifications" },
 ];
 
-type ViewMode = "form" | "test-sequence";
+type ViewMode = "forms" | "test-sequence" | "blueprint" | "assessment";
 
 const FormsDashboard = () => {
   const navigate = useNavigate();
@@ -166,7 +168,7 @@ const FormsDashboard = () => {
   
   // Project state
   const [selectedProjectId, setSelectedProjectId] = useState(mockProjects[0]?.id || "");
-  const [viewMode, setViewMode] = useState<ViewMode>("form");
+  const [viewMode, setViewMode] = useState<ViewMode>("forms");
   
   // Repository state
   const [repositories, setRepositories] = useState<Repository[]>(initialMockRepositories);
@@ -748,11 +750,44 @@ const handleDragEnd = (event: DragEndEvent) => {
   };
 
   const renderTabContent = () => {
-    // If viewMode is test-sequence, render the test sequence content
+    // Handle different view modes
     if (viewMode === "test-sequence") {
       return renderTestSequenceContent();
     }
-    
+
+    if (viewMode === "blueprint") {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <FileStack className="h-16 w-16 text-muted-foreground/50 mb-4" />
+          <h3 className="text-xl font-semibold text-foreground mb-2">Blueprint</h3>
+          <p className="text-muted-foreground text-center max-w-md">
+            Create and manage test blueprints to define the structure and composition of your assessments.
+          </p>
+          <Button className="mt-6">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Blueprint
+          </Button>
+        </div>
+      );
+    }
+
+    if (viewMode === "assessment") {
+      return (
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <GraduationCap className="h-16 w-16 text-muted-foreground/50 mb-4" />
+          <h3 className="text-xl font-semibold text-foreground mb-2">Assessment</h3>
+          <p className="text-muted-foreground text-center max-w-md">
+            Schedule and manage assessments for candidates with comprehensive proctoring options.
+          </p>
+          <Button className="mt-6">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Assessment
+          </Button>
+        </div>
+      );
+    }
+
+    // Forms view content
     switch (activeTab) {
       case "forms":
         return (
@@ -1399,61 +1434,6 @@ const handleDragEnd = (event: DragEndEvent) => {
               <span className="text-[10px] text-muted-foreground block -mt-1">TEST & ASSESSMENT</span>
             </div>
           </div>
-          
-          {/* Project Switcher */}
-          <div className="ml-6 flex items-center gap-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="h-9 gap-2 min-w-[200px] justify-between">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-primary" />
-                    <span className="font-medium">{selectedProject?.name || "Select Project"}</span>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[280px] bg-popover">
-                {mockProjects.map((project) => (
-                  <DropdownMenuItem
-                    key={project.id}
-                    onClick={() => setSelectedProjectId(project.id)}
-                    className={selectedProjectId === project.id ? "bg-primary/10" : ""}
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-medium">{project.name}</span>
-                      <span className="text-xs text-muted-foreground">{project.description}</span>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* View Mode Selector */}
-            <div className="flex items-center bg-muted rounded-lg p-1">
-              <button
-                onClick={() => setViewMode("form")}
-                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-2 ${
-                  viewMode === "form"
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <PlayCircle className="h-4 w-4" />
-                Form
-              </button>
-              <button
-                onClick={() => setViewMode("test-sequence")}
-                className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all flex items-center gap-2 ${
-                  viewMode === "test-sequence"
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <ListOrdered className="h-4 w-4" />
-                Test Sequence
-              </button>
-            </div>
-          </div>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-foreground">NSE Admin</span>
@@ -1464,9 +1444,18 @@ const handleDragEnd = (event: DragEndEvent) => {
       </header>
 
       <div className="flex flex-1">
-        {/* Repository Sidebar - Only show for Form view */}
-        {viewMode === "form" && (
-          <aside className="w-80 border-r border-border bg-card">
+        {/* Main Sidebar with Project Switcher and Menu */}
+        <FormsSidebar
+          projects={mockProjects}
+          selectedProjectId={selectedProjectId}
+          onProjectChange={setSelectedProjectId}
+          activeMenu={viewMode}
+          onMenuChange={(menu) => setViewMode(menu as ViewMode)}
+        />
+
+        {/* Repository Sidebar - Only show for Forms view */}
+        {viewMode === "forms" && (
+          <aside className="w-72 border-r border-border bg-card">
             <div className="p-4 border-b border-border">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-foreground">Repositories</span>
@@ -1575,8 +1564,8 @@ const handleDragEnd = (event: DragEndEvent) => {
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col">
-          {/* Form View Tabs - Only show for Form view */}
-          {viewMode === "form" && (
+          {/* Form View Tabs - Only show for Forms view */}
+          {viewMode === "forms" && (
             <div className="bg-muted/50 px-2 pt-2">
               <div className="flex gap-1">
                 <button
@@ -1625,11 +1614,11 @@ const handleDragEnd = (event: DragEndEvent) => {
 
           {/* Content Area */}
           <div className="flex-1 flex flex-col">
-            {viewMode === "form" ? renderTabContent() : renderTabContent()}
+            {renderTabContent()}
           </div>
 
-          {/* Pagination - Only for Form list views */}
-          {viewMode === "form" && activeTab !== "test-sequence" && (
+          {/* Pagination - Only for Forms list views */}
+          {viewMode === "forms" && activeTab !== "test-sequence" && (
             <div className="p-4 border-t border-border bg-card flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span>
