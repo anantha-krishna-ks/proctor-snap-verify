@@ -1,12 +1,11 @@
-import { NavLink, useLocation } from "react-router-dom";
 import {
   PlayCircle,
   ListOrdered,
   FileStack,
   GraduationCap,
-  Building2,
   ChevronDown,
   Check,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -15,7 +14,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 
 interface Project {
   id: string;
@@ -32,10 +30,10 @@ interface FormsSidebarProps {
 }
 
 const menuItems = [
-  { id: "forms", title: "Forms", icon: PlayCircle },
-  { id: "test-sequence", title: "Test Sequence", icon: ListOrdered },
-  { id: "blueprint", title: "Blueprint", icon: FileStack },
-  { id: "assessment", title: "Assessment", icon: GraduationCap },
+  { id: "forms", title: "Forms", icon: PlayCircle, description: "Question banks & forms" },
+  { id: "test-sequence", title: "Test Sequence", icon: ListOrdered, description: "Assessment workflows" },
+  { id: "blueprint", title: "Blueprint", icon: FileStack, description: "Test structure templates" },
+  { id: "assessment", title: "Assessment", icon: GraduationCap, description: "Schedule & manage" },
 ];
 
 export const FormsSidebar = ({
@@ -47,47 +45,91 @@ export const FormsSidebar = ({
 }: FormsSidebarProps) => {
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
+  // Get initials from project name
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+  };
+
   return (
-    <aside className="w-64 bg-card border-r border-border flex flex-col shrink-0">
-      {/* Project Switcher */}
-      <div className="p-4 border-b border-border">
+    <aside className="w-72 bg-gradient-to-b from-card to-card/95 border-r border-border flex flex-col shrink-0">
+      {/* Project Switcher - Elegant Design */}
+      <div className="p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-full h-auto py-3 px-3 justify-between gap-2"
-            >
-              <div className="flex items-center gap-3 text-left">
-                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
-                  <Building2 className="h-4 w-4 text-primary" />
+            <button className="w-full group relative overflow-hidden rounded-xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5 p-4 transition-all duration-300 hover:from-primary/10 hover:via-primary/15 hover:to-accent/10 hover:shadow-lg hover:shadow-primary/5 border border-border/50 hover:border-primary/20">
+              <div className="flex items-center gap-3">
+                {/* Project Avatar */}
+                <div className="relative">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md shadow-primary/20">
+                    <span className="text-primary-foreground font-bold text-sm">
+                      {selectedProject ? getInitials(selectedProject.name) : "?"}
+                    </span>
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-card" />
                 </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="font-medium text-foreground text-sm truncate">
+
+                {/* Project Info */}
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-0.5">
+                    Project
+                  </p>
+                  <p className="font-semibold text-foreground truncate leading-tight">
                     {selectedProject?.name || "Select Project"}
-                  </span>
-                  <span className="text-xs text-muted-foreground truncate">
-                    {selectedProject?.description || "Choose a project"}
-                  </span>
+                  </p>
                 </div>
+
+                {/* Chevron */}
+                <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
               </div>
-              <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
-            </Button>
+            </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-[240px] bg-popover">
+          <DropdownMenuContent 
+            align="start" 
+            className="w-[260px] bg-popover border border-border shadow-xl rounded-xl p-2"
+            sideOffset={8}
+          >
+            <div className="px-2 py-1.5 mb-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Switch Project
+              </p>
+            </div>
             {projects.map((project) => (
               <DropdownMenuItem
                 key={project.id}
                 onClick={() => onProjectChange(project.id)}
-                className="flex items-start gap-3 py-2"
+                className={cn(
+                  "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all",
+                  selectedProjectId === project.id 
+                    ? "bg-primary/10" 
+                    : "hover:bg-muted"
+                )}
               >
+                <div className={cn(
+                  "w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold transition-colors",
+                  selectedProjectId === project.id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                )}>
+                  {getInitials(project.name)}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <span className="font-medium block truncate">{project.name}</span>
-                  <span className="text-xs text-muted-foreground block truncate">
+                  <p className={cn(
+                    "font-medium truncate text-sm",
+                    selectedProjectId === project.id ? "text-primary" : "text-foreground"
+                  )}>
+                    {project.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
                     {project.description}
-                  </span>
+                  </p>
                 </div>
                 {selectedProjectId === project.id && (
-                  <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-primary shrink-0" />
                 )}
               </DropdownMenuItem>
             ))}
@@ -95,8 +137,13 @@ export const FormsSidebar = ({
         </DropdownMenu>
       </div>
 
+      {/* Divider */}
+      <div className="px-4">
+        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      </div>
+
       {/* Menu Items */}
-      <nav className="flex-1 p-2">
+      <nav className="flex-1 p-3">
         <div className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -107,19 +154,29 @@ export const FormsSidebar = ({
                 key={item.id}
                 onClick={() => onMenuChange(item.id)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200",
                   isActive
-                    ? "bg-primary/10 text-primary"
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <Icon
-                  className={cn(
-                    "h-5 w-5",
-                    isActive ? "text-primary" : "text-muted-foreground"
-                  )}
-                />
-                <span>{item.title}</span>
+                <div className={cn(
+                  "w-9 h-9 rounded-lg flex items-center justify-center transition-colors",
+                  isActive
+                    ? "bg-primary-foreground/20"
+                    : "bg-muted"
+                )}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="font-medium block">{item.title}</span>
+                  <span className={cn(
+                    "text-xs block truncate",
+                    isActive ? "text-primary-foreground/70" : "text-muted-foreground"
+                  )}>
+                    {item.description}
+                  </span>
+                </div>
               </button>
             );
           })}
@@ -127,10 +184,13 @@ export const FormsSidebar = ({
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border">
-        <p className="text-xs text-muted-foreground text-center">
-          Project-specific content
-        </p>
+      <div className="p-4 border-t border-border/50">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50">
+          <Sparkles className="h-4 w-4 text-amber-500" />
+          <span className="text-xs text-muted-foreground">
+            Project-specific content
+          </span>
+        </div>
       </div>
     </aside>
   );
