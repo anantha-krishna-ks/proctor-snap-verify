@@ -102,6 +102,7 @@ export const FormsSidebar = ({
       {/* Menu Items */}
       <nav className="flex-1 p-2">
         {/* Content Group */}
+        <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Content</p>
         <div className="space-y-0.5">
           {contentMenuItems.map((item, index) => {
             const Icon = item.icon;
@@ -133,7 +134,8 @@ export const FormsSidebar = ({
         {/* Separator */}
         <div className="my-3 mx-2 border-t border-border" />
 
-        {/* Assessment Group */}
+        {/* Settings Group */}
+        <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Settings</p>
         <div className="space-y-0.5">
           {settingsMenuItems.map((item, index) => {
             const Icon = item.icon;
