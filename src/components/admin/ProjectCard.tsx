@@ -110,24 +110,13 @@ export const ProjectCard = ({
     navigate(resolvedPath);
   };
 
-  const handleCardClick = () => {
-    // Priority order for roles when clicking the card
-    const rolePriority = ["marker", "proctor", "admin", "author", "test_author"];
-    const primaryRole = rolePriority.find(role => userRoles.includes(role)) || userRoles[0];
-    const config = ROLE_CONFIG[primaryRole];
-    if (config?.actions[0]) {
-      handleAction(config.actions[0].path);
-    }
-  };
-
   return (
     <Card 
-      className="overflow-hidden cursor-pointer transition-all duration-300 group hover:shadow-xl hover:-translate-y-1"
+      className="overflow-hidden transition-all duration-300 group hover:shadow-xl hover:-translate-y-1"
     >
       {/* Image Section */}
       <div 
         className="h-32 bg-muted flex items-center justify-center relative overflow-hidden"
-        onClick={handleCardClick}
       >
         {/* Gradient overlay for better text visibility */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
@@ -212,7 +201,7 @@ export const ProjectCard = ({
       </div>
 
       {/* Content Section */}
-      <CardContent className="p-3" onClick={handleCardClick}>
+      <CardContent className="p-3">
         <div className="mb-2">
           <p className="text-xs text-muted-foreground truncate">Code: {project.code}</p>
           <h3 className="font-semibold text-foreground truncate text-sm" title={project.name}>
