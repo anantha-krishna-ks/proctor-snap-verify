@@ -115,7 +115,7 @@ export const FormsDashboardContent = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-background">
+    <div className="flex-1 flex flex-col bg-background min-h-0 h-full">
       {/* Header */}
       <div className="px-6 py-5 border-b border-border bg-card">
         <div className="flex items-center justify-between mb-4">

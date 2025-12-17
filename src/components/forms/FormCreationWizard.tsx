@@ -699,7 +699,7 @@ export const FormCreationWizard = ({ onBack, onSave }: FormCreationWizardProps) 
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-background">
+    <div className="flex-1 flex flex-col bg-background min-h-0 h-full">
       {/* Header */}
       <div className="px-6 py-4 border-b border-border bg-card">
         <div className="flex items-center gap-4">
