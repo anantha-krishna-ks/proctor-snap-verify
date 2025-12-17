@@ -202,7 +202,7 @@ export const FormCreationWizard = ({ onBack, onSave }: FormCreationWizardProps) 
                     <SelectValue placeholder="Select grade" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover">
-                    <SelectItem value="">Not applicable</SelectItem>
+                    <SelectItem value="none">Not applicable</SelectItem>
                     {grades.map((grade) => (
                       <SelectItem key={grade} value={grade}>
                         {grade}
