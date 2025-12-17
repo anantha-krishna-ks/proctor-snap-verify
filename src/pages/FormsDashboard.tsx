@@ -38,6 +38,7 @@ import {
   Pencil,
   Clock,
   ArrowLeft,
+  ListOrdered,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -109,6 +110,46 @@ interface TestSequenceStep {
   agreementText?: string;
 }
 
+// Mock test sequences data
+const mockTestSequences = [
+  {
+    id: "seq1",
+    name: "Complete Assessment Sequence",
+    steps: 5,
+    forms: 3,
+    surveys: 1,
+    createdAt: "2024-01-15",
+    status: "active",
+  },
+  {
+    id: "seq2",
+    name: "Basic Proctoring Flow",
+    steps: 3,
+    forms: 2,
+    surveys: 0,
+    createdAt: "2024-02-20",
+    status: "active",
+  },
+  {
+    id: "seq3",
+    name: "Advanced Test Series",
+    steps: 7,
+    forms: 5,
+    surveys: 2,
+    createdAt: "2024-03-01",
+    status: "draft",
+  },
+  {
+    id: "seq4",
+    name: "Quick Evaluation Pack",
+    steps: 2,
+    forms: 1,
+    surveys: 1,
+    createdAt: "2024-03-10",
+    status: "active",
+  },
+];
+
 const FormsDashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -122,6 +163,7 @@ const FormsDashboard = () => {
   const [expandedRepos, setExpandedRepos] = useState<string[]>([initialMockRepositories[0]?.id || ""]);
   const [rowsPerPage, setRowsPerPage] = useState("25");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isCreatingSequence, setIsCreatingSequence] = useState(false);
   
   // Repository dialog state
   const [createRepoDialogOpen, setCreateRepoDialogOpen] = useState(false);
@@ -872,81 +914,223 @@ const handleDragEnd = (event: DragEndEvent) => {
         );
 
       case "test-sequence":
+        // Filter sequences by search
+        const filteredSequences = mockTestSequences.filter((seq) =>
+          seq.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        if (isCreatingSequence) {
+          return (
+            <div className="flex-1 flex flex-col">
+              {/* Toolbar */}
+              <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setIsCreatingSequence(false)}
+                    className="gap-1"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                  <h2 className="text-lg font-semibold text-foreground">Test Sequence Builder</h2>
+                  <Badge variant="secondary" className="text-xs">
+                    {testSequenceSteps.length} steps
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button className="bg-primary hover:bg-primary/90">
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add Step
+                        <ChevronDown className="h-4 w-4 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-popover">
+                      <DropdownMenuItem onClick={() => addStep("form")}>
+                        <PlayCircle className="h-4 w-4 mr-2" />
+                        Form
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => addStep("survey")}>
+                        <ClipboardList className="h-4 w-4 mr-2" />
+                        Survey
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => addStep("agreement")}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Agreement
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button variant="outline" onClick={() => {
+                    toast.success("Sequence saved successfully");
+                    setIsCreatingSequence(false);
+                  }}>Save Sequence</Button>
+                </div>
+              </div>
+
+              {/* Steps List */}
+              <div className="flex-1 overflow-auto p-4">
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={testSequenceSteps.map((step) => step.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-3 max-w-4xl mx-auto">
+                      {testSequenceSteps.map((step) => (
+                        <SortableStepCard
+                          key={step.id}
+                          step={step}
+                          isExpanded={expandedSteps.includes(step.id)}
+                          onToggleExpand={toggleStepExpand}
+                          onRemoveStep={removeStep}
+                          onUpdateSystemCheckConfig={updateSystemCheckConfig}
+                          onUpdateFormIds={updateFormIds}
+                          onUpdateFormSelectionMode={updateFormSelectionMode}
+                          forms={mockForms}
+                          surveys={mockSurveys}
+                        />
+                      ))}
+
+                      {testSequenceSteps.length === 0 && (
+                        <div className="text-center py-12">
+                          <Monitor className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-foreground mb-2">No steps configured</h3>
+                          <p className="text-muted-foreground mb-4">Add steps to build your test sequence</p>
+                        </div>
+                      )}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              </div>
+            </div>
+          );
+        }
+
+        // List view (default)
         return (
           <div className="flex-1 flex flex-col">
             {/* Toolbar */}
             <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <h2 className="text-lg font-semibold text-foreground">Test Sequence Builder</h2>
+                <ListOrdered className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">Test Sequences</h2>
                 <Badge variant="secondary" className="text-xs">
-                  {testSequenceSteps.length} steps
+                  {mockTestSequences.length} total
                 </Badge>
               </div>
-              <div className="flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="bg-primary hover:bg-primary/90">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Step
-                      <ChevronDown className="h-4 w-4 ml-1" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-popover">
-                    <DropdownMenuItem onClick={() => addStep("form")}>
-                      <PlayCircle className="h-4 w-4 mr-2" />
-                      Form
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addStep("survey")}>
-                      <ClipboardList className="h-4 w-4 mr-2" />
-                      Survey
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => addStep("agreement")}>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Agreement
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Button variant="outline">Save Sequence</Button>
+              <div className="flex items-center gap-3">
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search sequences..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 bg-background"
+                  />
+                </div>
+                <Button 
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => setIsCreatingSequence(true)}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Create Sequence
+                </Button>
               </div>
             </div>
 
-            {/* Steps List */}
-            <div className="flex-1 overflow-auto p-4">
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={testSequenceSteps.map((step) => step.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-3 max-w-4xl mx-auto">
-                    {testSequenceSteps.map((step) => (
-                      <SortableStepCard
-                        key={step.id}
-                        step={step}
-                        isExpanded={expandedSteps.includes(step.id)}
-                        onToggleExpand={toggleStepExpand}
-                        onRemoveStep={removeStep}
-                        onUpdateSystemCheckConfig={updateSystemCheckConfig}
-                        onUpdateFormIds={updateFormIds}
-                        onUpdateFormSelectionMode={updateFormSelectionMode}
-                        forms={mockForms}
-                        surveys={mockSurveys}
-                      />
-                    ))}
-
-                    {testSequenceSteps.length === 0 && (
-                      <div className="text-center py-12">
-                        <Monitor className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-foreground mb-2">No steps configured</h3>
-                        <p className="text-muted-foreground mb-4">Add steps to build your test sequence</p>
-                      </div>
-                    )}
-                  </div>
-                </SortableContext>
-              </DndContext>
+            {/* Sequences Table */}
+            <div className="flex-1 overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/30 hover:bg-muted/30 border-b border-border">
+                    <TableHead className="w-12">
+                      <Checkbox />
+                    </TableHead>
+                    <TableHead className="font-semibold text-foreground">SEQUENCE NAME</TableHead>
+                    <TableHead className="text-center font-semibold text-foreground">STEPS</TableHead>
+                    <TableHead className="text-center font-semibold text-foreground">FORMS</TableHead>
+                    <TableHead className="text-center font-semibold text-foreground">SURVEYS</TableHead>
+                    <TableHead className="font-semibold text-foreground">CREATED</TableHead>
+                    <TableHead className="font-semibold text-foreground">STATUS</TableHead>
+                    <TableHead className="w-12"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredSequences.map((sequence) => (
+                    <TableRow
+                      key={sequence.id}
+                      className="hover:bg-muted/50 cursor-pointer transition-colors border-b border-border"
+                    >
+                      <TableCell>
+                        <Checkbox />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <ListOrdered className="h-4 w-4 text-primary" />
+                          <span className="font-medium text-foreground">{sequence.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center text-foreground">{sequence.steps}</TableCell>
+                      <TableCell className="text-center text-foreground">{sequence.forms}</TableCell>
+                      <TableCell className="text-center text-foreground">{sequence.surveys}</TableCell>
+                      <TableCell className="text-foreground">{sequence.createdAt}</TableCell>
+                      <TableCell>
+                        <Badge variant={sequence.status === "active" ? "default" : "secondary"}>
+                          {sequence.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-popover">
+                            <DropdownMenuItem onClick={() => setIsCreatingSequence(true)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setIsCreatingSequence(true)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive">
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {filteredSequences.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-2">
+                          <ListOrdered className="h-8 w-8 text-muted-foreground/50" />
+                          <p className="text-muted-foreground">No test sequences found</p>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setIsCreatingSequence(true)} 
+                            className="mt-2"
+                          >
+                            Create your first sequence
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
           </div>
         );
