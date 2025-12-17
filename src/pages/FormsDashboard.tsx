@@ -175,14 +175,17 @@ const FormsDashboard = () => {
   ];
   const [testSequenceSteps, setTestSequenceSteps] = useState<TestSequenceStep[]>(defaultSteps);
   const [expandedSteps, setExpandedSteps] = useState<string[]>(["1", "2"]);
+  const [sequenceName, setSequenceName] = useState("");
 
   // Function to handle editing a sequence
   const handleEditSequence = (sequenceId: string) => {
     const sequenceSteps = mockTestSequencesData[sequenceId];
-    if (sequenceSteps) {
+    const sequence = mockTestSequences.find(s => s.id === sequenceId);
+    if (sequenceSteps && sequence) {
       setTestSequenceSteps(sequenceSteps);
       setExpandedSteps(sequenceSteps.map(s => s.id));
       setEditingSequenceId(sequenceId);
+      setSequenceName(sequence.name);
       setIsCreatingSequence(true);
     }
   };
@@ -192,6 +195,7 @@ const FormsDashboard = () => {
     setTestSequenceSteps(defaultSteps);
     setExpandedSteps(["1", "2"]);
     setEditingSequenceId(null);
+    setSequenceName("");
     setIsCreatingSequence(true);
   };
 
@@ -201,6 +205,7 @@ const FormsDashboard = () => {
     setEditingSequenceId(null);
     setTestSequenceSteps(defaultSteps);
     setExpandedSteps(["1", "2"]);
+    setSequenceName("");
   };
 
 // Agreement State
@@ -942,10 +947,7 @@ const handleDragEnd = (event: DragEndEvent) => {
                     Back
                   </Button>
                   <h2 className="text-lg font-semibold text-foreground">
-                    {editingSequenceId 
-                      ? `Edit: ${mockTestSequences.find(s => s.id === editingSequenceId)?.name}`
-                      : "Create New Sequence"
-                    }
+                    {editingSequenceId ? "Edit Sequence" : "Create New Sequence"}
                   </h2>
                   <Badge variant="secondary" className="text-xs">
                     {testSequenceSteps.length} steps
@@ -975,10 +977,36 @@ const handleDragEnd = (event: DragEndEvent) => {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <Button variant="outline" onClick={() => {
-                    toast.success(editingSequenceId ? "Sequence updated successfully" : "Sequence saved successfully");
-                    handleBackToList();
-                  }}>Save Sequence</Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      if (!sequenceName.trim()) {
+                        toast.error("Please enter a sequence name");
+                        return;
+                      }
+                      toast.success(editingSequenceId ? "Sequence updated successfully" : "Sequence saved successfully");
+                      handleBackToList();
+                    }}
+                  >
+                    Save Sequence
+                  </Button>
+                </div>
+              </div>
+
+              {/* Sequence Name Input */}
+              <div className="p-4 border-b border-border bg-muted/30">
+                <div className="max-w-4xl mx-auto">
+                  <Label htmlFor="sequence-name" className="text-sm font-medium mb-2 block">
+                    Sequence Name <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="sequence-name"
+                    placeholder="Enter sequence name..."
+                    value={sequenceName}
+                    onChange={(e) => setSequenceName(e.target.value)}
+                    className="max-w-md bg-background"
+                    maxLength={100}
+                  />
                 </div>
               </div>
 
