@@ -85,6 +85,7 @@ const ScheduleDashboard = () => {
           onProjectChange={setSelectedProjectId}
           activeMenu="schedule"
           onMenuChange={handleMenuChange}
+          hideSettings
         />
 
         {/* Main Content */}
