@@ -16,6 +16,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Search, Users, UserPlus, X, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+
+const listItemVariants = {
+  initial: { opacity: 0, x: -20, height: 0 },
+  animate: { opacity: 1, x: 0, height: "auto" },
+  exit: { opacity: 0, x: 20, height: 0 },
+};
 
 interface User {
   id: string;
@@ -307,40 +314,48 @@ export const ScheduleUserMappingDialog = ({
                 </div>
                 <ScrollArea className="h-[300px] border rounded-md">
                   <div className="p-2 space-y-1">
-                    {filteredMappedUsers.map((user) => (
-                      <div
-                        key={user.id}
-                        className={`flex items-center gap-3 p-3 rounded-md transition-colors ${
-                          selectedMappedUsers.includes(user.id)
-                            ? "bg-primary/10 border border-primary/20"
-                            : "hover:bg-muted"
-                        }`}
-                      >
-                        <Checkbox
-                          checked={selectedMappedUsers.includes(user.id)}
-                          onCheckedChange={() => handleToggleMappedUser(user.id)}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{user.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {user.email}
-                          </p>
-                        </div>
-                        {user.addedVia === "group" && user.groupName && (
-                          <Badge variant="outline" className="text-xs">
-                            {user.groupName}
-                          </Badge>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => handleRemoveUser(user.id)}
+                    <AnimatePresence mode="popLayout">
+                      {filteredMappedUsers.map((user) => (
+                        <motion.div
+                          key={user.id}
+                          variants={listItemVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                          layout
+                          className={`flex items-center gap-3 p-3 rounded-md transition-colors ${
+                            selectedMappedUsers.includes(user.id)
+                              ? "bg-primary/10 border border-primary/20"
+                              : "hover:bg-muted"
+                          }`}
                         >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                          <Checkbox
+                            checked={selectedMappedUsers.includes(user.id)}
+                            onCheckedChange={() => handleToggleMappedUser(user.id)}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm">{user.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {user.email}
+                            </p>
+                          </div>
+                          {user.addedVia === "group" && user.groupName && (
+                            <Badge variant="outline" className="text-xs">
+                              {user.groupName}
+                            </Badge>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => handleRemoveUser(user.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                     {filteredMappedUsers.length === 0 && (
                       <div className="text-center py-8 text-muted-foreground">
                         No users found matching your search
@@ -372,28 +387,36 @@ export const ScheduleUserMappingDialog = ({
                 </div>
                 <ScrollArea className="h-[250px] border rounded-md">
                   <div className="p-2 space-y-1">
-                    {filteredUnmappedUsers.map((user) => (
-                      <div
-                        key={user.id}
-                        className={`flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors ${
-                          selectedUsersToAdd.includes(user.id)
-                            ? "bg-primary/10 border border-primary/20"
-                            : "hover:bg-muted"
-                        }`}
-                        onClick={() => handleToggleUserToAdd(user.id)}
-                      >
-                        <Checkbox
-                          checked={selectedUsersToAdd.includes(user.id)}
-                          onCheckedChange={() => handleToggleUserToAdd(user.id)}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{user.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {user.email}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                    <AnimatePresence mode="popLayout">
+                      {filteredUnmappedUsers.map((user) => (
+                        <motion.div
+                          key={user.id}
+                          variants={listItemVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                          layout
+                          className={`flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors ${
+                            selectedUsersToAdd.includes(user.id)
+                              ? "bg-primary/10 border border-primary/20"
+                              : "hover:bg-muted"
+                          }`}
+                          onClick={() => handleToggleUserToAdd(user.id)}
+                        >
+                          <Checkbox
+                            checked={selectedUsersToAdd.includes(user.id)}
+                            onCheckedChange={() => handleToggleUserToAdd(user.id)}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm">{user.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {user.email}
+                            </p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                     {filteredUnmappedUsers.length === 0 && (
                       <div className="text-center py-8 text-muted-foreground">
                         All available users are already mapped
@@ -411,34 +434,42 @@ export const ScheduleUserMappingDialog = ({
                 </div>
                 <ScrollArea className="h-[250px] border rounded-md">
                   <div className="p-2 space-y-2">
-                    {filteredGroups.map((group) => (
-                      <div
-                        key={group.id}
-                        className={`flex items-start gap-3 p-3 rounded-md cursor-pointer transition-colors ${
-                          selectedGroupsToAdd.includes(group.id)
-                            ? "bg-primary/10 border border-primary/20"
-                            : "hover:bg-muted border border-transparent"
-                        }`}
-                        onClick={() => handleToggleGroupToAdd(group.id)}
-                      >
-                        <Checkbox
-                          checked={selectedGroupsToAdd.includes(group.id)}
-                          onCheckedChange={() => handleToggleGroupToAdd(group.id)}
-                          className="mt-1"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm">{group.name}</p>
-                            <Badge variant="outline" className="text-xs">
-                              {group.userCount} users
-                            </Badge>
+                    <AnimatePresence mode="popLayout">
+                      {filteredGroups.map((group) => (
+                        <motion.div
+                          key={group.id}
+                          variants={listItemVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                          transition={{ duration: 0.2, ease: "easeOut" }}
+                          layout
+                          className={`flex items-start gap-3 p-3 rounded-md cursor-pointer transition-colors ${
+                            selectedGroupsToAdd.includes(group.id)
+                              ? "bg-primary/10 border border-primary/20"
+                              : "hover:bg-muted border border-transparent"
+                          }`}
+                          onClick={() => handleToggleGroupToAdd(group.id)}
+                        >
+                          <Checkbox
+                            checked={selectedGroupsToAdd.includes(group.id)}
+                            onCheckedChange={() => handleToggleGroupToAdd(group.id)}
+                            className="mt-1"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-sm">{group.name}</p>
+                              <Badge variant="outline" className="text-xs">
+                                {group.userCount} users
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {group.description}
+                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {group.description}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                     {filteredGroups.length === 0 && (
                       <div className="text-center py-8 text-muted-foreground">
                         No groups found
