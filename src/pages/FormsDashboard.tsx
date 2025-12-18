@@ -41,6 +41,7 @@ import {
   ListOrdered,
   FileStack,
   GraduationCap,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -897,6 +898,10 @@ const handleDragEnd = (event: DragEndEvent) => {
                           <DropdownMenuItem>Edit</DropdownMenuItem>
                           <DropdownMenuItem>Duplicate</DropdownMenuItem>
                           <DropdownMenuItem>Preview</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => navigate("/scheduling")}>
+                            <Calendar className="h-4 w-4 mr-2" />
+                            Schedule
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
                         </DropdownMenuContent>
