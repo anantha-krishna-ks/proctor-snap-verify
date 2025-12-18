@@ -1406,7 +1406,13 @@ const handleDragEnd = (event: DragEndEvent) => {
           selectedProjectId={selectedProjectId}
           onProjectChange={setSelectedProjectId}
           activeMenu={viewMode}
-          onMenuChange={(menu) => setViewMode(menu as ViewMode)}
+          onMenuChange={(menu) => {
+            if (menu === "schedule") {
+              navigate("/scheduling");
+              return;
+            }
+            setViewMode(menu as ViewMode);
+          }}
         />
 
         {/* Main Content */}
