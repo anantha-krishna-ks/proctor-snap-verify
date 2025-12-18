@@ -126,6 +126,9 @@ export const FormsSidebar = ({
 
         {/* Project Switcher */}
         <div className="p-3 border-b border-border">
+          {!isCollapsed && (
+            <p className="px-3 pb-1 text-xs font-medium text-muted-foreground">Product</p>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <motion.button 
