@@ -27,6 +27,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { UserMappingDialog } from "@/components/UserMappingDialog";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Clock, Save, Users } from "lucide-react";
@@ -57,6 +58,7 @@ const CreateSchedule = () => {
   const [testDate, setTestDate] = useState<Date>();
   const [testTime, setTestTime] = useState("10:00");
   const [duration, setDuration] = useState("60");
+  const [showUserMapping, setShowUserMapping] = useState(false);
 
   const availableItems = scheduleType === "form" ? mockForms : mockSequences;
 
@@ -68,7 +70,17 @@ const CreateSchedule = () => {
       return;
     }
 
-    toast.success("Schedule created successfully! You can now map candidates.");
+    toast.success("Schedule created successfully!");
+    setShowUserMapping(true);
+  };
+
+  const handleMappingComplete = () => {
+    setShowUserMapping(false);
+    navigate("/scheduling");
+  };
+
+  const handleMappingClose = () => {
+    setShowUserMapping(false);
     navigate("/scheduling");
   };
 
@@ -375,6 +387,14 @@ const CreateSchedule = () => {
           </a>
         </div>
       </main>
+
+      {/* User Mapping Dialog */}
+      <UserMappingDialog
+        open={showUserMapping}
+        onClose={handleMappingClose}
+        onConfirm={handleMappingComplete}
+        scheduleName={scheduleName}
+      />
     </div>
   );
 };
