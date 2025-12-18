@@ -1,12 +1,12 @@
 import { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -224,19 +224,19 @@ export const ScheduleUserMappingDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+    <Sheet open={open} onOpenChange={onClose}>
+      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             Manage Users - {scheduleName}
-          </DialogTitle>
-          <DialogDescription>
+          </SheetTitle>
+          <SheetDescription>
             View, add or remove users mapped to this schedule
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "mapped" | "add")}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "mapped" | "add")} className="mt-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="mapped" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -482,12 +482,12 @@ export const ScheduleUserMappingDialog = ({
           </TabsContent>
         </Tabs>
 
-        <DialogFooter>
+        <SheetFooter className="mt-6">
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
