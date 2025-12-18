@@ -10,6 +10,7 @@ export interface Schedule {
   attempted: number;
   notAttempted: number;
   pendingApprovals: number;
+  sourceType: "form" | "sequence";
   assignedMarkers?: Array<{
     markerId: string;
     markerName: string;
