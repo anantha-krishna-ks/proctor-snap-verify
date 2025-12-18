@@ -11,13 +11,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, AlertCircle, UserCheck, BarChart3 } from "lucide-react";
+import { ChevronDown, ChevronRight, Edit2, Trash2, Users, Clock, Calendar, AlertCircle, UserCheck, BarChart3, UserCog } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 import { MarkerAssignmentsSlider } from "@/components/MarkerAssignmentsSlider";
 import { MarkerProgressSlider } from "@/components/MarkerProgressDialog";
+import { ScheduleUserMappingDialog, MappedUser } from "@/components/ScheduleUserMappingDialog";
 import { candidates } from "@/data/mockData";
+
+// Mock mapped users data for demo
+const mockMappedUsers: Record<string, MappedUser[]> = {
+  "SCH-001": [
+    { id: "u1", name: "John Smith", email: "john.smith@example.com", addedVia: "direct" },
+    { id: "u2", name: "Sarah Johnson", email: "sarah.j@example.com", addedVia: "group", groupName: "Batch 2024 - Section A" },
+    { id: "u3", name: "Michael Brown", email: "m.brown@example.com", addedVia: "group", groupName: "Batch 2024 - Section A" },
+  ],
+  "SCH-002": [
+    { id: "u4", name: "Emily Davis", email: "emily.d@example.com", addedVia: "direct" },
+    { id: "u5", name: "James Wilson", email: "j.wilson@example.com", addedVia: "direct" },
+  ],
+};
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -32,6 +46,10 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
     schedule: Schedule;
   } | null>(null);
   const [progressDialog, setProgressDialog] = useState<{
+    open: boolean;
+    schedule: Schedule;
+  } | null>(null);
+  const [userMappingDialog, setUserMappingDialog] = useState<{
     open: boolean;
     schedule: Schedule;
   } | null>(null);
@@ -301,6 +319,24 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
                           variant="outline"
                           size="sm"
                           onClick={() =>
+                            setUserMappingDialog({
+                              open: true,
+                              schedule: schedule,
+                            })
+                          }
+                        >
+                          <UserCog className="w-4 h-4 mr-2" />
+                          Manage Users
+                          {mockMappedUsers[schedule.id] && (
+                            <Badge variant="secondary" className="ml-2">
+                              {mockMappedUsers[schedule.id].length}
+                            </Badge>
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
                             setAssignmentsSlider({
                               open: true,
                               schedule: schedule,
@@ -369,6 +405,16 @@ export const ScheduleTable = ({ schedules }: ScheduleTableProps) => {
           />
         );
       })()}
+
+      {userMappingDialog && (
+        <ScheduleUserMappingDialog
+          open={userMappingDialog.open}
+          onClose={() => setUserMappingDialog(null)}
+          scheduleName={userMappingDialog.schedule.scheduleName}
+          scheduleId={userMappingDialog.schedule.id}
+          initialMappedUsers={mockMappedUsers[userMappingDialog.schedule.id] || []}
+        />
+      )}
     </div>
   );
 };
