@@ -2,12 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { schedules } from "@/data/mockData";
 import { ScheduleTable } from "@/components/ScheduleTable";
-import { Pagination } from "@/components/Pagination";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Calendar, ArrowLeft, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FormsSidebar } from "@/components/FormsSidebar";
+import { ScheduleSidebar } from "@/components/ScheduleSidebar";
 
 // Mock projects data
 const mockProjects = [
@@ -20,16 +19,21 @@ const mockProjects = [
 const ScheduleDashboard = () => {
   const navigate = useNavigate();
   const [selectedProjectId, setSelectedProjectId] = useState(mockProjects[0]?.id || "");
+  const [activeFilter, setActiveFilter] = useState("forms");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
   const [rowsPerPage, setRowsPerPage] = useState("25");
 
+  // Filter schedules by source type and search query
   const filteredSchedules = schedules.filter((schedule) => {
+    const matchesSourceType = activeFilter === "forms" 
+      ? schedule.sourceType === "form" 
+      : schedule.sourceType === "sequence";
     const matchesSearch = schedule.scheduleName
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-    return matchesSearch;
+    return matchesSourceType && matchesSearch;
   });
 
   const totalPages = Math.ceil(filteredSchedules.length / itemsPerPage);
@@ -38,11 +42,13 @@ const ScheduleDashboard = () => {
     currentPage * itemsPerPage
   );
 
-  const handleMenuChange = (menu: string) => {
-    // Navigate to forms dashboard for other menu items
-    if (menu !== "schedule") {
-      navigate(`/forms`);
-    }
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
+  const getFilterLabel = () => {
+    return activeFilter === "forms" ? "Form Schedules" : "Test Sequence Schedules";
   };
 
   return (
@@ -78,14 +84,13 @@ const ScheduleDashboard = () => {
       </header>
 
       <div className="flex flex-1">
-        {/* Main Sidebar with Project Switcher and Menu */}
-        <FormsSidebar
+        {/* Schedule Sidebar with Filters */}
+        <ScheduleSidebar
           projects={mockProjects}
           selectedProjectId={selectedProjectId}
           onProjectChange={setSelectedProjectId}
-          activeMenu="schedule"
-          onMenuChange={handleMenuChange}
-          hideSettings
+          activeFilter={activeFilter}
+          onFilterChange={handleFilterChange}
         />
 
         {/* Main Content */}
@@ -94,7 +99,7 @@ const ScheduleDashboard = () => {
           <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Calendar className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Schedules</h2>
+              <h2 className="text-lg font-semibold text-foreground">{getFilterLabel()}</h2>
             </div>
             <div className="flex items-center gap-3">
               <div className="relative w-64">
@@ -122,7 +127,10 @@ const ScheduleDashboard = () => {
           <div className="p-4 border-t border-border bg-card flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>
-                {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredSchedules.length)} of {filteredSchedules.length}
+                {filteredSchedules.length > 0 
+                  ? `${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, filteredSchedules.length)} of ${filteredSchedules.length}`
+                  : "0 of 0"
+                }
               </span>
               <span className="ml-4">Rows per page:</span>
               <Select 

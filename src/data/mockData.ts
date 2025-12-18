@@ -13,6 +13,7 @@ export const schedules: Schedule[] = [
     attempted: 32,
     notAttempted: 13,
     pendingApprovals: 8,
+    sourceType: "form",
     assignedMarkers: [
       { markerId: "m1", markerName: "Dr. Sarah Wilson", assignedCandidates: 15 },
       { markerId: "m2", markerName: "Prof. Michael Brown", assignedCandidates: 17 },
@@ -30,6 +31,7 @@ export const schedules: Schedule[] = [
     attempted: 25,
     notAttempted: 3,
     pendingApprovals: 12,
+    sourceType: "sequence",
     assignedMarkers: [
       { markerId: "m3", markerName: "Dr. Emily Chen", assignedCandidates: 25 },
     ],
@@ -46,6 +48,7 @@ export const schedules: Schedule[] = [
     attempted: 0,
     notAttempted: 15,
     pendingApprovals: 0,
+    sourceType: "form",
   },
   {
     id: "4",
@@ -59,6 +62,7 @@ export const schedules: Schedule[] = [
     attempted: 30,
     notAttempted: 5,
     pendingApprovals: 5,
+    sourceType: "sequence",
   },
 ];
 
