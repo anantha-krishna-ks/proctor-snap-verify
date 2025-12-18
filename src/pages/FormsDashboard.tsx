@@ -1370,7 +1370,7 @@ const handleDragEnd = (event: DragEndEvent) => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/admin")}
             className="h-8 w-8"
             title="Go back"
           >
