@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { AdminHeader } from "@/components/admin/AdminHeader";
+import { useNavigate, Link } from "react-router-dom";
+import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,9 +19,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { ArrowLeft, CalendarIcon, Clock, Save, Users } from "lucide-react";
+import { CalendarIcon, Clock, Save, Users } from "lucide-react";
 import { toast } from "sonner";
 
 // Mock data for forms and sequences
@@ -39,6 +47,7 @@ const mockSequences = [
 
 const CreateSchedule = () => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
   const [scheduleName, setScheduleName] = useState("");
   const [description, setDescription] = useState("");
   const [scheduleType, setScheduleType] = useState<"form" | "sequence">("form");
@@ -59,24 +68,40 @@ const CreateSchedule = () => {
       return;
     }
 
-    // Here you would typically save to backend
     toast.success("Schedule created successfully! You can now map candidates.");
     navigate("/scheduling");
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminHeader />
-      
-      <main className="container mx-auto px-6 py-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/scheduling")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Create Schedule</h1>
-            <p className="text-muted-foreground">Schedule a form or test sequence for candidates</p>
-          </div>
+    <div className="min-h-screen bg-background flex flex-col">
+      <DashboardHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+
+      <main className="flex-1 p-6">
+        {/* Breadcrumb */}
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/admin">Admin</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/scheduling">Scheduling</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Create Schedule</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        {/* Page Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold text-foreground">Create Schedule</h1>
+          <p className="text-muted-foreground">Schedule a form or test sequence for candidates</p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -337,8 +362,17 @@ const CreateSchedule = () => {
           </div>
         </form>
 
-        <div className="mt-6 text-center text-xs text-muted-foreground">
-          Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd
+        {/* Footer */}
+        <div className="mt-8 text-center text-xs text-muted-foreground">
+          Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd{" "}
+          <a
+            href="https://www.excelsoftcorp.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            https://www.excelsoftcorp.com
+          </a>
         </div>
       </main>
     </div>
