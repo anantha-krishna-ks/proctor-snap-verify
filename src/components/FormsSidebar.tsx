@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Settings,
   FileSignature,
+  Calendar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -46,6 +47,7 @@ const contentMenuItems = [
   { id: "forms", title: "Form", icon: PlayCircle },
   { id: "assessment", title: "Assessment", icon: GraduationCap },
   { id: "test-sequence", title: "Test Sequence", icon: ListOrdered },
+  { id: "schedule", title: "Schedule", icon: Calendar },
 ];
 
 const settingsMenuItems = [

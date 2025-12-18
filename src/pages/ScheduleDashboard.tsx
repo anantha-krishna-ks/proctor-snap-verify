@@ -1,72 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { schedules } from "@/data/mockData";
-import { ScheduleHeader } from "@/components/ScheduleHeader";
 import { ScheduleTable } from "@/components/ScheduleTable";
 import { Pagination } from "@/components/Pagination";
-import { AdminHeader } from "@/components/admin/AdminHeader";
-import { usePrivileges } from "@/hooks/usePrivileges";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Calendar, FileText, ListOrdered, MoreVertical, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Search, Calendar, ArrowLeft, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FormsSidebar } from "@/components/FormsSidebar";
 
-// Mock test sequences data
-const mockTestSequences = [
-  {
-    id: "seq1",
-    name: "Complete Assessment Sequence",
-    steps: 5,
-    forms: 3,
-    surveys: 1,
-    createdAt: "2024-01-15",
-    status: "active",
-  },
-  {
-    id: "seq2",
-    name: "Basic Proctoring Flow",
-    steps: 3,
-    forms: 2,
-    surveys: 0,
-    createdAt: "2024-02-20",
-    status: "active",
-  },
-  {
-    id: "seq3",
-    name: "Advanced Test Series",
-    steps: 7,
-    forms: 5,
-    surveys: 2,
-    createdAt: "2024-03-01",
-    status: "draft",
-  },
-  {
-    id: "seq4",
-    name: "Quick Evaluation Pack",
-    steps: 2,
-    forms: 1,
-    surveys: 1,
-    createdAt: "2024-03-10",
-    status: "active",
-  },
+// Mock projects data
+const mockProjects = [
+  { id: "proj-1", name: "NSE Certification 2025", description: "National certification exams" },
+  { id: "proj-2", name: "Corporate Training Q1", description: "Employee skill assessments" },
+  { id: "proj-3", name: "University Entrance Exams", description: "Undergraduate admissions" },
+  { id: "proj-4", name: "Professional License Tests", description: "Industry certifications" },
 ];
 
 const ScheduleDashboard = () => {
   const navigate = useNavigate();
-  const { hasPrivilege } = usePrivileges();
-  const [selectedAssessment, setSelectedAssessment] = useState("easy-proctor");
+  const [selectedProjectId, setSelectedProjectId] = useState(mockProjects[0]?.id || "");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(25);
-  const [activeTab, setActiveTab] = useState("assessments");
+  const [rowsPerPage, setRowsPerPage] = useState("25");
 
   const filteredSchedules = schedules.filter((schedule) => {
     const matchesSearch = schedule.scheduleName
@@ -81,165 +38,167 @@ const ScheduleDashboard = () => {
     currentPage * itemsPerPage
   );
 
-  // Filter test sequences by search
-  const filteredSequences = mockTestSequences.filter((seq) =>
-    seq.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Handle tab change - navigate to /forms for Forms tab
-  const handleTabChange = (value: string) => {
-    if (value === "forms") {
-      navigate("/forms");
-      return;
+  const handleMenuChange = (menu: string) => {
+    // Navigate to forms dashboard for other menu items
+    if (menu !== "schedule") {
+      navigate(`/forms`);
     }
-    setActiveTab(value);
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {hasPrivilege("dashboard.admin") ? (
-        <AdminHeader />
-      ) : (
-        <ScheduleHeader
-          selectedAssessment={selectedAssessment}
-          onAssessmentChange={setSelectedAssessment}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
-      )}
-
-      <main className="container mx-auto px-6 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Schedule Management</h1>
-          <Button onClick={() => navigate("/scheduling/create")} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Create Schedule
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/admin")}
+            className="h-8 w-8"
+            title="Go back"
+          >
+            <ArrowLeft className="h-4 w-4" />
           </Button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">S</span>
+            </div>
+            <div>
+              <span className="font-semibold text-foreground">Saras</span>
+              <span className="text-[10px] text-muted-foreground block -mt-1">TEST & ASSESSMENT</span>
+            </div>
+          </div>
         </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-foreground">NSE Admin</span>
+          <div className="w-8 h-8 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
+            <span className="text-primary text-sm font-medium">NA</span>
+          </div>
+        </div>
+      </header>
 
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <div className="flex items-center justify-between mb-4">
-            <TabsList className="grid w-auto grid-cols-3">
-              <TabsTrigger value="assessments" className="gap-2">
-                <Calendar className="h-4 w-4" />
-                Assessments
-              </TabsTrigger>
-              <TabsTrigger value="forms" className="gap-2">
-                <FileText className="h-4 w-4" />
-                Forms
-              </TabsTrigger>
-              <TabsTrigger value="test-sequence" className="gap-2">
-                <ListOrdered className="h-4 w-4" />
-                Test Sequence
-              </TabsTrigger>
-            </TabsList>
-            
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+      <div className="flex flex-1">
+        {/* Main Sidebar with Project Switcher and Menu */}
+        <FormsSidebar
+          projects={mockProjects}
+          selectedProjectId={selectedProjectId}
+          onProjectChange={setSelectedProjectId}
+          activeMenu="schedule"
+          onMenuChange={handleMenuChange}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1 flex flex-col">
+          {/* Toolbar */}
+          <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Schedules</h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search schedules..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-background"
+                />
+              </div>
+              <Button onClick={() => navigate("/scheduling/create")} className="bg-primary hover:bg-primary/90">
+                <Plus className="h-4 w-4 mr-1" />
+                Create Schedule
+              </Button>
             </div>
           </div>
 
-          <TabsContent value="assessments" className="mt-0">
+          {/* Content Area */}
+          <div className="flex-1 overflow-auto">
             <ScheduleTable schedules={paginatedSchedules} />
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={filteredSchedules.length}
-              itemsPerPage={itemsPerPage}
-              onPageChange={setCurrentPage}
-              onItemsPerPageChange={(items) => {
-                setItemsPerPage(items);
-                setCurrentPage(1);
-              }}
-            />
-          </TabsContent>
+          </div>
 
-          <TabsContent value="forms" className="mt-0">
-            {/* This tab navigates to /forms, content won't show */}
-          </TabsContent>
+          {/* Pagination */}
+          <div className="p-4 border-t border-border bg-card flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>
+                {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredSchedules.length)} of {filteredSchedules.length}
+              </span>
+              <span className="ml-4">Rows per page:</span>
+              <Select 
+                value={rowsPerPage} 
+                onValueChange={(value) => {
+                  setRowsPerPage(value);
+                  setItemsPerPage(parseInt(value));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-16 h-8 bg-background">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <TabsContent value="test-sequence" className="mt-0">
-            <div className="flex justify-end mb-4">
-              <Button onClick={() => navigate("/forms?tab=test-sequence")} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Create Sequence
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-8 w-8" 
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(1)}
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-8 w-8" 
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="px-3 text-sm text-foreground">{currentPage}/{totalPages || 1}</span>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-8 w-8" 
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-8 w-8" 
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage(totalPages)}
+              >
+                <ChevronsRight className="h-4 w-4" />
               </Button>
             </div>
+          </div>
 
-            <div className="border rounded-lg">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Sequence Name</TableHead>
-                    <TableHead className="text-center">Steps</TableHead>
-                    <TableHead className="text-center">Forms</TableHead>
-                    <TableHead className="text-center">Surveys</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSequences.map((sequence) => (
-                    <TableRow key={sequence.id}>
-                      <TableCell className="font-medium">{sequence.name}</TableCell>
-                      <TableCell className="text-center">{sequence.steps}</TableCell>
-                      <TableCell className="text-center">{sequence.forms}</TableCell>
-                      <TableCell className="text-center">{sequence.surveys}</TableCell>
-                      <TableCell>{sequence.createdAt}</TableCell>
-                      <TableCell>
-                        <Badge variant={sequence.status === "active" ? "default" : "secondary"}>
-                          {sequence.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate("/forms?tab=test-sequence")}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              View
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => navigate("/forms?tab=test-sequence")}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {filteredSequences.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        No test sequences found. Create your first sequence to get started.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        <div className="mt-4 text-center text-xs text-muted-foreground">
-          Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd
-        </div>
-      </main>
+          {/* Footer */}
+          <div className="py-3 text-center text-xs text-muted-foreground border-t border-border">
+            Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd{" "}
+            <a
+              href="https://www.excelsoftcorp.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              https://www.excelsoftcorp.com
+            </a>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
