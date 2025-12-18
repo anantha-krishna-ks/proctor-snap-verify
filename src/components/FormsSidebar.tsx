@@ -40,6 +40,7 @@ interface FormsSidebarProps {
   onProjectChange: (projectId: string) => void;
   activeMenu: string;
   onMenuChange: (menu: string) => void;
+  hideSettings?: boolean;
 }
 
 const contentMenuItems = [
@@ -62,6 +63,7 @@ export const FormsSidebar = ({
   onProjectChange,
   activeMenu,
   onMenuChange,
+  hideSettings = false,
 }: FormsSidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
@@ -186,16 +188,20 @@ export const FormsSidebar = ({
             {contentMenuItems.map((item, index) => renderMenuItem(item, index))}
           </div>
 
-          {/* Separator */}
-          <div className="my-3 mx-2 border-t border-border" />
+          {/* Settings Group - conditionally rendered */}
+          {!hideSettings && (
+            <>
+              {/* Separator */}
+              <div className="my-3 mx-2 border-t border-border" />
 
-          {/* Settings Group */}
-          {!isCollapsed && (
-            <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Settings</p>
+              {!isCollapsed && (
+                <p className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Settings</p>
+              )}
+              <div className="space-y-0.5">
+                {settingsMenuItems.map((item, index) => renderMenuItem(item, index, contentMenuItems.length))}
+              </div>
+            </>
           )}
-          <div className="space-y-0.5">
-            {settingsMenuItems.map((item, index) => renderMenuItem(item, index, contentMenuItems.length))}
-          </div>
         </nav>
       </motion.aside>
     </TooltipProvider>
