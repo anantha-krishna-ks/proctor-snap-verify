@@ -4,8 +4,8 @@ import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { ProjectCard } from "@/components/admin/ProjectCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Grid3X3, List, UserCog } from "lucide-react";
-import { mockProjects } from "@/data/projectMockData";
+import { Search, Plus, Grid3X3, List, UserCog, MoreHorizontal, Pencil, Trash2, UserPlus } from "lucide-react";
+import { mockProjects, Project } from "@/data/projectMockData";
 import {
   Table,
   TableBody,
@@ -23,6 +23,9 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import AddProductSheet from "@/components/AddProductSheet";
+import EditProductSheet from "@/components/EditProductSheet";
+import DeleteProductDialog from "@/components/DeleteProductDialog";
+import ProductUserAssignmentSheet from "@/components/ProductUserAssignmentSheet";
 
 const ROLES = [
   { id: "admin", label: "Administrator", color: "bg-primary/10 text-primary" },
@@ -36,6 +39,10 @@ const ProductsDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isEditProductOpen, setIsEditProductOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isAssignUsersOpen, setIsAssignUsersOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Project | null>(null);
   const [currentRole, setCurrentRole] = useState(() => localStorage.getItem("userRole") || "admin");
 
   const handleRoleChange = (roleId: string) => {
@@ -54,6 +61,21 @@ const ProductsDashboard = () => {
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleEditProduct = (project: Project) => {
+    setSelectedProduct(project);
+    setIsEditProductOpen(true);
+  };
+
+  const handleDeleteProduct = (project: Project) => {
+    setSelectedProduct(project);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleAssignUsers = (project: Project) => {
+    setSelectedProduct(project);
+    setIsAssignUsersOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -129,16 +151,39 @@ const ProductsDashboard = () => {
             </div>
           </div>
 
+          {/* Product Sheets/Dialogs */}
           <AddProductSheet
             open={isAddProductOpen}
             onOpenChange={setIsAddProductOpen}
+          />
+          <EditProductSheet
+            open={isEditProductOpen}
+            onOpenChange={setIsEditProductOpen}
+            product={selectedProduct}
+          />
+          <DeleteProductDialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+            product={selectedProduct}
+          />
+          <ProductUserAssignmentSheet
+            open={isAssignUsersOpen}
+            onOpenChange={setIsAssignUsersOpen}
+            product={selectedProduct}
           />
 
           {/* Grid View */}
           {viewMode === "grid" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} userRoles={[currentRole]} />
+                <ProjectCard 
+                  key={project.id} 
+                  project={project} 
+                  userRoles={[currentRole]}
+                  onEdit={handleEditProduct}
+                  onDelete={handleDeleteProduct}
+                  onAssignUsers={handleAssignUsers}
+                />
               ))}
             </div>
           )}
@@ -154,16 +199,44 @@ const ProductsDashboard = () => {
                     <TableHead className="font-semibold text-center">ITEMS</TableHead>
                     <TableHead className="font-semibold text-center">TESTS</TableHead>
                     <TableHead className="font-semibold text-center">SCHEDULES</TableHead>
+                    <TableHead className="font-semibold text-center w-16">ACTIONS</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredProjects.map((project) => (
-                    <TableRow key={project.id} className="hover:bg-muted/30 cursor-pointer">
+                    <TableRow key={project.id} className="hover:bg-muted/30">
                       <TableCell className="font-medium text-primary">{project.code}</TableCell>
                       <TableCell>{project.name}</TableCell>
                       <TableCell className="text-center">{project.itemCount}</TableCell>
                       <TableCell className="text-center">{project.testCount}</TableCell>
                       <TableCell className="text-center">{project.scheduleCount}</TableCell>
+                      <TableCell className="text-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => handleEditProduct(project)}>
+                              <Pencil className="h-4 w-4 mr-2" />
+                              Edit Product
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleAssignUsers(project)}>
+                              <UserPlus className="h-4 w-4 mr-2" />
+                              Assign Users
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteProduct(project)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete Product
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

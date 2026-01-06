@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   FolderOpen, FileText, Calendar, MoreHorizontal, Image, 
-  Shield, UserCheck, Eye, Edit, Users
+  Shield, UserCheck, Eye, Edit, Users, Pencil, Trash2, UserPlus
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -19,6 +19,9 @@ import type { Project } from "@/data/projectMockData";
 interface ProjectCardProps {
   project: Project;
   userRoles?: string[];
+  onEdit?: (project: Project) => void;
+  onDelete?: (project: Project) => void;
+  onAssignUsers?: (project: Project) => void;
 }
 
 const ROLE_CONFIG: Record<string, { 
@@ -101,7 +104,10 @@ const ROLE_CONFIG: Record<string, {
 
 export const ProjectCard = ({ 
   project, 
-  userRoles = ["admin"], 
+  userRoles = ["admin"],
+  onEdit,
+  onDelete,
+  onAssignUsers,
 }: ProjectCardProps) => {
   const navigate = useNavigate();
 
@@ -171,12 +177,34 @@ export const ProjectCard = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover border border-border shadow-lg z-50 w-48">
+              {/* Product Actions */}
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Product Actions
+              </DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => onEdit?.(project)}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit Product
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onAssignUsers?.(project)}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Assign Users
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => onDelete?.(project)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Product
+              </DropdownMenuItem>
+              
+              {/* Role-specific Actions */}
               {userRoles.map((role, idx) => {
                 const config = ROLE_CONFIG[role];
                 if (!config) return null;
                 return (
                   <div key={role}>
-                    {idx > 0 && <DropdownMenuSeparator />}
+                    <DropdownMenuSeparator />
                     <DropdownMenuLabel className="text-xs text-muted-foreground">
                       {config.label} Actions
                     </DropdownMenuLabel>
