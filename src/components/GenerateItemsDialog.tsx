@@ -86,23 +86,29 @@ export const GenerateItemsDialog = ({
         },
       });
 
+      console.log("Edge function response:", { data, error });
+
       if (error) {
         console.error("Edge function error:", error);
         toast.error("Failed to generate items. Please try again.");
         return;
       }
 
-      if (data.error) {
+      if (data?.error) {
         toast.error(data.error);
         return;
       }
 
-      if (data.items && data.items.length > 0) {
-        onGenerate(data.items);
+      // Handle both possible response formats
+      const items = data?.items || (Array.isArray(data) ? data : null);
+      
+      if (items && items.length > 0) {
+        onGenerate(items);
         onOpenChange(false);
         setPrompt("");
-        toast.success(`Generated ${data.items.length} items successfully!`);
+        toast.success(`Generated ${items.length} items successfully!`);
       } else {
+        console.error("Unexpected response format:", data);
         toast.error("No items were generated. Please try again.");
       }
     } catch (err) {
