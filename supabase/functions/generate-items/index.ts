@@ -10,6 +10,9 @@ const MODEL_MAPPING: Record<string, string> = {
   "gemini-pro": "google/gemini-3-pro-preview",
   "gpt-5": "openai/gpt-5",
   "gpt-5-mini": "openai/gpt-5-mini",
+  // Free models using smaller/efficient variants
+  "llama-free": "google/gemini-2.5-flash-lite",
+  "mistral-free": "google/gemini-2.5-flash-lite",
 };
 
 serve(async (req) => {

@@ -7,6 +7,7 @@ import {
   Users,
   Database,
   Settings,
+  Brain,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ const navItems = [
   { title: "Roles", url: "/admin/roles", icon: Shield },
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Metadata", url: "/admin/metadata", icon: Database },
+  { title: "AI Settings", url: "/admin/ai-settings", icon: Brain },
   { title: "Masters", url: "/admin/masters", icon: Settings },
 ];
 
