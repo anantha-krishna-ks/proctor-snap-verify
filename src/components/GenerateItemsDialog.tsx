@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/select";
 import { Sparkles, Loader2, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface GenerateItemsDialogProps {
   open: boolean;
@@ -73,30 +75,42 @@ export const GenerateItemsDialog = ({
   const handleGenerate = async () => {
     setIsGenerating(true);
     
-    // Simulate AI generation - in real implementation, this would call the AI gateway
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    const mockGeneratedItems: GeneratedItem[] = Array.from(
-      { length: parseInt(numberOfItems) },
-      (_, i) => ({
-        id: `gen-${Date.now()}-${i}`,
-        code: `Demo001-Item-GEN${String(i + 1).padStart(3, "0")}`,
-        question: `Generated question ${i + 1} based on: ${prompt.slice(0, 50)}...`,
-        type: ITEM_TYPES.find((t) => t.id === itemType)?.name || "Multiple Choice",
-        options: [
-          { text: "Option A", isCorrect: i % 4 === 0 },
-          { text: "Option B", isCorrect: i % 4 === 1 },
-          { text: "Option C", isCorrect: i % 4 === 2 },
-          { text: "Option D", isCorrect: i % 4 === 3 },
-        ],
-        score: 1,
-      })
-    );
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-items', {
+        body: {
+          prompt,
+          model: selectedModel,
+          itemType,
+          difficulty,
+          numberOfItems: parseInt(numberOfItems),
+        },
+      });
 
-    onGenerate(mockGeneratedItems);
-    setIsGenerating(false);
-    onOpenChange(false);
-    setPrompt("");
+      if (error) {
+        console.error("Edge function error:", error);
+        toast.error("Failed to generate items. Please try again.");
+        return;
+      }
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data.items && data.items.length > 0) {
+        onGenerate(data.items);
+        onOpenChange(false);
+        setPrompt("");
+        toast.success(`Generated ${data.items.length} items successfully!`);
+      } else {
+        toast.error("No items were generated. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error calling generate-items:", err);
+      toast.error("Failed to connect to AI service. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
