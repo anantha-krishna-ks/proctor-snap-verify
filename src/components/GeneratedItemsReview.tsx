@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -40,13 +40,13 @@ export const GeneratedItemsReview = ({
   }>({ question: "", options: [] });
 
   // Reset state when dialog opens with new items
-  useState(() => {
+  useEffect(() => {
     if (open && initialItems.length > 0) {
       setItems(initialItems);
       setSelectedIds(new Set(initialItems.map((item) => item.id)));
       setEditingId(null);
     }
-  });
+  }, [open, initialItems]);
 
   const toggleItem = (id: string) => {
     const newSelected = new Set(selectedIds);
