@@ -18,8 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Loader2, Brain } from "lucide-react";
+import { Sparkles, Loader2, Brain, Info, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -90,12 +91,40 @@ export const GenerateItemsDialog = ({
 
       if (error) {
         console.error("Edge function error:", error);
+        // Check for specific error status codes
+        if (error.message?.includes("429") || error.status === 429) {
+          toast.error("Rate limit exceeded. Please wait a moment before trying again.", {
+            description: "You've made too many requests in a short period.",
+            duration: 6000,
+          });
+          return;
+        }
+        if (error.message?.includes("402") || error.status === 402) {
+          toast.error("AI credits exhausted", {
+            description: "Please add credits to your workspace in Settings → Workspace → Usage.",
+            duration: 8000,
+          });
+          return;
+        }
         toast.error("Failed to generate items. Please try again.");
         return;
       }
 
+      // Handle error responses from the edge function
       if (data?.error) {
-        toast.error(data.error);
+        if (data.error.includes("Rate limit")) {
+          toast.error("Rate limit exceeded", {
+            description: "Please wait a moment before trying again. Consider reducing the number of items per request.",
+            duration: 6000,
+          });
+        } else if (data.error.includes("Payment required") || data.error.includes("credits")) {
+          toast.error("AI credits exhausted", {
+            description: "Please add credits to your workspace in Settings → Workspace → Usage.",
+            duration: 8000,
+          });
+        } else {
+          toast.error(data.error);
+        }
         return;
       }
 
@@ -113,7 +142,20 @@ export const GenerateItemsDialog = ({
       }
     } catch (err) {
       console.error("Error calling generate-items:", err);
-      toast.error("Failed to connect to AI service. Please try again.");
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      if (errorMessage.includes("429")) {
+        toast.error("Rate limit exceeded", {
+          description: "Please wait a moment before trying again.",
+          duration: 6000,
+        });
+      } else if (errorMessage.includes("402")) {
+        toast.error("AI credits exhausted", {
+          description: "Please add credits to your workspace.",
+          duration: 8000,
+        });
+      } else {
+        toast.error("Failed to connect to AI service. Please try again.");
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -160,6 +202,16 @@ export const GenerateItemsDialog = ({
               </p>
             )}
           </div>
+
+          {/* Usage Information */}
+          <Alert className="bg-muted/50 border-muted">
+            <Info className="h-4 w-4" />
+            <AlertDescription className="text-xs">
+              <span className="font-medium">Usage Info:</span> AI generation uses your workspace credits. 
+              Each request consumes credits based on the model and number of items. 
+              Free tier includes limited monthly usage.
+            </AlertDescription>
+          </Alert>
 
           {/* Item Type */}
           <div className="grid grid-cols-2 gap-4">
@@ -219,6 +271,15 @@ export const GenerateItemsDialog = ({
               rows={4}
             />
           </div>
+
+          {/* Rate Limit Warning */}
+          <Alert variant="default" className="bg-warning/10 border-warning/30">
+            <AlertTriangle className="h-4 w-4 text-warning" />
+            <AlertDescription className="text-xs text-warning-foreground">
+              <span className="font-medium">Tip:</span> To avoid rate limits, generate items in smaller batches 
+              (5-10 at a time) and wait a few seconds between requests.
+            </AlertDescription>
+          </Alert>
         </div>
 
         <DialogFooter>
