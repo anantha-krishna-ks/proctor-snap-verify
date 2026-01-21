@@ -164,6 +164,7 @@ const ItemsManagement = () => {
   const [selectedTab, setSelectedTab] = useState("repository");
   const [selectedRepository, setSelectedRepository] = useState<string | null>("repo-1-1");
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(["1", "2"]));
+  const [allExpanded, setAllExpanded] = useState(true);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
@@ -329,8 +330,23 @@ const ItemsManagement = () => {
                     <MoreVertical className="h-4 w-4" />
                   </Button>
 
-                  {/* Toggle */}
-                  <Switch defaultChecked />
+                  {/* Toggle Expand/Collapse All */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">
+                      {allExpanded ? "Collapse" : "Expand"}
+                    </span>
+                    <Switch 
+                      checked={allExpanded}
+                      onCheckedChange={(checked) => {
+                        setAllExpanded(checked);
+                        if (checked) {
+                          setExpandedItems(new Set(filteredItems.map(item => item.id)));
+                        } else {
+                          setExpandedItems(new Set());
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
