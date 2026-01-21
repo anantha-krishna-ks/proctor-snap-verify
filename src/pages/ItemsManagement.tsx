@@ -37,8 +37,10 @@ import {
 import { mockProjects } from "@/data/projectMockData";
 import { ItemRepositorySidebar } from "@/components/ItemRepositorySidebar";
 import { GenerateItemsDialog, GeneratedItem } from "@/components/GenerateItemsDialog";
+import { GeneratedItemsReview } from "@/components/GeneratedItemsReview";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "sonner";
 
 interface ItemOption {
   text: string;
@@ -166,6 +168,8 @@ const ItemsManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [isGenerateDialogOpen, setIsGenerateDialogOpen] = useState(false);
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [pendingGeneratedItems, setPendingGeneratedItems] = useState<GeneratedItem[]>([]);
   const [items, setItems] = useState<Item[]>(mockItems);
 
   const project = mockProjects.find((p) => p.id === productId);
@@ -213,7 +217,12 @@ const ItemsManagement = () => {
   };
 
   const handleGenerateItems = (generatedItems: GeneratedItem[]) => {
-    const newItems: Item[] = generatedItems.map((item) => ({
+    setPendingGeneratedItems(generatedItems);
+    setIsReviewDialogOpen(true);
+  };
+
+  const handleConfirmItems = (selectedItems: GeneratedItem[]) => {
+    const newItems: Item[] = selectedItems.map((item) => ({
       id: item.id,
       code: item.code,
       question: item.question,
@@ -228,6 +237,8 @@ const ItemsManagement = () => {
       createdBy: "AI Generated",
     }));
     setItems([...newItems, ...items]);
+    setPendingGeneratedItems([]);
+    toast.success(`Added ${selectedItems.length} items to the repository!`);
   };
 
   const handleBack = () => {
@@ -555,6 +566,14 @@ const ItemsManagement = () => {
         open={isGenerateDialogOpen}
         onOpenChange={setIsGenerateDialogOpen}
         onGenerate={handleGenerateItems}
+      />
+
+      {/* Review Generated Items Dialog */}
+      <GeneratedItemsReview
+        open={isReviewDialogOpen}
+        onOpenChange={setIsReviewDialogOpen}
+        items={pendingGeneratedItems}
+        onConfirm={handleConfirmItems}
       />
     </div>
   );
