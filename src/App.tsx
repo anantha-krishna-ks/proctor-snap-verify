@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { PrivilegeProvider } from "@/hooks/usePrivileges";
 import AdminDashboard from "./pages/AdminDashboard";
+import AISettings from "./pages/AISettings";
 import ProductsDashboard from "./pages/ProductsDashboard";
 import ScheduleDashboard from "./pages/ScheduleDashboard";
 import CreateSchedule from "./pages/CreateSchedule";
@@ -79,6 +80,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <RoleManagement />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/ai-settings"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AISettings />
               </ProtectedRoute>
             }
           />

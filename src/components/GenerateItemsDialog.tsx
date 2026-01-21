@@ -40,10 +40,12 @@ export interface GeneratedItem {
 }
 
 const LLM_MODELS = [
-  { id: "gemini-flash", name: "Gemini 3 Flash", provider: "Google", description: "Fast & efficient" },
-  { id: "gemini-pro", name: "Gemini 3 Pro", provider: "Google", description: "Advanced reasoning" },
-  { id: "gpt-5", name: "GPT-5", provider: "OpenAI", description: "Powerful all-rounder" },
-  { id: "gpt-5-mini", name: "GPT-5 Mini", provider: "OpenAI", description: "Cost-effective" },
+  { id: "llama-free", name: "Llama 3.3 70B", provider: "Meta", description: "Free • Open-source", tier: "free" },
+  { id: "mistral-free", name: "Mistral 7B", provider: "Mistral", description: "Free • Fast inference", tier: "free" },
+  { id: "gemini-flash", name: "Gemini 3 Flash", provider: "Google", description: "Fast & efficient", tier: "paid" },
+  { id: "gemini-pro", name: "Gemini 3 Pro", provider: "Google", description: "Advanced reasoning", tier: "paid" },
+  { id: "gpt-5", name: "GPT-5", provider: "OpenAI", description: "Powerful all-rounder", tier: "paid" },
+  { id: "gpt-5-mini", name: "GPT-5 Mini", provider: "OpenAI", description: "Cost-effective", tier: "paid" },
 ];
 
 const ITEM_TYPES = [
@@ -65,7 +67,7 @@ export const GenerateItemsDialog = ({
   onGenerate,
 }: GenerateItemsDialogProps) => {
   const [prompt, setPrompt] = useState("");
-  const [selectedModel, setSelectedModel] = useState("gemini-flash");
+  const [selectedModel, setSelectedModel] = useState("llama-free"); // Default to free model
   const [itemType, setItemType] = useState("mcq");
   const [difficulty, setDifficulty] = useState("medium");
   const [numberOfItems, setNumberOfItems] = useState("5");
@@ -186,10 +188,13 @@ export const GenerateItemsDialog = ({
                 {LLM_MODELS.map((model) => (
                   <SelectItem key={model.id} value={model.id}>
                     <div className="flex items-center gap-2">
-                      <Brain className="h-4 w-4 text-primary" />
+                      <Brain className={`h-4 w-4 ${model.tier === "free" ? "text-accent-foreground" : "text-primary"}`} />
                       <span>{model.name}</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {model.provider}
+                      <Badge 
+                        variant={model.tier === "free" ? "secondary" : "outline"} 
+                        className={`text-xs ${model.tier === "free" ? "bg-accent text-accent-foreground" : ""}`}
+                      >
+                        {model.tier === "free" ? "Free" : model.provider}
                       </Badge>
                     </div>
                   </SelectItem>
