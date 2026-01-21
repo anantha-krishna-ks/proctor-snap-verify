@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   FolderOpen, FileText, Calendar, MoreHorizontal, Image, 
-  Shield, UserCheck, Eye, Edit, Users, Pencil, Trash2, UserPlus
+  Shield, UserCheck, Eye, Edit, Users, Pencil, Trash2, UserPlus, ClipboardList
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -22,6 +22,7 @@ interface ProjectCardProps {
   onEdit?: (project: Project) => void;
   onDelete?: (project: Project) => void;
   onAssignUsers?: (project: Project) => void;
+  onViewItems?: (project: Project) => void;
 }
 
 const ROLE_CONFIG: Record<string, { 
@@ -108,6 +109,7 @@ export const ProjectCard = ({
   onEdit,
   onDelete,
   onAssignUsers,
+  onViewItems,
 }: ProjectCardProps) => {
   const navigate = useNavigate();
 
@@ -181,6 +183,10 @@ export const ProjectCard = ({
               <DropdownMenuLabel className="text-xs text-muted-foreground">
                 Product Actions
               </DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => onViewItems?.(project)}>
+                <ClipboardList className="h-4 w-4 mr-2" />
+                View Items
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onEdit?.(project)}>
                 <Pencil className="h-4 w-4 mr-2" />
                 Edit Product

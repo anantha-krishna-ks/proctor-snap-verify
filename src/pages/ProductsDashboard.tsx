@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { ProjectCard } from "@/components/admin/ProjectCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Grid3X3, List, UserCog, MoreHorizontal, Pencil, Trash2, UserPlus } from "lucide-react";
+import { Search, Plus, Grid3X3, List, UserCog, MoreHorizontal, Pencil, Trash2, UserPlus, ClipboardList } from "lucide-react";
 import { mockProjects, Project } from "@/data/projectMockData";
 import {
   Table,
@@ -36,6 +37,7 @@ const ROLES = [
 ];
 
 const ProductsDashboard = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
@@ -75,6 +77,10 @@ const ProductsDashboard = () => {
   const handleAssignUsers = (project: Project) => {
     setSelectedProduct(project);
     setIsAssignUsersOpen(true);
+  };
+
+  const handleViewItems = (project: Project) => {
+    navigate(`/admin/products/${project.id}/items`);
   };
 
   return (
@@ -183,6 +189,7 @@ const ProductsDashboard = () => {
                   onEdit={handleEditProduct}
                   onDelete={handleDeleteProduct}
                   onAssignUsers={handleAssignUsers}
+                  onViewItems={handleViewItems}
                 />
               ))}
             </div>
@@ -218,6 +225,10 @@ const ProductsDashboard = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={() => handleViewItems(project)}>
+                              <ClipboardList className="h-4 w-4 mr-2" />
+                              View Items
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleEditProduct(project)}>
                               <Pencil className="h-4 w-4 mr-2" />
                               Edit Product
