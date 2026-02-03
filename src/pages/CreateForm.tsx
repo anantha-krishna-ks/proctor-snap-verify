@@ -425,17 +425,15 @@ const CreateForm = () => {
                                   </Badge>
                                 )}
                                 <span className="text-sm text-muted-foreground">{item.marks} marks</span>
-                                {(item.type === "mcq" || item.type === "true-false") && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 text-xs"
-                                    onClick={() => handleOpenBranching(item, section.id)}
-                                  >
-                                    <GitBranch className="h-3 w-3 mr-1" />
-                                    {item.hasBranching ? "Edit" : "Add"} Branching
-                                  </Button>
-                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 text-xs"
+                                  onClick={() => handleOpenBranching(item, section.id)}
+                                >
+                                  <GitBranch className="h-3 w-3 mr-1" />
+                                  {item.hasBranching ? "Edit" : "Add"} Branching
+                                </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
