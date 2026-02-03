@@ -26,6 +26,7 @@ import AddItemsSheet from "@/components/AddItemsSheet";
 import AddBlueprintSheet from "@/components/AddBlueprintSheet";
 import CreateConfigurationSheet from "@/components/CreateConfigurationSheet";
 import ItemBranchingDialog from "@/components/ItemBranchingDialog";
+import BranchingFlowPreview from "@/components/BranchingFlowPreview";
 
 const CreateForm = () => {
   const navigate = useNavigate();
@@ -315,6 +316,11 @@ const CreateForm = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Branching Flow Preview */}
+          {sections.some(s => s.items.some(i => i.hasBranching)) && (
+            <BranchingFlowPreview sections={sections} />
+          )}
 
           {/* Sections */}
           <Card>
