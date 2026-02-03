@@ -35,6 +35,21 @@ export interface FormConfiguration {
   };
 }
 
+// Branching target for navigation
+export type BranchingTarget = 
+  | { type: 'next' }  // Continue to next question
+  | { type: 'section'; sectionId: string }  // Go to specific section
+  | { type: 'item'; itemId: string }  // Go to specific item
+  | { type: 'end' };  // End the form
+
+// MCQ option with optional branching
+export interface ItemOption {
+  id: string;
+  text: string;
+  isCorrect?: boolean;
+  branchTo?: BranchingTarget;
+}
+
 export interface FormItem {
   id: string;
   title: string;
@@ -42,6 +57,8 @@ export interface FormItem {
   marks: number;
   category?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
+  options?: ItemOption[];  // For MCQ items
+  hasBranching?: boolean;  // Flag to indicate branching is enabled
 }
 
 export interface FormSection {

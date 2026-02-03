@@ -20,17 +20,78 @@ import {
 } from "@/components/ui/select";
 import type { FormItem } from "@/types/forms";
 
-// Mock available items
+// Mock available items with options for MCQ
 const availableItems: FormItem[] = [
-  { id: "item-1", title: "What is the capital of France?", type: "mcq", marks: 2, category: "Geography", difficulty: "easy" },
+  { 
+    id: "item-1", 
+    title: "What is the capital of France?", 
+    type: "mcq", 
+    marks: 2, 
+    category: "Geography", 
+    difficulty: "easy",
+    options: [
+      { id: "1a", text: "London" },
+      { id: "1b", text: "Paris", isCorrect: true },
+      { id: "1c", text: "Berlin" },
+      { id: "1d", text: "Madrid" },
+    ]
+  },
   { id: "item-2", title: "Explain the theory of relativity", type: "essay", marks: 10, category: "Physics", difficulty: "hard" },
   { id: "item-3", title: "The sun rises in the ___", type: "fill-blank", marks: 1, category: "General Knowledge", difficulty: "easy" },
-  { id: "item-4", title: "Water boils at 100°C", type: "true-false", marks: 1, category: "Science", difficulty: "easy" },
-  { id: "item-5", title: "Calculate the area of a circle with radius 5", type: "mcq", marks: 3, category: "Mathematics", difficulty: "medium" },
+  { 
+    id: "item-4", 
+    title: "Water boils at 100°C", 
+    type: "true-false", 
+    marks: 1, 
+    category: "Science", 
+    difficulty: "easy",
+    options: [
+      { id: "4a", text: "True", isCorrect: true },
+      { id: "4b", text: "False" },
+    ]
+  },
+  { 
+    id: "item-5", 
+    title: "Calculate the area of a circle with radius 5", 
+    type: "mcq", 
+    marks: 3, 
+    category: "Mathematics", 
+    difficulty: "medium",
+    options: [
+      { id: "5a", text: "25π", isCorrect: true },
+      { id: "5b", text: "10π" },
+      { id: "5c", text: "50π" },
+      { id: "5d", text: "5π" },
+    ]
+  },
   { id: "item-6", title: "Describe photosynthesis process", type: "essay", marks: 8, category: "Biology", difficulty: "medium" },
-  { id: "item-7", title: "What is Newton's first law?", type: "mcq", marks: 2, category: "Physics", difficulty: "easy" },
+  { 
+    id: "item-7", 
+    title: "What is Newton's first law?", 
+    type: "mcq", 
+    marks: 2, 
+    category: "Physics", 
+    difficulty: "easy",
+    options: [
+      { id: "7a", text: "Law of Inertia", isCorrect: true },
+      { id: "7b", text: "Law of Acceleration" },
+      { id: "7c", text: "Law of Action-Reaction" },
+      { id: "7d", text: "Law of Gravity" },
+    ]
+  },
   { id: "item-8", title: "Solve: 2x + 5 = 15", type: "fill-blank", marks: 2, category: "Mathematics", difficulty: "easy" },
-  { id: "item-9", title: "The Earth is flat", type: "true-false", marks: 1, category: "Geography", difficulty: "easy" },
+  { 
+    id: "item-9", 
+    title: "The Earth is flat", 
+    type: "true-false", 
+    marks: 1, 
+    category: "Geography", 
+    difficulty: "easy",
+    options: [
+      { id: "9a", text: "True" },
+      { id: "9b", text: "False", isCorrect: true },
+    ]
+  },
   { id: "item-10", title: "Explain the water cycle", type: "essay", marks: 6, category: "Science", difficulty: "medium" },
 ];
 

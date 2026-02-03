@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Settings, Trash2, GripVertical, ChevronDown, ChevronUp, Layers } from "lucide-react";
+import { ArrowLeft, Plus, Settings, Trash2, GripVertical, ChevronDown, ChevronUp, Layers, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,7 @@ import { toast } from "@/hooks/use-toast";
 import AddItemsSheet from "@/components/AddItemsSheet";
 import AddBlueprintSheet from "@/components/AddBlueprintSheet";
 import CreateConfigurationSheet from "@/components/CreateConfigurationSheet";
+import ItemBranchingDialog from "@/components/ItemBranchingDialog";
 
 const CreateForm = () => {
   const navigate = useNavigate();
@@ -40,6 +41,7 @@ const CreateForm = () => {
   const [showAddBlueprint, setShowAddBlueprint] = useState(false);
   const [showConfigSheet, setShowConfigSheet] = useState(false);
   const [expandedSections, setExpandedSections] = useState<string[]>(["section-1"]);
+  const [branchingItem, setBranchingItem] = useState<{ item: FormItem; sectionId: string } | null>(null);
 
   const selectedConfig = configurations.find((c) => c.id === selectedConfigId);
 
@@ -109,6 +111,47 @@ const CreateForm = () => {
       }
       return section;
     }));
+  };
+
+  const handleUpdateItem = (sectionId: string, updatedItem: FormItem) => {
+    setSections(sections.map((section) => {
+      if (section.id === sectionId) {
+        return {
+          ...section,
+          items: section.items.map((i) => (i.id === updatedItem.id ? updatedItem : i)),
+        };
+      }
+      return section;
+    }));
+  };
+
+  const handleOpenBranching = (item: FormItem, sectionId: string) => {
+    setBranchingItem({ item, sectionId });
+  };
+
+  const handleSaveBranching = (updatedItem: FormItem) => {
+    if (branchingItem) {
+      handleUpdateItem(branchingItem.sectionId, updatedItem);
+      toast({
+        title: updatedItem.hasBranching ? "Branching Updated" : "Branching Removed",
+        description: updatedItem.hasBranching
+          ? "Navigation rules have been saved"
+          : "Branching has been removed from this item",
+      });
+    }
+  };
+
+  // Get all items across all sections for branching targets
+  const getAllItemsFlat = () => {
+    const result: { sectionId: string; item: FormItem; index: number }[] = [];
+    let globalIndex = 0;
+    sections.forEach((section) => {
+      section.items.forEach((item) => {
+        result.push({ sectionId: section.id, item, index: globalIndex });
+        globalIndex++;
+      });
+    });
+    return result;
   };
 
   const toggleSectionExpanded = (sectionId: string) => {
@@ -375,7 +418,24 @@ const CreateForm = () => {
                                   <p className="text-sm truncate">{item.title}</p>
                                 </div>
                                 <Badge className={getItemTypeBadge(item.type)}>{item.type}</Badge>
+                                {item.hasBranching && (
+                                  <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
+                                    <GitBranch className="h-3 w-3 mr-1" />
+                                    Branching
+                                  </Badge>
+                                )}
                                 <span className="text-sm text-muted-foreground">{item.marks} marks</span>
+                                {(item.type === "mcq" || item.type === "true-false") && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 text-xs"
+                                    onClick={() => handleOpenBranching(item, section.id)}
+                                  >
+                                    <GitBranch className="h-3 w-3 mr-1" />
+                                    {item.hasBranching ? "Edit" : "Add"} Branching
+                                  </Button>
+                                )}
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -415,6 +475,19 @@ const CreateForm = () => {
         onOpenChange={setShowConfigSheet}
         onConfigurationCreated={handleConfigurationCreated}
       />
+
+      {/* Branching Dialog */}
+      {branchingItem && (
+        <ItemBranchingDialog
+          open={!!branchingItem}
+          onOpenChange={(open) => !open && setBranchingItem(null)}
+          item={branchingItem.item}
+          sections={sections}
+          currentSectionId={branchingItem.sectionId}
+          allItems={getAllItemsFlat()}
+          onSaveBranching={handleSaveBranching}
+        />
+      )}
     </div>
   );
 };
