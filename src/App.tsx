@@ -25,6 +25,7 @@ import SurveyList from "./pages/SurveyList";
 import CreateSurvey from "./pages/CreateSurvey";
 import Login from "./pages/Login";
 import ProjectLayoutShowcase from "./pages/ProjectLayoutShowcase";
+import BranchingBuilder from "./pages/BranchingBuilder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -228,6 +229,22 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <ProjectLayoutShowcase />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms/branching"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <BranchingBuilder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forms/branching/:id"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <BranchingBuilder />
               </ProtectedRoute>
             }
           />

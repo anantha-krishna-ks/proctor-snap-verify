@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Settings,
   FileSignature,
+  GitBranch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -47,6 +48,7 @@ const contentMenuItems = [
   { id: "forms", title: "Form", icon: PlayCircle },
   { id: "assessment", title: "Assessment", icon: GraduationCap },
   { id: "test-sequence", title: "Test Sequence", icon: ListOrdered },
+  { id: "branching", title: "Branching", icon: GitBranch },
 ];
 
 const settingsMenuItems = [

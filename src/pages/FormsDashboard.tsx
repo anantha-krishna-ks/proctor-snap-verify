@@ -42,6 +42,7 @@ import {
   FileStack,
   GraduationCap,
   Calendar,
+  GitBranch,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -158,7 +159,7 @@ const mockProjects = [
   { id: "proj-4", name: "Professional License Tests", description: "Industry certifications" },
 ];
 
-type ViewMode = "forms" | "survey" | "configuration" | "agreement" | "test-sequence" | "blueprint" | "assessment";
+type ViewMode = "forms" | "survey" | "configuration" | "agreement" | "test-sequence" | "blueprint" | "assessment" | "branching";
 
 const FormsDashboard = () => {
   const navigate = useNavigate();
@@ -781,6 +782,86 @@ const handleDragEnd = (event: DragEndEvent) => {
             <Plus className="h-4 w-4 mr-2" />
             Create Assessment
           </Button>
+        </div>
+      );
+    }
+
+    if (viewMode === "branching") {
+      return (
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <GitBranch className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold text-foreground">Branching Assessments</h2>
+              <Badge variant="secondary" className="text-xs">
+                Adaptive Testing
+              </Badge>
+            </div>
+
+            <Button className="bg-primary hover:bg-primary/90" onClick={() => navigate("/forms/branching")}>
+              <Plus className="h-4 w-4 mr-1" />
+              Create Branching Assessment
+            </Button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 p-6">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {/* Existing branching assessment cards */}
+              <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/forms/branching/branch-assess-1")}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="default" className="text-xs">Published</Badge>
+                    <span className="text-xs text-muted-foreground">v3</span>
+                  </div>
+                  <CardTitle className="text-base mt-2">Adaptive Math Assessment</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    An adaptive assessment that adjusts difficulty based on learner performance
+                  </p>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>9 nodes</span>
+                    <span>•</span>
+                    <span>10 connections</span>
+                    <span>•</span>
+                    <span>3 learner paths</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/forms/branching/branch-assess-2")}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="secondary" className="text-xs">Draft</Badge>
+                    <span className="text-xs text-muted-foreground">v1</span>
+                  </div>
+                  <CardTitle className="text-base mt-2">Language Proficiency Test</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Adaptive language assessment for placement
+                  </p>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>0 nodes</span>
+                    <span>•</span>
+                    <span>0 connections</span>
+                    <span>•</span>
+                    <span>0 learner paths</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Create new card */}
+              <Card className="border-dashed hover:border-primary/50 transition-colors cursor-pointer flex items-center justify-center min-h-[180px]" onClick={() => navigate("/forms/branching")}>
+                <div className="text-center p-6">
+                  <Plus className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm font-medium text-muted-foreground">Create New</p>
+                </div>
+              </Card>
+            </div>
+          </div>
         </div>
       );
     }
