@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Settings, Trash2, GripVertical, ChevronDown, ChevronUp, Layers, GitBranch } from "lucide-react";
+import { ArrowLeft, Plus, Settings, Trash2, GripVertical, ChevronDown, ChevronUp, Layers, GitBranch, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -178,6 +178,51 @@ const CreateForm = () => {
     return colors[type] || "bg-muted text-muted-foreground";
   };
 
+  const handleExportJSON = () => {
+    const formData = {
+      name: formName || "Untitled Form",
+      code: formCode || "FORM-001",
+      configuration: selectedConfig,
+      sections: sections.map((section) => ({
+        id: section.id,
+        name: section.name,
+        items: section.items.map((item) => ({
+          id: item.id,
+          title: item.title,
+          type: item.type,
+          marks: item.marks,
+          category: item.category,
+          difficulty: item.difficulty,
+          hasBranching: item.hasBranching || false,
+          options: item.options?.map((opt) => ({
+            id: opt.id,
+            text: opt.text,
+            isCorrect: opt.isCorrect,
+            branchTo: opt.branchTo,
+          })),
+        })),
+      })),
+      metadata: {
+        totalItems: getTotalItems(),
+        totalMarks: getTotalMarks(),
+        exportedAt: new Date().toISOString(),
+        version: "1.0",
+      },
+    };
+
+    const blob = new Blob([JSON.stringify(formData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${formCode || "form"}-export.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({ title: "Exported", description: "Form exported as JSON successfully" });
+  };
+
   const handleSubmit = () => {
     if (!formName.trim()) {
       toast({ title: "Error", description: "Form name is required", variant: "destructive" });
@@ -216,6 +261,10 @@ const CreateForm = () => {
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => navigate("/forms")}>
                 Cancel
+              </Button>
+              <Button variant="outline" onClick={handleExportJSON}>
+                <Download className="h-4 w-4 mr-2" />
+                Export JSON
               </Button>
               <Button onClick={handleSubmit}>Save Form</Button>
             </div>
