@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { format } from "date-fns";
 import { Schedule } from "@/types/assessment";
 import { candidates } from "@/data/mockData";
 import {
@@ -15,6 +16,20 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Accordion,
   AccordionContent,
@@ -22,11 +37,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { 
-  Search, User, CheckCircle2, XCircle, Clock, UserPlus, Users, Zap
+  Search, User, CheckCircle2, XCircle, Clock, UserPlus, Users, Zap, CalendarIcon, AlertTriangle, Bell
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+type Priority = "normal" | "high" | "urgent";
 
 interface Marker {
   id: string;
@@ -66,6 +83,13 @@ export const MarkerAssignmentsSlider = ({
   const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(new Set());
   const [candidateSearch, setCandidateSearch] = useState("");
   const [selectedMarkers, setSelectedMarkers] = useState<Set<string>>(new Set());
+  
+  // Deadline, priority, and reminder state
+  const [deadline, setDeadline] = useState<Date | undefined>(undefined);
+  const [priority, setPriority] = useState<Priority>("normal");
+  const [enableReminder, setEnableReminder] = useState(false);
+  const [reminderDays, setReminderDays] = useState("2");
+  
   const [assignments, setAssignments] = useState<Record<string, string[]>>(() => {
     // Initialize from existing assignments or empty
     const initial: Record<string, string[]> = {};
@@ -170,11 +194,28 @@ export const MarkerAssignmentsSlider = ({
     }));
 
     const markerName = mockMarkers.find(m => m.id === assigningToMarker)?.name;
-    toast.success(`Assigned ${selectedCandidates.size} candidate(s) to ${markerName}`);
+    const deadlineInfo = deadline ? ` with deadline ${format(deadline, "PPP")}` : "";
+    const priorityInfo = priority !== "normal" ? ` (${priority} priority)` : "";
+    toast.success(`Assigned ${selectedCandidates.size} candidate(s) to ${markerName}${deadlineInfo}${priorityInfo}`);
     
+    // Reset all assignment-related state
     setSelectedCandidates(new Set());
     setAssigningToMarker(null);
     setCandidateSearch("");
+    setDeadline(undefined);
+    setPriority("normal");
+    setEnableReminder(false);
+    setReminderDays("2");
+  };
+
+  const resetAssignmentPanel = () => {
+    setAssigningToMarker(null);
+    setSelectedCandidates(new Set());
+    setCandidateSearch("");
+    setDeadline(undefined);
+    setPriority("normal");
+    setEnableReminder(false);
+    setReminderDays("2");
   };
 
   const handleToggleCandidate = (candidateId: string) => {
@@ -413,14 +454,7 @@ export const MarkerAssignmentsSlider = ({
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setAssigningToMarker(null);
-                    setSelectedCandidates(new Set());
-                    setCandidateSearch("");
-                  }}
-                >
+                <Button variant="outline" onClick={resetAssignmentPanel}>
                   Cancel
                 </Button>
                 <Button
@@ -434,6 +468,97 @@ export const MarkerAssignmentsSlider = ({
               </div>
             </div>
 
+            {/* Deadline, Priority, and Reminder Controls */}
+            <div className="px-6 py-3 border-b space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                {/* Deadline Picker */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Completion Deadline</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal h-9",
+                          !deadline && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {deadline ? format(deadline, "PPP") : "Set deadline"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={deadline}
+                        onSelect={setDeadline}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Priority Selector */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Priority Level</Label>
+                  <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">
+                        <span className="flex items-center gap-2">Normal</span>
+                      </SelectItem>
+                      <SelectItem value="high">
+                        <span className="flex items-center gap-2 text-warning">
+                          <AlertTriangle className="h-3 w-3" /> High
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="urgent">
+                        <span className="flex items-center gap-2 text-destructive">
+                          <AlertTriangle className="h-3 w-3" /> Urgent
+                        </span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Reminder Toggle */}
+              <div className="flex items-center justify-between py-2 px-3 rounded-lg border bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-muted-foreground" />
+                  <Label htmlFor="reminder-toggle" className="text-sm">
+                    Send reminder before deadline
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  {enableReminder && (
+                    <Select value={reminderDays} onValueChange={setReminderDays}>
+                      <SelectTrigger className="w-[80px] h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 day</SelectItem>
+                        <SelectItem value="2">2 days</SelectItem>
+                        <SelectItem value="3">3 days</SelectItem>
+                        <SelectItem value="5">5 days</SelectItem>
+                        <SelectItem value="7">1 week</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <Switch
+                    id="reminder-toggle"
+                    checked={enableReminder}
+                    onCheckedChange={setEnableReminder}
+                    disabled={!deadline}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Candidate Search */}
             <div className="px-6 py-3 border-b flex items-center gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
