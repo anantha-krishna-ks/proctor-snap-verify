@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Settings, Trash2, GripVertical, ChevronDown, ChevronUp, Layers, GitBranch, Download } from "lucide-react";
+import { ArrowLeft, Plus, Settings, Trash2, GripVertical, ChevronDown, ChevronUp, Layers, GitBranch, Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,7 @@ import BranchingFlowPreview from "@/components/BranchingFlowPreview";
 
 const CreateForm = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formName, setFormName] = useState("");
   const [formCode, setFormCode] = useState("");
   const [configurations, setConfigurations] = useState<FormConfiguration[]>(mockConfigurations);
@@ -178,6 +179,74 @@ const CreateForm = () => {
     return colors[type] || "bg-muted text-muted-foreground";
   };
 
+  const handleImportJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target?.result as string);
+        
+        // Validate basic structure
+        if (!data.sections || !Array.isArray(data.sections)) {
+          throw new Error("Invalid form structure: missing sections");
+        }
+
+        // Import form details
+        if (data.name) setFormName(data.name);
+        if (data.code) setFormCode(data.code);
+
+        // Import configuration if it matches an existing one
+        if (data.configuration?.id) {
+          const existingConfig = configurations.find(c => c.id === data.configuration.id);
+          if (existingConfig) {
+            setSelectedConfigId(data.configuration.id);
+          }
+        }
+
+        // Import sections with items
+        const importedSections: FormSection[] = data.sections.map((section: any) => ({
+          id: section.id || `section-${Date.now()}-${Math.random()}`,
+          name: section.name || "Imported Section",
+          items: (section.items || []).map((item: any) => ({
+            id: item.id || `item-${Date.now()}-${Math.random()}`,
+            title: item.title || "Untitled Item",
+            type: item.type || "mcq",
+            marks: item.marks || 1,
+            category: item.category,
+            difficulty: item.difficulty,
+            hasBranching: item.hasBranching || false,
+            options: item.options?.map((opt: any) => ({
+              id: opt.id || `opt-${Date.now()}-${Math.random()}`,
+              text: opt.text || "",
+              isCorrect: opt.isCorrect,
+              branchTo: opt.branchTo,
+            })),
+          })),
+        }));
+
+        setSections(importedSections);
+        setExpandedSections(importedSections.map(s => s.id));
+
+        toast({ 
+          title: "Imported", 
+          description: `Loaded ${importedSections.length} sections with ${importedSections.reduce((sum, s) => sum + s.items.length, 0)} items` 
+        });
+      } catch (error) {
+        toast({ 
+          title: "Import Failed", 
+          description: error instanceof Error ? error.message : "Invalid JSON file", 
+          variant: "destructive" 
+        });
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input so same file can be imported again
+    event.target.value = "";
+  };
+
   const handleExportJSON = () => {
     const formData = {
       name: formName || "Untitled Form",
@@ -261,6 +330,17 @@ const CreateForm = () => {
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => navigate("/forms")}>
                 Cancel
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept=".json"
+                onChange={handleImportJSON}
+                className="hidden"
+              />
+              <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="h-4 w-4 mr-2" />
+                Import JSON
               </Button>
               <Button variant="outline" onClick={handleExportJSON}>
                 <Download className="h-4 w-4 mr-2" />
