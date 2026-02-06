@@ -55,7 +55,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex bg-background">
       {/* Left side - Illustration */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-secondary/30 p-12">
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-white p-12">
         <img
           src={graduationImg}
           alt="Graduating students celebrating"
