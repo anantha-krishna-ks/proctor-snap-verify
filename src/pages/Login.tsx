@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Shield, UserCheck, Users, Eye, FileEdit, Wrench } from "lucide-react";
+import { Shield, UserCheck, Users, Eye, FileEdit, EyeOff, BookOpen } from "lucide-react";
 import { toast } from "sonner";
+import graduationImg from "@/assets/graduation-illustration.png";
 
 const roles = [
   { value: "admin", label: "Admin", icon: Shield, description: "Full system access" },
@@ -27,6 +27,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,14 +37,12 @@ const Login = () => {
       return;
     }
 
-    // Mock login - store role in localStorage
     localStorage.setItem("userRole", selectedRole);
     localStorage.setItem("userEmail", email);
     localStorage.setItem("isAuthenticated", "true");
 
     toast.success(`Logged in as ${roles.find(r => r.value === selectedRole)?.label}`);
 
-    // Route based on role
     if (selectedRole === "marker") {
       navigate("/marker");
     } else if (selectedRole === "author" || selectedRole === "test_author") {
@@ -54,44 +53,72 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-bold">Assessment Platform</CardTitle>
-          <CardDescription>
-            Sign in to access your dashboard
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+    <div className="min-h-screen flex bg-background">
+      {/* Left side - Illustration */}
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-secondary/30 p-12">
+        <img
+          src={graduationImg}
+          alt="Graduating students celebrating"
+          className="max-w-lg w-full object-contain"
+        />
+      </div>
+
+      {/* Right side - Login Form */}
+      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Logo / Brand */}
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2 text-primary">
+              <BookOpen className="h-10 w-10" />
+              <span className="text-3xl font-bold tracking-tight">Saras</span>
+            </div>
+            <p className="text-xs font-semibold tracking-widest uppercase text-primary">
+              Test & Assessment
+            </p>
+            <p className="text-sm text-muted-foreground mt-3">TestPlayer</p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Username</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="bg-secondary/40 border-0 h-11"
                 required
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-secondary/40 border-0 h-11 pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="role">Select Role</Label>
               <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger id="role">
+                <SelectTrigger id="role" className="bg-secondary/40 border-0 h-11">
                   <SelectValue placeholder="Choose your role" />
                 </SelectTrigger>
                 <SelectContent>
@@ -101,12 +128,8 @@ const Login = () => {
                       <SelectItem key={role.value} value={role.value}>
                         <div className="flex items-center gap-2">
                           <Icon className="h-4 w-4" />
-                          <div>
-                            <div className="font-medium">{role.label}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {role.description}
-                            </div>
-                          </div>
+                          <span className="font-medium">{role.label}</span>
+                          <span className="text-xs text-muted-foreground">— {role.description}</span>
                         </div>
                       </SelectItem>
                     );
@@ -115,29 +138,24 @@ const Login = () => {
               </Select>
             </div>
 
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full h-11 text-sm font-semibold uppercase tracking-wider">
+              Login
             </Button>
 
-            <div className="mt-6 p-4 bg-muted/50 rounded-lg space-y-2">
-              <div className="text-xs font-semibold text-foreground">Quick Test Credentials:</div>
-              <div className="text-xs text-muted-foreground space-y-1">
-                <div><span className="font-medium">Email:</span> Any email (e.g., test@example.com)</div>
-                <div><span className="font-medium">Password:</span> Any password (e.g., password123)</div>
-                <div className="pt-2 font-medium text-foreground">Test as:</div>
-                <div className="pl-2 space-y-0.5">
-                  <div>• <span className="font-medium">Marker</span> - Evaluate candidates</div>
-                  <div>• <span className="font-medium">Admin</span> - Full system access</div>
-                  <div>• <span className="font-medium">Proctor</span> - Monitor assessments</div>
-                </div>
-              </div>
+            <div className="flex items-center justify-between text-sm">
+              <Link to="/forgot-password" className="text-primary hover:underline">
+                Forgot Password?
+              </Link>
+              <Link to="/register" className="text-primary hover:underline">
+                Register
+              </Link>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </div>
 
-      <div className="absolute bottom-4 text-center text-xs text-muted-foreground">
-        Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd
+        <p className="mt-12 text-xs text-muted-foreground">
+          Powered by Saras | Copyright © 2025 Excelsoft Technologies Ltd
+        </p>
       </div>
     </div>
   );
