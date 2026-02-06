@@ -25,6 +25,7 @@ import SurveyList from "./pages/SurveyList";
 import CreateSurvey from "./pages/CreateSurvey";
 import Login from "./pages/Login";
 import ProjectLayoutShowcase from "./pages/ProjectLayoutShowcase";
+import Register from "./pages/Register";
 import BranchingBuilder from "./pages/BranchingBuilder";
 import NotFound from "./pages/NotFound";
 
@@ -60,6 +61,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route
             path="/admin"
             element={
