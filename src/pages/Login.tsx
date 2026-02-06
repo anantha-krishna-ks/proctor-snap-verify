@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Shield, UserCheck, Users, Eye, FileEdit, EyeOff, BookOpen } from "lucide-react";
+import { Shield, UserCheck, Users, Eye, FileEdit, EyeOff, BookOpen, LogIn } from "lucide-react";
 import { toast } from "sonner";
 import graduationImg from "@/assets/graduation-illustration.png";
 
@@ -139,6 +139,7 @@ const Login = () => {
             </div>
 
             <Button type="submit" className="w-full h-11 text-sm font-semibold uppercase tracking-wider">
+              <LogIn className="h-4 w-4" />
               Login
             </Button>
 
