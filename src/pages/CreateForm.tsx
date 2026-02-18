@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Settings, Trash2, GripVertical, ChevronDown, ChevronUp, Layers, GitBranch, Download, Upload } from "lucide-react";
+import { ArrowLeft, Plus, Settings, Trash2, GripVertical, ChevronDown, ChevronUp, Layers, GitBranch, Download, Upload, X, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,8 @@ const CreateForm = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formName, setFormName] = useState("");
   const [formCode, setFormCode] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [configurations, setConfigurations] = useState<FormConfiguration[]>(mockConfigurations);
   const [selectedConfigId, setSelectedConfigId] = useState("default");
   const [sections, setSections] = useState<FormSection[]>([
@@ -196,6 +198,7 @@ const CreateForm = () => {
         // Import form details
         if (data.name) setFormName(data.name);
         if (data.code) setFormCode(data.code);
+        if (data.tags && Array.isArray(data.tags)) setTags(data.tags);
 
         // Import configuration if it matches an existing one
         if (data.configuration?.id) {
@@ -251,6 +254,7 @@ const CreateForm = () => {
     const formData = {
       name: formName || "Untitled Form",
       code: formCode || "FORM-001",
+      tags,
       configuration: selectedConfig,
       sections: sections.map((section) => ({
         id: section.id,
@@ -380,6 +384,62 @@ const CreateForm = () => {
                     value={formCode}
                     onChange={(e) => setFormCode(e.target.value)}
                   />
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div className="space-y-2">
+                <Label htmlFor="tagInput" className="flex items-center gap-1.5">
+                  <Tag className="h-3.5 w-3.5" />
+                  Tags
+                </Label>
+                <p className="text-xs text-muted-foreground">Add tags like subject, grade, or status to keep forms organized</p>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="gap-1 pr-1">
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => setTags(tags.filter((t) => t !== tag))}
+                        className="ml-0.5 rounded-full p-0.5 hover:bg-muted-foreground/20 transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    id="tagInput"
+                    placeholder="Type a tag and press Enter"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const value = tagInput.trim();
+                        if (value && !tags.includes(value)) {
+                          setTags([...tags, value]);
+                        }
+                        setTagInput("");
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const value = tagInput.trim();
+                      if (value && !tags.includes(value)) {
+                        setTags([...tags, value]);
+                      }
+                      setTagInput("");
+                    }}
+                    disabled={!tagInput.trim()}
+                  >
+                    Add
+                  </Button>
                 </div>
               </div>
             </CardContent>
