@@ -86,8 +86,37 @@ const ProductMeta = ({ project }: { project: Project }) => (
 );
 
 // ── Action button renderer ──
-const ActionButton = ({ action, isDanger }: { action: ActionItem; isDanger?: boolean }) => {
+const ActionButton = ({ action, isDanger, variant = "default" }: { action: ActionItem; isDanger?: boolean; variant?: "default" | "polished" }) => {
   const Icon = action.icon;
+
+  if (variant === "polished") {
+    return (
+      <button
+        className={cn(
+          "group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 text-left w-full",
+          isDanger
+            ? "text-destructive hover:bg-destructive/10 hover:shadow-sm"
+            : "text-foreground hover:bg-primary/5 hover:shadow-sm hover:translate-x-0.5"
+        )}
+      >
+        <div className={cn(
+          "flex items-center justify-center h-8 w-8 rounded-lg transition-all duration-200 flex-shrink-0",
+          isDanger
+            ? "bg-destructive/10 group-hover:bg-destructive/15"
+            : "bg-primary/10 group-hover:bg-primary/15 group-hover:scale-105"
+        )}>
+          <Icon className={cn("h-4 w-4", isDanger ? "text-destructive" : "text-primary")} />
+        </div>
+        <span className="truncate font-medium">{action.label}</span>
+        <ChevronRight className={cn(
+          "h-3.5 w-3.5 ml-auto opacity-0 -translate-x-1 transition-all duration-200",
+          "group-hover:opacity-50 group-hover:translate-x-0",
+          isDanger ? "text-destructive" : "text-muted-foreground"
+        )} />
+      </button>
+    );
+  }
+
   return (
     <button
       className={cn(
@@ -113,45 +142,77 @@ const OptionA = ({ projects }: { projects: Project[] }) => {
         {projects.map((p) => (
           <Card
             key={p.id}
-            className="cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+            className="group cursor-pointer overflow-hidden border border-border/60 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300"
             onClick={() => setSelected(p)}
           >
-            <div className="h-28 bg-muted flex items-center justify-center relative overflow-hidden">
+            <div className="h-32 bg-gradient-to-br from-primary/5 via-muted to-accent/5 flex items-center justify-center relative overflow-hidden">
               {p.image ? (
-                <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               ) : (
-                <Image className="h-8 w-8 text-muted-foreground" />
+                <div className="flex flex-col items-center gap-1">
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Image className="h-6 w-6 text-primary/60" />
+                  </div>
+                </div>
               )}
+              <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
-            <CardContent className="p-3">
-              <p className="text-xs text-muted-foreground font-mono">{p.code}</p>
-              <h3 className="font-semibold text-foreground text-sm truncate">{p.name}</h3>
-              <ProductMeta project={p} />
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground font-mono mb-0.5">{p.code}</p>
+              <h3 className="font-semibold text-foreground truncate">{p.name}</h3>
+              <div className="mt-3">
+                <ProductMeta project={p} />
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
       <Sheet open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-        <SheetContent className="w-[380px] sm:w-[440px] p-0">
+        <SheetContent className="w-[400px] sm:w-[460px] p-0 border-l border-border/60 shadow-2xl">
           {selected && (
             <>
-              <SheetHeader className="p-5 pb-3">
-                <SheetTitle className="text-lg">{selected.name}</SheetTitle>
-                <SheetDescription className="text-xs font-mono">{selected.code}</SheetDescription>
-                <ProductMeta project={selected} />
-              </SheetHeader>
+              {/* Polished header with gradient */}
+              <div className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent" />
+                <div className="relative p-6 pb-4">
+                  <SheetHeader className="space-y-1.5">
+                    <div className="flex items-start gap-3">
+                      <div className="h-14 w-14 rounded-xl bg-card shadow-sm border border-border/50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {selected.image ? (
+                          <img src={selected.image} alt={selected.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <Image className="h-6 w-6 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <SheetTitle className="text-lg leading-snug">{selected.name}</SheetTitle>
+                        <SheetDescription className="text-xs font-mono mt-0.5">{selected.code}</SheetDescription>
+                      </div>
+                    </div>
+                  </SheetHeader>
+                  <div className="mt-3">
+                    <ProductMeta project={selected} />
+                  </div>
+                </div>
+              </div>
+
               <Separator />
-              <ScrollArea className="h-[calc(100vh-180px)]">
-                <div className="p-4 space-y-5">
-                  {actionGroups.map((group) => (
+
+              <ScrollArea className="h-[calc(100vh-200px)]">
+                <div className="p-5 space-y-6">
+                  {actionGroups.map((group, idx) => (
                     <div key={group.label}>
-                      <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">
-                        {group.label}
-                      </p>
+                      <div className="flex items-center gap-2 mb-3 px-1">
+                        <div className="h-1 w-1 rounded-full bg-primary" />
+                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                          {group.label}
+                        </p>
+                        <div className="flex-1 h-px bg-border/50 ml-2" />
+                      </div>
                       <div className="space-y-0.5">
                         {group.items.map((a) => (
-                          <ActionButton key={a.id} action={a} isDanger={a.id === "delete"} />
+                          <ActionButton key={a.id} action={a} isDanger={a.id === "delete"} variant="polished" />
                         ))}
                       </div>
                     </div>
