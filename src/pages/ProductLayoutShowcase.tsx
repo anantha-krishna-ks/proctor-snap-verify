@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
@@ -173,36 +174,56 @@ const OptionA = ({ projects }: { projects: Project[] }) => {
           {selected && (
             <>
               {/* Polished header with gradient */}
-              <div className="relative overflow-hidden">
+              <motion.div
+                className="relative overflow-hidden"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent" />
                 <div className="relative p-6 pb-4">
                   <SheetHeader className="space-y-1.5">
                     <div className="flex items-start gap-3">
-                      <div className="h-14 w-14 rounded-xl bg-card shadow-sm border border-border/50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <motion.div
+                        className="h-14 w-14 rounded-xl bg-card shadow-sm border border-border/50 flex items-center justify-center overflow-hidden flex-shrink-0"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 20 }}
+                      >
                         {selected.image ? (
                           <img src={selected.image} alt={selected.name} className="w-full h-full object-cover" />
                         ) : (
                           <Image className="h-6 w-6 text-muted-foreground" />
                         )}
-                      </div>
+                      </motion.div>
                       <div className="min-w-0">
                         <SheetTitle className="text-lg leading-snug">{selected.name}</SheetTitle>
                         <SheetDescription className="text-xs font-mono mt-0.5">{selected.code}</SheetDescription>
                       </div>
                     </div>
                   </SheetHeader>
-                  <div className="mt-3">
+                  <motion.div
+                    className="mt-3"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.15 }}
+                  >
                     <ProductMeta project={selected} />
-                  </div>
+                  </motion.div>
                 </div>
-              </div>
+              </motion.div>
 
               <Separator />
 
               <ScrollArea className="h-[calc(100vh-200px)]">
                 <div className="p-5 space-y-6">
-                  {actionGroups.map((group, idx) => (
-                    <div key={group.label}>
+                  {actionGroups.map((group, groupIdx) => (
+                    <motion.div
+                      key={group.label}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 + groupIdx * 0.08, duration: 0.35, ease: "easeOut" }}
+                    >
                       <div className="flex items-center gap-2 mb-3 px-1">
                         <div className="h-1 w-1 rounded-full bg-primary" />
                         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
@@ -211,11 +232,18 @@ const OptionA = ({ projects }: { projects: Project[] }) => {
                         <div className="flex-1 h-px bg-border/50 ml-2" />
                       </div>
                       <div className="space-y-0.5">
-                        {group.items.map((a) => (
-                          <ActionButton key={a.id} action={a} isDanger={a.id === "delete"} variant="polished" />
+                        {group.items.map((a, itemIdx) => (
+                          <motion.div
+                            key={a.id}
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 + groupIdx * 0.08 + itemIdx * 0.04, duration: 0.25, ease: "easeOut" }}
+                          >
+                            <ActionButton action={a} isDanger={a.id === "delete"} variant="polished" />
+                          </motion.div>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </ScrollArea>
