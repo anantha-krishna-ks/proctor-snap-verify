@@ -25,6 +25,7 @@ import SurveyList from "./pages/SurveyList";
 import CreateSurvey from "./pages/CreateSurvey";
 import Login from "./pages/Login";
 import ProjectLayoutShowcase from "./pages/ProjectLayoutShowcase";
+import ProductLayoutShowcase from "./pages/ProductLayoutShowcase";
 import Register from "./pages/Register";
 import BranchingBuilder from "./pages/BranchingBuilder";
 import ProductsShowcase from "./pages/ProductsShowcase";
@@ -256,6 +257,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <ProductsShowcase />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/products-v3"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ProductLayoutShowcase />
               </ProtectedRoute>
             }
           />
