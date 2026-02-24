@@ -27,6 +27,7 @@ import Login from "./pages/Login";
 import ProjectLayoutShowcase from "./pages/ProjectLayoutShowcase";
 import Register from "./pages/Register";
 import BranchingBuilder from "./pages/BranchingBuilder";
+import ProductsShowcase from "./pages/ProductsShowcase";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -247,6 +248,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <BranchingBuilder />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/products-v2"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ProductsShowcase />
               </ProtectedRoute>
             }
           />
