@@ -356,9 +356,11 @@ const ProductsShowcase = () => {
     setSelected(null);
   };
 
-  // ── Compute sheet width based on mode ──
-  const getSheetWidth = () => {
-    if (panelMode === "expand" && subView) return "w-[760px] sm:w-[840px]";
+  // ── Compute sheet width based on mode + subView ──
+  const getInplaceWidth = () => {
+    if (!subView) return "w-[400px] sm:w-[460px]";
+    if (subView === "edit") return "w-[440px] sm:w-[520px]";
+    if (subView === "assign") return "w-[460px] sm:w-[560px]";
     return "w-[400px] sm:w-[460px]";
   };
 
@@ -466,7 +468,7 @@ const ProductsShowcase = () => {
           {/* ═══ MODE A: IN-PLACE SWAP ═══ */}
           {panelMode === "inplace" && (
             <Sheet open={!!selected} onOpenChange={(open) => { if (!open) { setSelected(null); setSubView(null); } }}>
-              <SheetContent className="w-[400px] sm:w-[460px] p-0 border-l border-border/60 shadow-2xl flex flex-col">
+              <SheetContent className={cn("p-0 border-l border-border/60 shadow-2xl flex flex-col !max-w-none transition-[width] duration-300 ease-in-out", getInplaceWidth())}>
                 {selected && (
                   <AnimatePresence mode="wait">
                     {!subView ? (
