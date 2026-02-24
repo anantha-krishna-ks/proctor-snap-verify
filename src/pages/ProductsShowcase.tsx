@@ -521,24 +521,31 @@ const ProductsShowcase = () => {
           {/* ═══ MODE C: EXPAND WIDTH ═══ */}
           {panelMode === "expand" && (
             <Sheet open={!!selected} onOpenChange={(open) => { if (!open) { setSelected(null); setSubView(null); } }}>
-              <SheetContent className={cn("p-0 border-l border-border/60 shadow-2xl flex transition-all duration-300", getSheetWidth())}>
+              <SheetContent
+                className={cn(
+                  "p-0 border-l border-border/60 shadow-2xl flex flex-row !max-w-none transition-[width] duration-300 ease-in-out",
+                  subView ? "w-[840px]" : "w-[460px]"
+                )}
+              >
                 {selected && (
-                  <div className="flex flex-1 h-full">
-                    {/* Actions side */}
-                    <div className={cn("flex flex-col transition-all duration-300 overflow-hidden", subView ? "w-[340px] border-r border-border/40" : "flex-1")}>
+                  <div className="flex flex-1 h-full min-w-0">
+                    {/* Actions side — fixed width */}
+                    <div className="flex flex-col w-[420px] min-w-[420px] overflow-hidden">
                       <ActionListContent project={selected} onAction={handleAction} onNav={(path) => navigate(path)} />
                     </div>
-                    {/* Sub-content side */}
+                    {/* Sub-content side — slides in */}
                     <AnimatePresence>
                       {subView && (
                         <motion.div
-                          className="flex-1 flex flex-col overflow-hidden"
+                          className="flex flex-col overflow-hidden border-l border-border/40"
                           initial={{ width: 0, opacity: 0 }}
-                          animate={{ width: "auto", opacity: 1 }}
+                          animate={{ width: 420, opacity: 1 }}
                           exit={{ width: 0, opacity: 0 }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                         >
-                          {renderSubContent()}
+                          <div className="w-[420px] h-full flex flex-col">
+                            {renderSubContent()}
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
