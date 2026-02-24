@@ -6,38 +6,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Search, Plus, FolderOpen, FileText, Calendar, Image,
   Pencil, Trash2, UserPlus, ClipboardList, BarChart3,
-  Copy, Archive, Settings, Eye, Download, Share2, Lock,
-  ChevronDown, ChevronUp, Pin, PinOff, Clock,
+  Layers, BookOpen, FileStack, CalendarDays, Package,
+  FolderArchive, BookMarked, ScrollText, UserCheck,
+  Grid3X3, List, MoreHorizontal,
 } from "lucide-react";
 import { mockProjects, Project } from "@/data/projectMockData";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import AddProductSheet from "@/components/AddProductSheet";
 import EditProductSheet from "@/components/EditProductSheet";
 import DeleteProductDialog from "@/components/DeleteProductDialog";
 import ProductUserAssignmentSheet from "@/components/ProductUserAssignmentSheet";
 import { cn } from "@/lib/utils";
-
-const STATUS_STYLES: Record<string, string> = {
-  active: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  draft: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  completed: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-};
+import { Separator } from "@/components/ui/separator";
 
 interface ActionItem {
   icon: React.ElementType;
   label: string;
   onClick: (project: Project) => void;
-  variant?: "default" | "destructive";
-  group: string;
+  variant?: "destructive";
 }
+
+type ActionGroup = { label: string; items: ActionItem[] };
 
 const ProductsShowcase = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [isEditProductOpen, setIsEditProductOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -50,26 +54,97 @@ const ProductsShowcase = () => {
       p.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const actions: ActionItem[] = [
-    { icon: ClipboardList, label: "Items", onClick: (p) => navigate(`/admin/products/${p.id}/items`), group: "Content" },
-    { icon: BarChart3, label: "Reports", onClick: (p) => navigate(`/admin/products/${p.id}/reports`), group: "Content" },
-    { icon: Eye, label: "Preview", onClick: () => {}, group: "Content" },
-    { icon: Download, label: "Export", onClick: () => {}, group: "Content" },
-    { icon: Pencil, label: "Edit", onClick: (p) => { setSelectedProduct(p); setIsEditProductOpen(true); }, group: "Manage" },
-    { icon: UserPlus, label: "Assign Users", onClick: (p) => { setSelectedProduct(p); setIsAssignUsersOpen(true); }, group: "Manage" },
-    { icon: Copy, label: "Duplicate", onClick: () => {}, group: "Manage" },
-    { icon: Share2, label: "Share", onClick: () => {}, group: "Manage" },
-    { icon: Settings, label: "Settings", onClick: () => {}, group: "Manage" },
-    { icon: Archive, label: "Archive", onClick: () => {}, group: "Manage" },
-    { icon: Lock, label: "Permissions", onClick: () => {}, group: "Manage" },
-    { icon: Trash2, label: "Delete", onClick: (p) => { setSelectedProduct(p); setIsDeleteDialogOpen(true); }, variant: "destructive", group: "Danger" },
+  const buildActions = (project: Project): ActionGroup[] => [
+    {
+      label: "Program Actions",
+      items: [
+        { icon: Pencil, label: "Edit Program", onClick: (p) => { setSelectedProduct(p); setIsEditProductOpen(true); } },
+        { icon: UserPlus, label: "Assign User", onClick: (p) => { setSelectedProduct(p); setIsAssignUsersOpen(true); } },
+        { icon: Trash2, label: "Delete Program", onClick: (p) => { setSelectedProduct(p); setIsDeleteDialogOpen(true); }, variant: "destructive" },
+      ],
+    },
+    {
+      label: "Author Actions",
+      items: [
+        { icon: Layers, label: "Manage Blueprint", onClick: () => {} },
+        { icon: ClipboardList, label: "Manage Items", onClick: (p) => navigate(`/admin/products/${p.id}/items`) },
+        { icon: BookOpen, label: "Manage Passages", onClick: () => {} },
+        { icon: FileStack, label: "Manage Assessment", onClick: () => {} },
+        { icon: CalendarDays, label: "Manage Schedules", onClick: () => navigate("/scheduling") },
+        { icon: Package, label: "Manage Batches", onClick: () => {} },
+        { icon: FolderArchive, label: "Manage Assets", onClick: () => {} },
+      ],
+    },
+    {
+      label: "Resources",
+      items: [
+        { icon: BookMarked, label: "Knowledge Base", onClick: () => {} },
+        { icon: ScrollText, label: "Guidelines", onClick: () => {} },
+        { icon: BarChart3, label: "Reports", onClick: (p) => navigate(`/admin/products/${p.id}/reports`) },
+      ],
+    },
+    {
+      label: "Marker Actions",
+      items: [
+        { icon: UserCheck, label: "Start Evaluation", onClick: () => {} },
+      ],
+    },
   ];
 
-  const groupedActions = actions.reduce<Record<string, ActionItem[]>>((acc, action) => {
-    if (!acc[action.group]) acc[action.group] = [];
-    acc[action.group].push(action);
-    return acc;
-  }, {});
+  const ActionPopover = ({ project }: { project: Project }) => {
+    const groups = buildActions(project);
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="secondary"
+            size="icon"
+            className="h-7 w-7 rounded-full bg-background/90 backdrop-blur-sm hover:bg-background shadow-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          side="bottom"
+          className="w-[340px] p-0"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-3 space-y-3 max-h-[420px] overflow-y-auto">
+            {groups.map((group, gi) => (
+              <div key={group.label}>
+                {gi > 0 && <Separator className="mb-3" />}
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">
+                  {group.label}
+                </p>
+                <div className="grid grid-cols-2 gap-1">
+                  {group.items.map((action) => {
+                    const Icon = action.icon;
+                    return (
+                      <button
+                        key={action.label}
+                        onClick={() => action.onClick(project)}
+                        className={cn(
+                          "flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors text-left w-full",
+                          action.variant === "destructive"
+                            ? "text-destructive hover:bg-destructive/10"
+                            : "text-foreground hover:bg-accent"
+                        )}
+                      >
+                        <Icon className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">{action.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -81,146 +156,98 @@ const ProductsShowcase = () => {
         <main className="flex-1 p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground">Products (New Layout)</h1>
-              <p className="text-sm text-muted-foreground mt-1">Click any product row to expand actions</p>
-            </div>
+            <h1 className="text-2xl font-semibold text-foreground">Products (V2)</h1>
             <div className="flex items-center gap-3">
+              <div className="flex items-center border border-border rounded-md">
+                <Button variant={viewMode === "grid" ? "secondary" : "ghost"} size="sm" onClick={() => setViewMode("grid")} className="rounded-r-none">
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+                <Button variant={viewMode === "list" ? "secondary" : "ghost"} size="sm" onClick={() => setViewMode("list")} className="rounded-l-none">
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
               <Button className="gap-2" onClick={() => setIsAddProductOpen(true)}>
                 <Plus className="h-4 w-4" />
                 Add Product
               </Button>
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
+                <Input placeholder="Search products..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
               </div>
             </div>
           </div>
 
-          {/* Product List */}
-          <div className="space-y-3">
-            {filteredProjects.map((project) => {
-              const isExpanded = expandedId === project.id;
-              return (
-                <Card
-                  key={project.id}
-                  className={cn(
-                    "transition-all duration-200 overflow-hidden",
-                    isExpanded && "ring-2 ring-primary/20 shadow-lg"
-                  )}
-                >
-                  {/* Main Row */}
-                  <button
-                    className="w-full text-left"
-                    onClick={() => setExpandedId(isExpanded ? null : project.id)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-4">
-                        {/* Thumbnail */}
-                        <div className="h-12 w-12 rounded-lg bg-muted flex-shrink-0 overflow-hidden flex items-center justify-center">
-                          {project.image ? (
-                            <img src={project.image} alt={project.name} className="h-full w-full object-cover" />
-                          ) : (
-                            <Image className="h-5 w-5 text-muted-foreground" />
-                          )}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-foreground truncate">{project.name}</h3>
-                            {project.isPinned && <Pin className="h-3.5 w-3.5 text-primary flex-shrink-0" />}
-                          </div>
-                          <div className="flex items-center gap-3 mt-0.5">
-                            <span className="text-xs text-muted-foreground font-mono">{project.code}</span>
-                            <Badge variant="secondary" className={cn("text-xs", STATUS_STYLES[project.status])}>
-                              {project.status}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1.5" title="Items">
-                            <FolderOpen className="h-4 w-4" />
-                            <span>{project.itemCount}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5" title="Tests">
-                            <FileText className="h-4 w-4" />
-                            <span>{project.testCount}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5" title="Schedules">
-                            <Calendar className="h-4 w-4" />
-                            <span>{project.scheduleCount}</span>
-                          </div>
-                        </div>
-
-                        {/* Progress */}
-                        <div className="hidden lg:flex items-center gap-3 w-32">
-                          <Progress value={project.progress} className="h-2 flex-1" />
-                          <span className="text-xs text-muted-foreground w-8 text-right">{project.progress}%</span>
-                        </div>
-
-                        {/* Last activity */}
-                        <div className="hidden xl:flex items-center gap-1.5 text-xs text-muted-foreground w-28">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>{project.lastActivity}</span>
-                        </div>
-
-                        {/* Expand icon */}
-                        <div className="flex-shrink-0 text-muted-foreground">
-                          {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                        </div>
+          {/* Grid View */}
+          {viewMode === "grid" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {filteredProjects.map((project) => (
+                <Card key={project.id} className="overflow-hidden group hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                  {/* Image */}
+                  <div className="h-32 bg-muted flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10" />
+                    {project.image ? (
+                      <img src={project.image} alt={project.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <div className="flex flex-col items-center text-muted-foreground">
+                        <Image className="h-10 w-10 mb-1" />
+                        <span className="text-xs">No Image</span>
                       </div>
-                    </CardContent>
-                  </button>
-
-                  {/* Expanded Actions Panel */}
-                  {isExpanded && (
-                    <div className="border-t border-border bg-muted/30 px-4 py-4 animate-in slide-in-from-top-2 duration-200">
-                      <div className="flex flex-wrap gap-x-8 gap-y-4">
-                        {Object.entries(groupedActions).map(([group, items]) => (
-                          <div key={group}>
-                            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">{group}</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {items.map((action) => {
-                                const Icon = action.icon;
-                                return (
-                                  <Button
-                                    key={action.label}
-                                    variant={action.variant === "destructive" ? "destructive" : "outline"}
-                                    size="sm"
-                                    className="gap-1.5 h-8 text-xs"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      action.onClick(project);
-                                    }}
-                                  >
-                                    <Icon className="h-3.5 w-3.5" />
-                                    {action.label}
-                                  </Button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                    )}
+                    {/* Action button */}
+                    <div className="absolute top-2 right-2 z-20">
+                      <ActionPopover project={project} />
                     </div>
-                  )}
+                  </div>
+
+                  {/* Content */}
+                  <CardContent className="p-3">
+                    <p className="text-xs text-muted-foreground font-mono truncate">Code:{project.code}</p>
+                    <h3 className="font-semibold text-foreground truncate text-sm mt-0.5" title={project.name}>{project.name}</h3>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><FolderOpen className="h-3.5 w-3.5" />{project.itemCount}</span>
+                      <span className="flex items-center gap-1"><FileText className="h-3.5 w-3.5" />{project.testCount}</span>
+                      <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{project.scheduleCount}</span>
+                    </div>
+                  </CardContent>
                 </Card>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {/* List View */}
+          {viewMode === "list" && (
+            <div className="border border-border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold">CODE</TableHead>
+                    <TableHead className="font-semibold">NAME</TableHead>
+                    <TableHead className="font-semibold text-center">ITEMS</TableHead>
+                    <TableHead className="font-semibold text-center">TESTS</TableHead>
+                    <TableHead className="font-semibold text-center">SCHEDULES</TableHead>
+                    <TableHead className="font-semibold text-center w-16">ACTIONS</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProjects.map((project) => (
+                    <TableRow key={project.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium text-primary">{project.code}</TableCell>
+                      <TableCell>{project.name}</TableCell>
+                      <TableCell className="text-center">{project.itemCount}</TableCell>
+                      <TableCell className="text-center">{project.testCount}</TableCell>
+                      <TableCell className="text-center">{project.scheduleCount}</TableCell>
+                      <TableCell className="text-center">
+                        <ActionPopover project={project} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
 
           {filteredProjects.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              No products found matching your search.
-            </div>
+            <div className="text-center py-12 text-muted-foreground">No products found matching your search.</div>
           )}
 
           {/* Sheets/Dialogs */}
@@ -229,12 +256,9 @@ const ProductsShowcase = () => {
           <DeleteProductDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} product={selectedProduct} />
           <ProductUserAssignmentSheet open={isAssignUsersOpen} onOpenChange={setIsAssignUsersOpen} product={selectedProduct} />
 
-          {/* Footer */}
           <div className="mt-8 text-center text-xs text-muted-foreground">
             Powered by Saras | Copyright © 2025 of Excelsoft Technologies Ltd{" "}
-            <a href="https://www.excelsoftcorp.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-              https://www.excelsoftcorp.com
-            </a>
+            <a href="https://www.excelsoftcorp.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://www.excelsoftcorp.com</a>
           </div>
         </main>
       </div>
