@@ -77,6 +77,7 @@ const actionGroups: ActionGroup[] = [
     items: [
       { icon: Pencil, label: "Edit Program", id: "edit", subView: "edit" },
       { icon: UserPlus, label: "Assign User", id: "assign", subView: "assign" },
+      { icon: GitBranch, label: "Workflow", id: "workflow", navTo: "/admin/workflow-settings" },
       { icon: Trash2, label: "Delete Program", id: "delete", subView: "delete", variant: "destructive" },
     ],
   },
