@@ -203,7 +203,7 @@ const AssignUsersContent = ({ project, onBack, onSave }: { project: Project; onB
   const getRoleName = (roleId: string) => allWorkflowRoles.find(r => r.id === roleId)?.name || "Select role";
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       <div className="flex items-center gap-2 p-4 border-b border-border shrink-0">
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
           <ArrowLeft className="h-4 w-4" />
