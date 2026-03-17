@@ -56,6 +56,7 @@ const WorkflowSettings = () => {
   );
 
   const [selectedWorkflowId, setSelectedWorkflowId] = useState(workflow.id);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSave = () => {
     toast({ title: "Workflow saved", description: `"${workflow.name}" has been saved successfully.` });
