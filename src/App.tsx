@@ -29,6 +29,7 @@ import ProductLayoutShowcase from "./pages/ProductLayoutShowcase";
 import Register from "./pages/Register";
 import BranchingBuilder from "./pages/BranchingBuilder";
 import ProductsShowcase from "./pages/ProductsShowcase";
+import WorkflowSettings from "./pages/WorkflowSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -265,6 +266,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <ProductLayoutShowcase />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/workflow-settings"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <WorkflowSettings />
               </ProtectedRoute>
             }
           />

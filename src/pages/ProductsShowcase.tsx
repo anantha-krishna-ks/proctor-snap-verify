@@ -35,12 +35,14 @@ import {
   Layers, BookOpen, FileStack, CalendarDays, Package,
   FolderArchive, BookMarked, ScrollText, UserCheck,
   Grid3X3, List, ChevronRight, ArrowLeft, Save, Upload, X,
-  Users, SplitSquareHorizontal, Layers2, Replace,
+  Users, SplitSquareHorizontal, Layers2, Replace, GitBranch,
 } from "lucide-react";
 import { mockProjects, Project } from "@/data/projectMockData";
 import { mockUsers } from "@/data/adminMockData";
 import AddProductSheet from "@/components/AddProductSheet";
 import { toast } from "@/hooks/use-toast";
+import { WorkflowSummary } from "@/components/WorkflowBuilder";
+import { getWorkflowForProgram } from "@/data/workflowMockData";
 
 // ── Types ──
 type PanelMode = "inplace" | "stacked" | "expand";
@@ -75,6 +77,7 @@ const actionGroups: ActionGroup[] = [
     items: [
       { icon: Pencil, label: "Edit Program", id: "edit", subView: "edit" },
       { icon: UserPlus, label: "Assign User", id: "assign", subView: "assign" },
+      { icon: GitBranch, label: "Workflow", id: "workflow", navTo: "/admin/workflow-settings" },
       { icon: Trash2, label: "Delete Program", id: "delete", subView: "delete", variant: "destructive" },
     ],
   },
@@ -303,6 +306,7 @@ const ActionListContent = ({ project, onAction, onNav }: {
                 <motion.div key={a.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + gi * 0.08 + ii * 0.04, duration: 0.25, ease: "easeOut" }}>
                   <ActionBtn action={a} onClick={() => {
                     if (a.subView) onAction(a.subView);
+                    else if (a.id === "workflow") onNav(`/admin/workflow-settings?programId=${project.id}`);
                     else if (a.navTo) onNav(a.navTo.replace("{id}", project.id));
                   }} />
                 </motion.div>
@@ -310,6 +314,28 @@ const ActionListContent = ({ project, onAction, onNav }: {
             </div>
           </motion.div>
         ))}
+
+        {/* Workflow Summary Card */}
+        {(() => {
+          const wf = getWorkflowForProgram(project.id);
+          if (!wf) return null;
+          return (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.35 }}>
+              <div className="flex items-center gap-2 mb-3 px-1">
+                <div className="h-1 w-1 rounded-full bg-primary" />
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Active Workflow</p>
+                <div className="flex-1 h-px bg-border/50 ml-2" />
+              </div>
+              <div className="border border-border/60 rounded-lg p-3 bg-muted/30">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold">{wf.name}</p>
+                  <Badge variant="outline" className="text-[10px] h-5">{wf.steps.length} steps</Badge>
+                </div>
+                <WorkflowSummary workflow={wf} />
+              </div>
+            </motion.div>
+          );
+        })()}
       </div>
     </ScrollArea>
   </>
