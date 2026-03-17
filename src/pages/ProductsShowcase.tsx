@@ -42,7 +42,7 @@ import { mockUsers } from "@/data/adminMockData";
 import AddProductSheet from "@/components/AddProductSheet";
 import { toast } from "@/hooks/use-toast";
 import { WorkflowSummary } from "@/components/WorkflowBuilder";
-import { getWorkflowForProgram } from "@/data/workflowMockData";
+import { getWorkflowForProgram, allWorkflowRoles } from "@/data/workflowMockData";
 
 // ── Types ──
 type PanelMode = "inplace" | "stacked" | "expand";
