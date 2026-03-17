@@ -66,7 +66,7 @@ const WorkflowSettings = () => {
     <div className="flex h-screen bg-background">
       <AdminSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader />
+        <DashboardHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
         <div className="flex-1 overflow-auto">
           <div className="p-6 max-w-5xl mx-auto space-y-6">
             {/* Header */}
