@@ -203,7 +203,7 @@ const AssignUsersContent = ({ project, onBack, onSave }: { project: Project; onB
   const getRoleName = (roleId: string) => allWorkflowRoles.find(r => r.id === roleId)?.name || "Select role";
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       <div className="flex items-center gap-2 p-4 border-b border-border shrink-0">
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
           <ArrowLeft className="h-4 w-4" />
@@ -600,7 +600,7 @@ const ProductsShowcase = () => {
                         <ActionListContent project={selected} onAction={handleAction} onNav={(path) => navigate(path)} />
                       </motion.div>
                     ) : (
-                      <motion.div key={subView} className="flex-1 flex flex-col" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.25 }}>
+                      <motion.div key={subView} className="flex-1 flex flex-col min-h-0 overflow-hidden" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.25 }}>
                         {renderSubContent()}
                       </motion.div>
                     )}
