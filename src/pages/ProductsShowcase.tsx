@@ -203,8 +203,8 @@ const AssignUsersContent = ({ project, onBack, onSave }: { project: Project; onB
   const getRoleName = (roleId: string) => allWorkflowRoles.find(r => r.id === roleId)?.name || "Select role";
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 p-4 border-b border-border">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex items-center gap-2 p-4 border-b border-border shrink-0">
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -213,7 +213,7 @@ const AssignUsersContent = ({ project, onBack, onSave }: { project: Project; onB
       </div>
 
       {/* Search + Scope Filter */}
-      <div className="px-4 py-3 border-b border-border space-y-2">
+      <div className="px-4 py-3 border-b border-border space-y-2 shrink-0">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
@@ -228,27 +228,27 @@ const AssignUsersContent = ({ project, onBack, onSave }: { project: Project; onB
         </div>
       </div>
 
-      {/* Workflow Info Banner */}
-      {workflow && (
-        <div className="mx-4 mt-3 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
-          <div className="flex items-center gap-2 text-xs">
-            <GitBranch className="h-3.5 w-3.5 text-primary" />
-            <span className="font-medium text-foreground">{workflow.name}</span>
-            <Badge variant="outline" className="text-[10px] h-4 ml-auto">{workflow.steps.length} steps</Badge>
-          </div>
-          <div className="flex gap-1 mt-1.5 flex-wrap">
-            {workflow.steps.map((step, i) => (
-              <span key={step.id} className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                {i > 0 && <ChevronRight className="h-2.5 w-2.5" />}
-                {step.name}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <ScrollArea className="flex-1">
+      <div className="flex-1 min-h-0 overflow-auto">
         <div className="p-4 space-y-4">
+          {/* Workflow Info Banner */}
+          {workflow && (
+            <div className="p-2.5 rounded-lg bg-primary/5 border border-primary/10">
+              <div className="flex items-center gap-2 text-xs">
+                <GitBranch className="h-3.5 w-3.5 text-primary" />
+                <span className="font-medium text-foreground">{workflow.name}</span>
+                <Badge variant="outline" className="text-[10px] h-4 ml-auto">{workflow.steps.length} steps</Badge>
+              </div>
+              <div className="flex gap-1 mt-1.5 flex-wrap">
+                {workflow.steps.map((step, i) => (
+                  <span key={step.id} className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                    {i > 0 && <ChevronRight className="h-2.5 w-2.5" />}
+                    {step.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Assigned Users */}
           <div>
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-2">
@@ -329,8 +329,8 @@ const AssignUsersContent = ({ project, onBack, onSave }: { project: Project; onB
             </div>
           </div>
         </div>
-      </ScrollArea>
-      <div className="p-4 border-t border-border flex gap-3">
+      </div>
+      <div className="p-4 border-t border-border flex gap-3 shrink-0">
         <Button variant="outline" className="flex-1" onClick={onBack}>Cancel</Button>
         <Button className="flex-1" onClick={onSave}><Save className="h-4 w-4 mr-2" />Save Assignments</Button>
       </div>
