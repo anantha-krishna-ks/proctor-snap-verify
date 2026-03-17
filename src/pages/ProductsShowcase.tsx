@@ -600,7 +600,7 @@ const ProductsShowcase = () => {
                         <ActionListContent project={selected} onAction={handleAction} onNav={(path) => navigate(path)} />
                       </motion.div>
                     ) : (
-                      <motion.div key={subView} className="flex-1 flex flex-col" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.25 }}>
+                      <motion.div key={subView} className="flex-1 flex flex-col min-h-0 overflow-hidden" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.25 }}>
                         {renderSubContent()}
                       </motion.div>
                     )}
