@@ -159,16 +159,48 @@ const EditFormContent = ({ project, onBack, onSave }: { project: Project; onBack
   );
 };
 
-// ── Inline Assign Users Form ──
-const AssignUsersContent = ({ project, onBack, onSave }: { project: Project; onBack: () => void; onSave: () => void }) => {
-  const [assigned, setAssigned] = useState<string[]>(mockUsers.slice(0, 3).map(u => u.id));
-  const [search, setSearch] = useState("");
+// ── User assignment with workflow role ──
+interface UserAssignment {
+  userId: string;
+  workflowRoleId: string;
+  roleScope: "organization" | "program";
+}
 
+const AssignUsersContent = ({ project, onBack, onSave }: { project: Project; onBack: () => void; onSave: () => void }) => {
+  const workflow = getWorkflowForProgram(project.id);
+  const [assignments, setAssignments] = useState<UserAssignment[]>(
+    mockUsers.slice(0, 3).map((u, i) => ({
+      userId: u.id,
+      workflowRoleId: allWorkflowRoles[i % allWorkflowRoles.length]?.id || "",
+      roleScope: "program",
+    }))
+  );
+  const [search, setSearch] = useState("");
+  const [scopeFilter, setScopeFilter] = useState<"all" | "organization" | "program">("all");
+
+  const assignedIds = assignments.map(a => a.userId);
   const filtered = mockUsers.filter(u =>
     u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  const toggle = (id: string) => setAssigned(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const rolesForScope = scopeFilter === "all" ? allWorkflowRoles :
+    allWorkflowRoles.filter(r => r.scope === scopeFilter);
+
+  const toggleUser = (userId: string) => {
+    if (assignedIds.includes(userId)) {
+      setAssignments(prev => prev.filter(a => a.userId !== userId));
+    } else {
+      setAssignments(prev => [...prev, { userId, workflowRoleId: "", roleScope: "program" }]);
+    }
+  };
+
+  const updateAssignment = (userId: string, field: keyof Omit<UserAssignment, "userId">, value: string) => {
+    setAssignments(prev => prev.map(a =>
+      a.userId === userId ? { ...a, [field]: value } : a
+    ));
+  };
+
+  const getRoleName = (roleId: string) => allWorkflowRoles.find(r => r.id === roleId)?.name || "Select role";
 
   return (
     <div className="flex flex-col h-full">
@@ -179,48 +211,114 @@ const AssignUsersContent = ({ project, onBack, onSave }: { project: Project; onB
         <Users className="h-4 w-4 text-muted-foreground" />
         <h3 className="font-semibold text-foreground">Assign Users</h3>
       </div>
-      <div className="px-4 py-3 border-b border-border">
+
+      {/* Search + Scope Filter */}
+      <div className="px-4 py-3 border-b border-border space-y-2">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
+        <div className="flex gap-1">
+          {(["all", "organization", "program"] as const).map(scope => (
+            <Button key={scope} variant={scopeFilter === scope ? "default" : "outline"} size="sm" className="text-xs h-7 capitalize"
+              onClick={() => setScopeFilter(scope)}>
+              {scope === "all" ? "All Roles" : `${scope} Roles`}
+            </Button>
+          ))}
+        </div>
       </div>
+
+      {/* Workflow Info Banner */}
+      {workflow && (
+        <div className="mx-4 mt-3 p-2.5 rounded-lg bg-primary/5 border border-primary/10">
+          <div className="flex items-center gap-2 text-xs">
+            <GitBranch className="h-3.5 w-3.5 text-primary" />
+            <span className="font-medium text-foreground">{workflow.name}</span>
+            <Badge variant="outline" className="text-[10px] h-4 ml-auto">{workflow.steps.length} steps</Badge>
+          </div>
+          <div className="flex gap-1 mt-1.5 flex-wrap">
+            {workflow.steps.map((step, i) => (
+              <span key={step.id} className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                {i > 0 && <ChevronRight className="h-2.5 w-2.5" />}
+                {step.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-4">
+          {/* Assigned Users */}
           <div>
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-2">
-              Assigned <Badge variant="secondary" className="text-[10px]">{assigned.length}</Badge>
+              Assigned <Badge variant="secondary" className="text-[10px]">{assignments.length}</Badge>
             </Label>
             <div className="border border-border rounded-lg overflow-hidden">
               <AnimatePresence mode="popLayout">
-                {filtered.filter(u => assigned.includes(u.id)).map(user => (
-                  <motion.div key={user.id} layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}
-                    className="flex items-center gap-3 p-3 hover:bg-muted/50 border-b border-border last:border-b-0 bg-primary/5"
-                  >
-                    <Checkbox checked onCheckedChange={() => toggle(user.id)} />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{user.name}</p>
-                      <p className="text-xs text-muted-foreground">{user.email}</p>
-                    </div>
-                  </motion.div>
-                ))}
+                {filtered.filter(u => assignedIds.includes(u.id)).map(user => {
+                  const assignment = assignments.find(a => a.userId === user.id)!;
+                  return (
+                    <motion.div key={user.id} layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}
+                      className="p-3 hover:bg-muted/50 border-b border-border last:border-b-0 bg-primary/5 space-y-2"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Checkbox checked onCheckedChange={() => toggleUser(user.id)} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{user.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                      </div>
+                      {/* Role Assignment Row */}
+                      <div className="ml-7 flex gap-2">
+                        <Select value={assignment.roleScope} onValueChange={(v) => updateAssignment(user.id, "roleScope", v)}>
+                          <SelectTrigger className="h-7 text-xs w-[110px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="organization">Org Level</SelectItem>
+                            <SelectItem value="program">Program Level</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Select value={assignment.workflowRoleId} onValueChange={(v) => updateAssignment(user.id, "workflowRoleId", v)}>
+                          <SelectTrigger className="h-7 text-xs flex-1">
+                            <SelectValue placeholder="Select workflow role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allWorkflowRoles
+                              .filter(r => r.scope === assignment.roleScope)
+                              .map(role => (
+                                <SelectItem key={role.id} value={role.id}>
+                                  <div className="flex flex-col">
+                                    <span>{role.name}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
-              {filtered.filter(u => assigned.includes(u.id)).length === 0 && (
+              {filtered.filter(u => assignedIds.includes(u.id)).length === 0 && (
                 <p className="p-3 text-sm text-muted-foreground text-center">No users assigned</p>
               )}
             </div>
           </div>
+
+          {/* Available Users */}
           <div>
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-2">
-              Available <Badge variant="outline" className="text-[10px]">{filtered.filter(u => !assigned.includes(u.id)).length}</Badge>
+              Available <Badge variant="outline" className="text-[10px]">{filtered.filter(u => !assignedIds.includes(u.id)).length}</Badge>
             </Label>
             <div className="border border-border rounded-lg overflow-hidden">
               <AnimatePresence mode="popLayout">
-                {filtered.filter(u => !assigned.includes(u.id)).map(user => (
+                {filtered.filter(u => !assignedIds.includes(u.id)).map(user => (
                   <motion.div key={user.id} layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}
                     className="flex items-center gap-3 p-3 hover:bg-muted/50 border-b border-border last:border-b-0"
                   >
-                    <Checkbox checked={false} onCheckedChange={() => toggle(user.id)} />
+                    <Checkbox checked={false} onCheckedChange={() => toggleUser(user.id)} />
                     <div className="flex-1">
                       <p className="text-sm font-medium">{user.name}</p>
                       <p className="text-xs text-muted-foreground">{user.email}</p>
