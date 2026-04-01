@@ -39,6 +39,7 @@ interface SelectedFolder {
   numberOfItems: number;
   percentage: number;
   includeSubFolders: boolean;
+  children?: ContentBalancingFolder[];
 }
 
 interface ItemExposureRow {
