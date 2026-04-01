@@ -35,7 +35,7 @@ import {
   Layers, BookOpen, FileStack, CalendarDays, Package,
   FolderArchive, BookMarked, ScrollText, UserCheck,
   Grid3X3, List, ChevronRight, ArrowLeft, Save, Upload, X,
-  Users, SplitSquareHorizontal, Layers2, Replace, GitBranch,
+  Users, SplitSquareHorizontal, Layers2, Replace, GitBranch, Zap,
 } from "lucide-react";
 import { mockProjects, Project } from "@/data/projectMockData";
 import { mockUsers } from "@/data/adminMockData";
@@ -88,6 +88,7 @@ const actionGroups: ActionGroup[] = [
       { icon: ClipboardList, label: "Manage Items", id: "items", navTo: "/admin/products/{id}/items" },
       { icon: BookOpen, label: "Manage Passages", id: "passages" },
       { icon: FileStack, label: "Manage Assessment", id: "assessment" },
+      { icon: Zap, label: "Adaptive Test (CAT)", id: "adaptive-test", navTo: "/admin/products/{id}/adaptive-test" },
       { icon: CalendarDays, label: "Manage Schedules", id: "schedules", navTo: "/scheduling" },
       { icon: Package, label: "Manage Batches", id: "batches" },
       { icon: FolderArchive, label: "Manage Assets", id: "assets" },

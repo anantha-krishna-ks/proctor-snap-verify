@@ -29,6 +29,7 @@ import ProductLayoutShowcase from "./pages/ProductLayoutShowcase";
 import Register from "./pages/Register";
 import BranchingBuilder from "./pages/BranchingBuilder";
 import ProductsShowcase from "./pages/ProductsShowcase";
+import AdaptiveTestConfig from "./pages/AdaptiveTestConfig";
 import WorkflowSettings from "./pages/WorkflowSettings";
 import NotFound from "./pages/NotFound";
 
@@ -274,6 +275,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <WorkflowSettings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/products/:productId/adaptive-test"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdaptiveTestConfig />
               </ProtectedRoute>
             }
           />
