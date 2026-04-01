@@ -329,11 +329,12 @@ const AdaptiveTestConfig = () => {
 
                 {/* Selected folders table */}
                 <div className="border border-border rounded-lg overflow-hidden">
-                  <div className="grid grid-cols-[1fr_120px_100px_100px] gap-0 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
+                  <div className="grid grid-cols-[1fr_120px_100px_100px_40px] gap-0 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
                     <span>Selected Folder(s)</span>
                     <span>Number of Items</span>
                     <span>Percentage</span>
                     <span>Include Sub</span>
+                    <span></span>
                   </div>
                   {selectedFolders.length === 0 ? (
                     <div className="px-4 py-8 text-center text-sm text-muted-foreground">
