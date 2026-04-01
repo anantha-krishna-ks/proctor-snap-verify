@@ -363,6 +363,7 @@ const AdaptiveTestConfig = () => {
                       folder={f}
                       onSelect={handleSelectFolder}
                       selectedIds={selectedFolders.map(sf => sf.id)}
+                      highlightedIds={highlightedIds}
                     />
                   ))}
                 </div>
