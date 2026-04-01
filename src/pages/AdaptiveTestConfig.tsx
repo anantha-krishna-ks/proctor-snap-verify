@@ -459,13 +459,9 @@ const AdaptiveTestConfig = () => {
               </div>
             </SectionCard>
 
-            {/* ─── 2-Column Grid: Algorithm, Constraints, Theta, Likelihood ─── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
             {/* ─── CAT Algorithm Configuration ─── */}
             <SectionCard title="CAT Algorithm Configuration" icon={Brain} delay={0.05}>
-              <div className="space-y-5">
-                {/* Test Type */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 <FieldRow label="Test Type(s)">
                   <div className="flex items-center gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -490,11 +486,9 @@ const AdaptiveTestConfig = () => {
                   <RangeInput fromValue={difficultyMin} toValue={difficultyMax} onFromChange={setDifficultyMin} onToChange={setDifficultyMax} />
                 </FieldRow>
 
-                <Separator />
-
                 <FieldRow label="Item Selection" required>
                   <Select value={itemSelection} onValueChange={setItemSelection}>
-                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="maximum-fisher">Maximum Fisher Information</SelectItem>
                       <SelectItem value="a-stratified">A-Stratified</SelectItem>
@@ -505,7 +499,7 @@ const AdaptiveTestConfig = () => {
 
                 <FieldRow label="Item Exposure" required>
                   <Select value={itemExposure} onValueChange={setItemExposure}>
-                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="randomesque">Randomesque</SelectItem>
                       <SelectItem value="sympson-hetter">Sympson-Hetter</SelectItem>
@@ -513,88 +507,77 @@ const AdaptiveTestConfig = () => {
                     </SelectContent>
                   </Select>
                 </FieldRow>
+              </div>
 
-                {/* Exposure rows */}
-                <div className="pl-[160px] space-y-2">
-                  {exposureRows.map((row) => (
-                    <div key={row.id} className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <Label className="text-xs text-muted-foreground whitespace-nowrap">Position</Label>
-                        <Input
-                          type="number" value={row.itemPositionFrom}
-                          onChange={e => setExposureRows(prev => prev.map(r =>
-                            r.id === row.id ? { ...r, itemPositionFrom: Number(e.target.value) } : r
-                          ))}
-                          className="h-8 w-16"
-                        />
-                        <span className="text-xs text-muted-foreground">to</span>
-                        <Input
-                          type="number" value={row.itemPositionTo}
-                          onChange={e => setExposureRows(prev => prev.map(r =>
-                            r.id === row.id ? { ...r, itemPositionTo: Number(e.target.value) } : r
-                          ))}
-                          className="h-8 w-16"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Label className="text-xs text-muted-foreground whitespace-nowrap">Items</Label>
-                        <Input
-                          type="number" value={row.numberOfItems}
-                          onChange={e => setExposureRows(prev => prev.map(r =>
-                            r.id === row.id ? { ...r, numberOfItems: Number(e.target.value) } : r
-                          ))}
-                          className="h-8 w-20"
-                        />
-                      </div>
+              {/* Exposure rows — full width below */}
+              <div className="space-y-2 mt-4">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wide">Exposure Control Rows</Label>
+                {exposureRows.map((row) => (
+                  <div key={row.id} className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs text-muted-foreground whitespace-nowrap">Position</Label>
+                      <Input type="number" value={row.itemPositionFrom}
+                        onChange={e => setExposureRows(prev => prev.map(r => r.id === row.id ? { ...r, itemPositionFrom: Number(e.target.value) } : r))}
+                        className="h-8 w-16" />
+                      <span className="text-xs text-muted-foreground">to</span>
+                      <Input type="number" value={row.itemPositionTo}
+                        onChange={e => setExposureRows(prev => prev.map(r => r.id === row.id ? { ...r, itemPositionTo: Number(e.target.value) } : r))}
+                        className="h-8 w-16" />
                     </div>
-                  ))}
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={addExposureRow} className="h-7">
-                      <Plus className="h-3.5 w-3.5 mr-1" />Add
-                    </Button>
-                    {exposureRows.length > 1 && (
-                      <Button size="sm" variant="outline" onClick={() => removeExposureRow(exposureRows[exposureRows.length - 1].id)} className="h-7">
-                        <Minus className="h-3.5 w-3.5 mr-1" />Remove
-                      </Button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs text-muted-foreground whitespace-nowrap">Items</Label>
+                      <Input type="number" value={row.numberOfItems}
+                        onChange={e => setExposureRows(prev => prev.map(r => r.id === row.id ? { ...r, numberOfItems: Number(e.target.value) } : r))}
+                        className="h-8 w-20" />
+                    </div>
                   </div>
+                ))}
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={addExposureRow} className="h-7">
+                    <Plus className="h-3.5 w-3.5 mr-1" />Add
+                  </Button>
+                  {exposureRows.length > 1 && (
+                    <Button size="sm" variant="outline" onClick={() => removeExposureRow(exposureRows[exposureRows.length - 1].id)} className="h-7">
+                      <Minus className="h-3.5 w-3.5 mr-1" />Remove
+                    </Button>
+                  )}
                 </div>
               </div>
             </SectionCard>
 
             {/* ─── Item Constraints ─── */}
             <SectionCard title="Item Constraints" icon={ShieldCheck} delay={0.1}>
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 <FieldRow label="Number of Scored Items" required>
-                  <Input value={scoredItems} onChange={e => setScoredItems(e.target.value)} className="w-64" />
+                  <Input value={scoredItems} onChange={e => setScoredItems(e.target.value)} className="w-full" />
                 </FieldRow>
                 <FieldRow label="Number of Unscored Items" required>
-                  <Input value={unscoredItems} onChange={e => setUnscoredItems(e.target.value)} className="w-64" />
+                  <Input value={unscoredItems} onChange={e => setUnscoredItems(e.target.value)} className="w-full" />
                 </FieldRow>
-                <Separator />
-                <div className="space-y-3">
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <Checkbox checked={noRepetition} onCheckedChange={(c) => setNoRepetition(!!c)} />
-                    <span className="text-sm text-foreground group-hover:text-primary transition-colors">
-                      No item repetition between test takes for a candidate
-                    </span>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <Checkbox checked={enemyExclusion} onCheckedChange={(c) => setEnemyExclusion(!!c)} />
-                    <span className="text-sm text-foreground group-hover:text-primary transition-colors">
-                      Enemy Item Exclusion
-                    </span>
-                  </label>
-                </div>
+              </div>
+              <Separator className="my-3" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <Checkbox checked={noRepetition} onCheckedChange={(c) => setNoRepetition(!!c)} />
+                  <span className="text-sm text-foreground group-hover:text-primary transition-colors">
+                    No item repetition between test takes
+                  </span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <Checkbox checked={enemyExclusion} onCheckedChange={(c) => setEnemyExclusion(!!c)} />
+                  <span className="text-sm text-foreground group-hover:text-primary transition-colors">
+                    Enemy Item Exclusion
+                  </span>
+                </label>
               </div>
             </SectionCard>
 
             {/* ─── Theta Estimation ─── */}
             <SectionCard title="Theta Estimation" icon={Gauge} delay={0.15}>
-              <div className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 <FieldRow label="Initial Ability Estimation" required>
                   <Select value={initialAbility} onValueChange={setInitialAbility}>
-                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="map">MAP</SelectItem>
                       <SelectItem value="eap">EAP</SelectItem>
@@ -604,7 +587,7 @@ const AdaptiveTestConfig = () => {
                 </FieldRow>
 
                 {initialAbility === "map" && (
-                  <FieldRow label="Prior Distribution (Bayesian)" info="Mean and SD for the Bayesian prior">
+                  <FieldRow label="Prior Distribution" info="Mean and SD for the Bayesian prior">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5">
                         <Label className="text-xs text-muted-foreground">Mean</Label>
@@ -620,7 +603,7 @@ const AdaptiveTestConfig = () => {
 
                 <FieldRow label="Interim Ability Estimation" required>
                   <Select value={interimEstimation} onValueChange={setInterimEstimation}>
-                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="mle">Maximum Likelihood Estimation</SelectItem>
                       <SelectItem value="map">MAP</SelectItem>
@@ -631,7 +614,7 @@ const AdaptiveTestConfig = () => {
 
                 <FieldRow label="Final Ability Estimation" required>
                   <Select value={finalEstimation} onValueChange={setFinalEstimation}>
-                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="mle">Maximum Likelihood Estimation</SelectItem>
                       <SelectItem value="map">MAP</SelectItem>
@@ -644,10 +627,10 @@ const AdaptiveTestConfig = () => {
 
             {/* ─── Finding Maximum in Likelihood ─── */}
             <SectionCard title="Finding Maximum in Likelihood" icon={Target} delay={0.2}>
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 <FieldRow label="Method" required>
                   <Select value={maximumMethod} onValueChange={setMaximumMethod}>
-                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="newton-raphson">Newton Raphson Method</SelectItem>
                       <SelectItem value="bisection">Bisection Method</SelectItem>
@@ -656,21 +639,20 @@ const AdaptiveTestConfig = () => {
                   </Select>
                 </FieldRow>
                 <FieldRow label="Start Theta Value">
-                  <Input value={startTheta} onChange={e => setStartTheta(e.target.value)} placeholder="eg: -1" className="w-40" />
+                  <Input value={startTheta} onChange={e => setStartTheta(e.target.value)} placeholder="eg: -1" className="w-full" />
                 </FieldRow>
                 <FieldRow label="Tolerance" required>
-                  <Input value={tolerance} onChange={e => setTolerance(e.target.value)} placeholder="eg: 1" className="w-40" />
+                  <Input value={tolerance} onChange={e => setTolerance(e.target.value)} placeholder="eg: 1" className="w-full" />
                 </FieldRow>
                 <FieldRow label="Maximum Iterations" required>
-                  <Input value={maxIterations} onChange={e => setMaxIterations(e.target.value)} placeholder="eg: 1" className="w-40" />
+                  <Input value={maxIterations} onChange={e => setMaxIterations(e.target.value)} placeholder="eg: 1" className="w-full" />
                 </FieldRow>
                 <FieldRow label="Maximum Allowed Delta" required>
-                  <Input value={maxDelta} onChange={e => setMaxDelta(e.target.value)} placeholder="eg: 1" className="w-40" />
+                  <Input value={maxDelta} onChange={e => setMaxDelta(e.target.value)} placeholder="eg: 1" className="w-full" />
                 </FieldRow>
               </div>
             </SectionCard>
 
-            </div>{/* end 2-column grid */}
 
             {/* ─── Content Balancing Method ─── */}
             <SectionCard title="Content Balancing Method" icon={Settings2} delay={0.25}>
