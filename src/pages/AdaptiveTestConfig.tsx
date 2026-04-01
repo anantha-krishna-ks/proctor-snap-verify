@@ -262,6 +262,21 @@ const AdaptiveTestConfig = () => {
 
             {/* ─── Content Balancing ─── */}
             <SectionCard title="Content Balancing" icon={FolderTree} delay={0}>
+              {/* Product selector */}
+              <div className="flex items-center gap-4">
+                <Label className="text-sm text-muted-foreground whitespace-nowrap">Product</Label>
+                <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                  <SelectTrigger className="w-80">
+                    <SelectValue placeholder="Select a product" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockProjects.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.code} — {p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Stats bar */}
               <div className="flex items-center gap-6 p-3 rounded-lg bg-muted/50 text-sm">
                 <div className="flex items-center gap-2">
