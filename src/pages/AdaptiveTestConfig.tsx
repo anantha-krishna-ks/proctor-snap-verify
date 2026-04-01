@@ -383,41 +383,50 @@ const AdaptiveTestConfig = () => {
                     </div>
                   ) : (
                     selectedFolders.map(sf => (
-                      <div key={sf.id} className="grid grid-cols-[1fr_120px_100px_100px_40px] gap-0 px-4 py-2.5 border-b border-border last:border-b-0 items-center">
-                        <span className="text-sm text-foreground truncate">{sf.name}</span>
-                        <Input
-                          type="number"
-                          value={sf.numberOfItems}
-                          onChange={e => setSelectedFolders(prev => prev.map(f =>
-                            f.id === sf.id ? { ...f, numberOfItems: Number(e.target.value) } : f
-                          ))}
-                          className="h-8 w-20"
-                        />
-                        <div className="flex items-center gap-1">
+                      <div key={sf.id}>
+                        <div className="grid grid-cols-[1fr_120px_100px_100px_40px] gap-0 px-4 py-2.5 border-b border-border items-center">
+                          <div className="flex items-center gap-1.5">
+                            <FolderTree className="h-3.5 w-3.5 text-warning shrink-0" />
+                            <span className="text-sm text-foreground truncate">{sf.name}</span>
+                          </div>
                           <Input
                             type="number"
-                            value={sf.percentage}
+                            value={sf.numberOfItems}
                             onChange={e => setSelectedFolders(prev => prev.map(f =>
-                              f.id === sf.id ? { ...f, percentage: Number(e.target.value) } : f
+                              f.id === sf.id ? { ...f, numberOfItems: Number(e.target.value) } : f
                             ))}
-                            className="h-8 w-16"
+                            className="h-8 w-20"
                           />
-                          <span className="text-xs text-muted-foreground">%</span>
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="number"
+                              value={sf.percentage}
+                              onChange={e => setSelectedFolders(prev => prev.map(f =>
+                                f.id === sf.id ? { ...f, percentage: Number(e.target.value) } : f
+                              ))}
+                              className="h-8 w-16"
+                            />
+                            <span className="text-xs text-muted-foreground">%</span>
+                          </div>
+                          <Checkbox
+                            checked={sf.includeSubFolders}
+                            onCheckedChange={(checked) => setSelectedFolders(prev => prev.map(f =>
+                              f.id === sf.id ? { ...f, includeSubFolders: !!checked } : f
+                            ))}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                            onClick={() => setSelectedFolders(prev => prev.filter(f => f.id !== sf.id))}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Checkbox
-                          checked={sf.includeSubFolders}
-                          onCheckedChange={(checked) => setSelectedFolders(prev => prev.map(f =>
-                            f.id === sf.id ? { ...f, includeSubFolders: !!checked } : f
-                          ))}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                          onClick={() => setSelectedFolders(prev => prev.filter(f => f.id !== sf.id))}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
+                        {/* Subfolder tree rows when includeSubFolders is checked */}
+                        {sf.includeSubFolders && sf.children && sf.children.length > 0 && (
+                          <SubFolderRows folders={sf.children} level={1} />
+                        )}
                       </div>
                     ))
                   )}
