@@ -232,7 +232,7 @@ const AdaptiveTestConfig = () => {
     <div className="min-h-screen bg-background flex">
       <AdminSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader />
+        <DashboardHeader searchQuery="" onSearchChange={() => {}} />
         <div className="flex-1 overflow-auto">
           {/* Header */}
           <div className="border-b border-border bg-card">
