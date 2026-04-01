@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { mockProjects } from "@/data/projectMockData";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { mockProjects } from "@/data/projectMockData";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -18,7 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import {
   ArrowLeft, Save, Plus, Minus, Brain, Target, Settings2,
-  Gauge, ShieldCheck, FolderTree, ChevronRight, Info, Layers,
+  Gauge, ShieldCheck, FolderTree, ChevronRight, Info, Zap,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -61,17 +63,28 @@ const mockFolderTree: ContentBalancingFolder[] = [
   },
 ];
 
-// ── Nav tabs config ──
-const navTabs = [
-  { id: "content", label: "Content Balancing", icon: FolderTree },
-  { id: "algorithm", label: "CAT Algorithm", icon: Brain },
-  { id: "constraints", label: "Item Constraints", icon: ShieldCheck },
-  { id: "theta", label: "Theta Estimation", icon: Gauge },
-  { id: "likelihood", label: "Maximum Likelihood", icon: Target },
-  { id: "balancing-method", label: "Balancing Method", icon: Settings2 },
-] as const;
-
-type TabId = typeof navTabs[number]["id"];
+// ── Section wrapper ──
+const SectionCard = ({ title, icon: Icon, children, className, delay = 0 }: {
+  title: string; icon: React.ElementType; children: React.ReactNode; className?: string; delay?: number;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay, duration: 0.3 }}
+  >
+    <Card className={cn("border border-border shadow-sm", className)}>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base font-semibold text-foreground">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Icon className="h-4 w-4 text-primary" />
+          </div>
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">{children}</CardContent>
+    </Card>
+  </motion.div>
+);
 
 // ── Folder Tree Component ──
 const FolderTreeItem = ({ folder, level = 0, onSelect, selectedIds }: {
@@ -85,8 +98,8 @@ const FolderTreeItem = ({ folder, level = 0, onSelect, selectedIds }: {
     <div>
       <div
         className={cn(
-          "flex items-center gap-1.5 py-1.5 px-2 rounded-md cursor-pointer text-sm transition-all hover:bg-accent/10",
-          isSelected && "bg-primary/8 text-primary font-medium ring-1 ring-primary/20"
+          "flex items-center gap-1.5 py-1 px-2 rounded-md cursor-pointer text-sm transition-colors hover:bg-muted/50",
+          isSelected && "bg-primary/10 text-primary font-medium"
         )}
         style={{ paddingLeft: `${level * 16 + 8}px` }}
         onClick={() => {
@@ -100,7 +113,7 @@ const FolderTreeItem = ({ folder, level = 0, onSelect, selectedIds }: {
         <FolderTree className="h-3.5 w-3.5 text-warning" />
         <span className="truncate">{folder.name}</span>
         {folder.itemCount > 0 && (
-          <Badge variant="secondary" className="ml-auto text-[10px] h-4 px-1.5 font-mono">{folder.itemCount}</Badge>
+          <Badge variant="secondary" className="ml-auto text-[10px] h-4 px-1.5">{folder.itemCount}</Badge>
         )}
       </div>
       {expanded && hasChildren && folder.children!.map(child => (
@@ -110,18 +123,18 @@ const FolderTreeItem = ({ folder, level = 0, onSelect, selectedIds }: {
   );
 };
 
-// ── Field component ──
-const Field = ({ label, children, required, info, stacked }: {
-  label: string; children: React.ReactNode; required?: boolean; info?: string; stacked?: boolean;
+// ── Field row ──
+const FieldRow = ({ label, children, required, info }: {
+  label: string; children: React.ReactNode; required?: boolean; info?: string;
 }) => (
-  <div className={cn(stacked ? "space-y-2" : "grid grid-cols-[220px_1fr] items-start gap-4")}>
-    <div className={cn("flex items-center gap-1.5", !stacked && "pt-2")}>
-      <Label className="text-sm text-muted-foreground">{label}</Label>
+  <div className="grid grid-cols-[200px_1fr] items-center gap-3">
+    <div className="flex items-center gap-1.5">
+      <Label className="text-sm text-muted-foreground whitespace-nowrap">{label}</Label>
       {required && <span className="text-destructive text-xs">*</span>}
       {info && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Info className="h-3 w-3 text-muted-foreground/40 cursor-help" />
+            <Info className="h-3.5 w-3.5 text-muted-foreground/50 cursor-help" />
           </TooltipTrigger>
           <TooltipContent className="max-w-[220px] text-xs">{info}</TooltipContent>
         </Tooltip>
@@ -131,14 +144,26 @@ const Field = ({ label, children, required, info, stacked }: {
   </div>
 );
 
+// ── Range Input ──
+const RangeInput = ({ fromValue, toValue, onFromChange, onToChange, fromPlaceholder, toPlaceholder }: {
+  fromValue: string; toValue: string; onFromChange: (v: string) => void; onToChange: (v: string) => void;
+  fromPlaceholder?: string; toPlaceholder?: string;
+}) => (
+  <div className="flex items-center gap-2">
+    <Input value={fromValue} onChange={e => onFromChange(e.target.value)} placeholder={fromPlaceholder || "eg: -1"} className="w-28" />
+    <span className="text-sm text-muted-foreground">to</span>
+    <Input value={toValue} onChange={e => onToChange(e.target.value)} placeholder={toPlaceholder || "eg: 1"} className="w-28" />
+  </div>
+);
+
 // ── Main Component ──
 const AdaptiveTestConfig = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
-  const [activeTab, setActiveTab] = useState<TabId>("content");
 
   // Product Selection
   const [selectedProduct, setSelectedProduct] = useState(productId || mockProjects[0]?.id || "");
+  const currentProduct = mockProjects.find(p => p.id === selectedProduct);
 
   // Content Balancing
   const [balancingMode, setBalancingMode] = useState<"non-unified" | "unified">("non-unified");
@@ -205,350 +230,8 @@ const AdaptiveTestConfig = () => {
   };
 
   const handleSave = () => {
-    toast({ title: "Configuration saved", description: "Adaptive test settings updated successfully." });
+    toast({ title: "Configuration saved", description: "Adaptive test configuration has been saved successfully." });
   };
-
-  // ── Section renderers ──
-  const renderContent = () => (
-    <div className="space-y-6">
-      {/* Product selector */}
-      <Field label="Program" required>
-        <Select value={selectedProduct} onValueChange={setSelectedProduct}>
-          <SelectTrigger className="w-full max-w-sm">
-            <SelectValue placeholder="Select a product" />
-          </SelectTrigger>
-          <SelectContent>
-            {mockProjects.map(p => (
-              <SelectItem key={p.id} value={p.id}>{p.code} — {p.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Field>
-
-      {/* Stats chips */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 rounded-full bg-muted px-4 py-1.5 text-sm">
-          <Layers className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-muted-foreground">Total:</span>
-          <span className="font-semibold text-foreground">{totalItems}</span>
-        </div>
-        <div className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm">
-          <span className="text-primary/70">Selected:</span>
-          <span className="font-semibold text-primary">{selectedItemCount}</span>
-        </div>
-        <div className="flex items-center gap-2 rounded-full bg-muted px-4 py-1.5 text-sm">
-          <span className="text-muted-foreground">Time:</span>
-          <span className="font-semibold text-foreground">180 min</span>
-        </div>
-        <div className="ml-auto inline-flex rounded-lg border border-border p-0.5 bg-muted/50">
-          <button
-            onClick={() => setBalancingMode("non-unified")}
-            className={cn(
-              "px-3 py-1 rounded-md text-xs font-medium transition-all",
-              balancingMode === "non-unified"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >Non-Unified</button>
-          <button
-            onClick={() => setBalancingMode("unified")}
-            className={cn(
-              "px-3 py-1 rounded-md text-xs font-medium transition-all",
-              balancingMode === "unified"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >Unified</button>
-        </div>
-      </div>
-
-      {/* Folder tree + table */}
-      <div className="grid grid-cols-[260px_1fr] gap-4">
-        <div className="rounded-xl border border-border bg-card p-3 space-y-1">
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">Folders</p>
-          {mockFolderTree.map(f => (
-            <FolderTreeItem key={f.id} folder={f} onSelect={handleSelectFolder} selectedIds={selectedFolders.map(sf => sf.id)} />
-          ))}
-        </div>
-
-        <div className="rounded-xl border border-border overflow-hidden bg-card">
-          <div className="grid grid-cols-[1fr_110px_90px_80px] gap-0 bg-muted/60 px-4 py-2.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
-            <span>Folder</span>
-            <span>Items</span>
-            <span>%</span>
-            <span>Sub-folders</span>
-          </div>
-          {selectedFolders.length === 0 ? (
-            <div className="px-4 py-10 text-center text-sm text-muted-foreground/60">
-              Click folders on the left to add them
-            </div>
-          ) : (
-            selectedFolders.map(sf => (
-              <div key={sf.id} className="grid grid-cols-[1fr_110px_90px_80px] gap-0 px-4 py-3 border-b border-border/50 last:border-b-0 items-center hover:bg-muted/20 transition-colors">
-                <span className="text-sm font-medium text-foreground">{sf.name}</span>
-                <Input
-                  type="number" value={sf.numberOfItems}
-                  onChange={e => setSelectedFolders(prev => prev.map(f => f.id === sf.id ? { ...f, numberOfItems: Number(e.target.value) } : f))}
-                  className="h-8 w-20"
-                />
-                <div className="flex items-center gap-1">
-                  <Input
-                    type="number" value={sf.percentage}
-                    onChange={e => setSelectedFolders(prev => prev.map(f => f.id === sf.id ? { ...f, percentage: Number(e.target.value) } : f))}
-                    className="h-8 w-16"
-                  />
-                  <span className="text-xs text-muted-foreground">%</span>
-                </div>
-                <Checkbox
-                  checked={sf.includeSubFolders}
-                  onCheckedChange={(checked) => setSelectedFolders(prev => prev.map(f => f.id === sf.id ? { ...f, includeSubFolders: !!checked } : f))}
-                />
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderAlgorithm = () => (
-    <div className="space-y-6">
-      <Field label="Test Type(s)">
-        <div className="inline-flex rounded-lg border border-border p-0.5 bg-muted/50">
-          <button
-            onClick={() => setTestType("fixed")}
-            className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", testType === "fixed" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground")}
-          >Fixed</button>
-          <button
-            onClick={() => setTestType("variable")}
-            className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", testType === "variable" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground")}
-          >Variable</button>
-        </div>
-      </Field>
-
-      <Field label="IRT Scale Range" required info="The range of the IRT ability scale">
-        <div className="flex items-center gap-2">
-          <Input value={irtMin} onChange={e => setIrtMin(e.target.value)} placeholder="-4.0" className="w-28" />
-          <span className="text-sm text-muted-foreground font-medium">→</span>
-          <Input value={irtMax} onChange={e => setIrtMax(e.target.value)} placeholder="4.0" className="w-28" />
-        </div>
-      </Field>
-
-      <Field label="First Item Difficulty" required info="IRT difficulty range for the first administered item">
-        <div className="flex items-center gap-2">
-          <Input value={difficultyMin} onChange={e => setDifficultyMin(e.target.value)} placeholder="Min" className="w-28" />
-          <span className="text-sm text-muted-foreground font-medium">→</span>
-          <Input value={difficultyMax} onChange={e => setDifficultyMax(e.target.value)} placeholder="Max" className="w-28" />
-        </div>
-      </Field>
-
-      <Separator />
-
-      <Field label="Item Selection" required>
-        <Select value={itemSelection} onValueChange={setItemSelection}>
-          <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="maximum-fisher">Maximum Fisher Information</SelectItem>
-            <SelectItem value="a-stratified">A-Stratified</SelectItem>
-            <SelectItem value="weighted">Weighted Information</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-
-      <Field label="Item Exposure" required>
-        <Select value={itemExposure} onValueChange={setItemExposure}>
-          <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="randomesque">Randomesque</SelectItem>
-            <SelectItem value="sympson-hetter">Sympson-Hetter</SelectItem>
-            <SelectItem value="none">None</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-
-      {/* Exposure rows */}
-      <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-3">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Exposure Control Ranges</p>
-        {exposureRows.map((row) => (
-          <div key={row.id} className="flex items-center gap-3 bg-card rounded-lg px-3 py-2 border border-border/50">
-            <Label className="text-xs text-muted-foreground shrink-0">Pos</Label>
-            <Input type="number" value={row.itemPositionFrom}
-              onChange={e => setExposureRows(prev => prev.map(r => r.id === row.id ? { ...r, itemPositionFrom: Number(e.target.value) } : r))}
-              className="h-8 w-16" />
-            <span className="text-xs text-muted-foreground">→</span>
-            <Input type="number" value={row.itemPositionTo}
-              onChange={e => setExposureRows(prev => prev.map(r => r.id === row.id ? { ...r, itemPositionTo: Number(e.target.value) } : r))}
-              className="h-8 w-16" />
-            <Separator orientation="vertical" className="h-5" />
-            <Label className="text-xs text-muted-foreground shrink-0">Items</Label>
-            <Input type="number" value={row.numberOfItems}
-              onChange={e => setExposureRows(prev => prev.map(r => r.id === row.id ? { ...r, numberOfItems: Number(e.target.value) } : r))}
-              className="h-8 w-20" />
-          </div>
-        ))}
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={addExposureRow} className="h-7 text-xs">
-            <Plus className="h-3 w-3 mr-1" />Add Row
-          </Button>
-          {exposureRows.length > 1 && (
-            <Button size="sm" variant="outline" onClick={() => removeExposureRow(exposureRows[exposureRows.length - 1].id)} className="h-7 text-xs">
-              <Minus className="h-3 w-3 mr-1" />Remove
-            </Button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderConstraints = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="rounded-xl border border-border bg-card p-5 space-y-3">
-          <Label className="text-sm text-muted-foreground">Scored Items</Label>
-          <Input value={scoredItems} onChange={e => setScoredItems(e.target.value)} className="text-lg font-semibold" />
-        </div>
-        <div className="rounded-xl border border-border bg-card p-5 space-y-3">
-          <Label className="text-sm text-muted-foreground">Unscored Items</Label>
-          <Input value={unscoredItems} onChange={e => setUnscoredItems(e.target.value)} className="text-lg font-semibold" />
-        </div>
-      </div>
-      <Separator />
-      <div className="space-y-4">
-        <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-border p-4 hover:border-primary/30 hover:bg-primary/[0.02] transition-all group">
-          <Checkbox checked={noRepetition} onCheckedChange={(c) => setNoRepetition(!!c)} className="mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">No Item Repetition</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Prevent the same item from appearing in multiple test sessions for a candidate</p>
-          </div>
-        </label>
-        <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-border p-4 hover:border-primary/30 hover:bg-primary/[0.02] transition-all group">
-          <Checkbox checked={enemyExclusion} onCheckedChange={(c) => setEnemyExclusion(!!c)} className="mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Enemy Item Exclusion</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Exclude items that conflict or overlap in content from the same test session</p>
-          </div>
-        </label>
-      </div>
-    </div>
-  );
-
-  const renderTheta = () => (
-    <div className="space-y-6">
-      <Field label="Initial Ability Estimation" required>
-        <Select value={initialAbility} onValueChange={setInitialAbility}>
-          <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="map">MAP</SelectItem>
-            <SelectItem value="eap">EAP</SelectItem>
-            <SelectItem value="fixed">Fixed Value</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-
-      {initialAbility === "map" && (
-        <div className="rounded-xl border border-dashed border-border bg-muted/20 p-4 space-y-4">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bayesian Prior Distribution</p>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Mean</Label>
-              <Input value={priorMean} onChange={e => setPriorMean(e.target.value)} placeholder="eg: -1" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Standard Deviation</Label>
-              <Input value={priorSD} onChange={e => setPriorSD(e.target.value)} placeholder="eg: 1" />
-            </div>
-          </div>
-        </div>
-      )}
-
-      <Field label="Interim Ability Estimation" required>
-        <Select value={interimEstimation} onValueChange={setInterimEstimation}>
-          <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="mle">Maximum Likelihood Estimation</SelectItem>
-            <SelectItem value="map">MAP</SelectItem>
-            <SelectItem value="eap">EAP</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-
-      <Field label="Final Ability Estimation" required>
-        <Select value={finalEstimation} onValueChange={setFinalEstimation}>
-          <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="mle">Maximum Likelihood Estimation</SelectItem>
-            <SelectItem value="map">MAP</SelectItem>
-            <SelectItem value="eap">EAP</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-    </div>
-  );
-
-  const renderLikelihood = () => (
-    <div className="space-y-6">
-      <Field label="Method" required>
-        <Select value={maximumMethod} onValueChange={setMaximumMethod}>
-          <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newton-raphson">Newton Raphson Method</SelectItem>
-            <SelectItem value="bisection">Bisection Method</SelectItem>
-            <SelectItem value="brent">Brent's Method</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label className="text-sm text-muted-foreground">Start Theta Value</Label>
-          <Input value={startTheta} onChange={e => setStartTheta(e.target.value)} placeholder="eg: -1" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-sm text-muted-foreground">Tolerance <span className="text-destructive">*</span></Label>
-          <Input value={tolerance} onChange={e => setTolerance(e.target.value)} placeholder="eg: 1" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-sm text-muted-foreground">Max Iterations <span className="text-destructive">*</span></Label>
-          <Input value={maxIterations} onChange={e => setMaxIterations(e.target.value)} placeholder="eg: 1" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-sm text-muted-foreground">Max Allowed Delta <span className="text-destructive">*</span></Label>
-          <Input value={maxDelta} onChange={e => setMaxDelta(e.target.value)} placeholder="eg: 1" />
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderBalancingMethod = () => (
-    <div className="space-y-6">
-      <Field label="Method" required>
-        <Select value={cbMethod} onValueChange={setCbMethod}>
-          <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="script">Script</SelectItem>
-            <SelectItem value="ccat">CCAT</SelectItem>
-            <SelectItem value="none">None</SelectItem>
-          </SelectContent>
-        </Select>
-      </Field>
-      {cbMethod === "script" && (
-        <Field label="Admin Sequence" required>
-          <Input value={adminSequence} onChange={e => setAdminSequence(e.target.value)} className="w-full max-w-xs font-mono" placeholder="1,1,1,2" />
-        </Field>
-      )}
-    </div>
-  );
-
-  const tabRenderers: Record<TabId, () => JSX.Element> = {
-    content: renderContent,
-    algorithm: renderAlgorithm,
-    constraints: renderConstraints,
-    theta: renderTheta,
-    likelihood: renderLikelihood,
-    "balancing-method": renderBalancingMethod,
-  };
-
-  const activeTabInfo = navTabs.find(t => t.id === activeTab)!;
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -556,78 +239,383 @@ const AdaptiveTestConfig = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardHeader searchQuery="" onSearchChange={() => {}} />
         <div className="flex-1 overflow-auto">
-          {/* Compact header */}
-          <div className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
-            <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => navigate(-1)}>
+          {/* Header */}
+          <div className="border-b border-border bg-card">
+            <div className="max-w-6xl mx-auto px-6 py-4">
+              <div className="flex items-center gap-3 mb-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(-1)}>
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold text-foreground">Adaptive Test</h1>
-                    <Badge className="bg-primary/10 text-primary border-0 text-[10px] font-semibold">CAT</Badge>
+                    <h1 className="text-xl font-semibold text-foreground">Adaptive Test Configuration</h1>
+                    <Badge variant="secondary" className="text-xs">CAT</Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">Computer adaptive testing configuration</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">Configure computer adaptive testing parameters and item selection algorithms</p>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate(-1)}>Cancel</Button>
-                <Button size="sm" onClick={handleSave}>
-                  <Save className="h-3.5 w-3.5 mr-1.5" />Save
-                </Button>
               </div>
             </div>
           </div>
 
-          {/* Body: sidebar nav + content */}
-          <div className="max-w-7xl mx-auto px-6 py-6">
-            <div className="flex gap-6">
-              {/* Left nav */}
-              <nav className="w-56 shrink-0 space-y-1 sticky top-20 self-start">
-                {navTabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left",
-                        isActive
-                          ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                      )}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </nav>
+          {/* Content */}
+          <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
 
-              {/* Right content */}
-              <div className="flex-1 min-w-0">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeTab}
-                    initial={{ opacity: 0, x: 8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -8 }}
-                    transition={{ duration: 0.2 }}
-                    className="rounded-2xl border border-border bg-card p-6"
-                  >
-                    <div className="flex items-center gap-2.5 mb-6">
-                      <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <activeTabInfo.icon className="h-4.5 w-4.5 text-primary" />
-                      </div>
-                      <h2 className="text-base font-semibold text-foreground">{activeTabInfo.label}</h2>
-                    </div>
-                    {tabRenderers[activeTab]()}
-                  </motion.div>
-                </AnimatePresence>
+            {/* ─── Content Balancing ─── */}
+            <SectionCard title="Content Balancing" icon={FolderTree} delay={0}>
+              {/* Product selector */}
+              <div className="flex items-center gap-4">
+                <Label className="text-sm text-muted-foreground whitespace-nowrap">Product</Label>
+                <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                  <SelectTrigger className="w-80">
+                    <SelectValue placeholder="Select a product" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockProjects.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.code} — {p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
+
+              {/* Stats bar */}
+              <div className="flex items-center gap-6 p-3 rounded-lg bg-muted/50 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">Total items in test:</span>
+                  <span className="font-semibold text-foreground">{totalItems}</span>
+                </div>
+                <Separator orientation="vertical" className="h-4" />
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">Selected:</span>
+                  <span className="font-semibold text-primary">{selectedItemCount}</span>
+                </div>
+                <Separator orientation="vertical" className="h-4" />
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">Test time:</span>
+                  <span className="font-semibold text-foreground">180 min</span>
+                </div>
+                <div className="ml-auto flex gap-1">
+                  <Button
+                    size="sm"
+                    variant={balancingMode === "non-unified" ? "default" : "outline"}
+                    onClick={() => setBalancingMode("non-unified")}
+                    className="h-7 text-xs"
+                  >
+                    Non-Unified
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={balancingMode === "unified" ? "default" : "outline"}
+                    onClick={() => setBalancingMode("unified")}
+                    className="h-7 text-xs"
+                  >
+                    Unified
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-[280px_1fr] gap-4">
+                {/* Folder tree */}
+                <div className="border border-border rounded-lg p-3 bg-card">
+                  <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wide">Item Folders</p>
+                  {mockFolderTree.map(f => (
+                    <FolderTreeItem
+                      key={f.id}
+                      folder={f}
+                      onSelect={handleSelectFolder}
+                      selectedIds={selectedFolders.map(sf => sf.id)}
+                    />
+                  ))}
+                </div>
+
+                {/* Selected folders table */}
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <div className="grid grid-cols-[1fr_120px_100px_100px] gap-0 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
+                    <span>Selected Folder(s)</span>
+                    <span>Number of Items</span>
+                    <span>Percentage</span>
+                    <span>Include Sub</span>
+                  </div>
+                  {selectedFolders.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                      Select folders from the tree to configure content balancing
+                    </div>
+                  ) : (
+                    selectedFolders.map(sf => (
+                      <div key={sf.id} className="grid grid-cols-[1fr_120px_100px_100px] gap-0 px-4 py-2.5 border-b border-border last:border-b-0 items-center">
+                        <span className="text-sm text-foreground truncate">{sf.name}</span>
+                        <Input
+                          type="number"
+                          value={sf.numberOfItems}
+                          onChange={e => setSelectedFolders(prev => prev.map(f =>
+                            f.id === sf.id ? { ...f, numberOfItems: Number(e.target.value) } : f
+                          ))}
+                          className="h-8 w-20"
+                        />
+                        <div className="flex items-center gap-1">
+                          <Input
+                            type="number"
+                            value={sf.percentage}
+                            onChange={e => setSelectedFolders(prev => prev.map(f =>
+                              f.id === sf.id ? { ...f, percentage: Number(e.target.value) } : f
+                            ))}
+                            className="h-8 w-16"
+                          />
+                          <span className="text-xs text-muted-foreground">%</span>
+                        </div>
+                        <Checkbox
+                          checked={sf.includeSubFolders}
+                          onCheckedChange={(checked) => setSelectedFolders(prev => prev.map(f =>
+                            f.id === sf.id ? { ...f, includeSubFolders: !!checked } : f
+                          ))}
+                        />
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* ─── CAT Algorithm Configuration ─── */}
+            <SectionCard title="CAT Algorithm Configuration" icon={Brain} delay={0.05}>
+              <div className="space-y-5">
+                {/* Test Type */}
+                <FieldRow label="Test Type(s)">
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" name="testType" checked={testType === "fixed"} onChange={() => setTestType("fixed")}
+                        className="h-4 w-4 text-primary accent-primary" />
+                      <span className="text-sm">Fixed</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" name="testType" checked={testType === "variable"} onChange={() => setTestType("variable")}
+                        className="h-4 w-4 text-primary accent-primary" />
+                      <span className="text-sm">Variable</span>
+                    </label>
+                  </div>
+                </FieldRow>
+
+                <FieldRow label="Min & Max on IRT Scale" required info="The range of the IRT ability scale">
+                  <RangeInput fromValue={irtMin} toValue={irtMax} onFromChange={setIrtMin} onToChange={setIrtMax}
+                    fromPlaceholder="eg: -4.0" toPlaceholder="eg: 4.0" />
+                </FieldRow>
+
+                <FieldRow label="Difficulty of First Item" required info="IRT difficulty range for the first administered item">
+                  <RangeInput fromValue={difficultyMin} toValue={difficultyMax} onFromChange={setDifficultyMin} onToChange={setDifficultyMax} />
+                </FieldRow>
+
+                <Separator />
+
+                <FieldRow label="Item Selection" required>
+                  <Select value={itemSelection} onValueChange={setItemSelection}>
+                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="maximum-fisher">Maximum Fisher Information</SelectItem>
+                      <SelectItem value="a-stratified">A-Stratified</SelectItem>
+                      <SelectItem value="weighted">Weighted Information</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+
+                <FieldRow label="Item Exposure" required>
+                  <Select value={itemExposure} onValueChange={setItemExposure}>
+                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="randomesque">Randomesque</SelectItem>
+                      <SelectItem value="sympson-hetter">Sympson-Hetter</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+
+                {/* Exposure rows */}
+                <div className="pl-[200px] space-y-2">
+                  {exposureRows.map((row) => (
+                    <div key={row.id} className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-muted-foreground whitespace-nowrap">Position</Label>
+                        <Input
+                          type="number" value={row.itemPositionFrom}
+                          onChange={e => setExposureRows(prev => prev.map(r =>
+                            r.id === row.id ? { ...r, itemPositionFrom: Number(e.target.value) } : r
+                          ))}
+                          className="h-8 w-16"
+                        />
+                        <span className="text-xs text-muted-foreground">to</span>
+                        <Input
+                          type="number" value={row.itemPositionTo}
+                          onChange={e => setExposureRows(prev => prev.map(r =>
+                            r.id === row.id ? { ...r, itemPositionTo: Number(e.target.value) } : r
+                          ))}
+                          className="h-8 w-16"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-muted-foreground whitespace-nowrap">Items</Label>
+                        <Input
+                          type="number" value={row.numberOfItems}
+                          onChange={e => setExposureRows(prev => prev.map(r =>
+                            r.id === row.id ? { ...r, numberOfItems: Number(e.target.value) } : r
+                          ))}
+                          className="h-8 w-20"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={addExposureRow} className="h-7">
+                      <Plus className="h-3.5 w-3.5 mr-1" />Add
+                    </Button>
+                    {exposureRows.length > 1 && (
+                      <Button size="sm" variant="outline" onClick={() => removeExposureRow(exposureRows[exposureRows.length - 1].id)} className="h-7">
+                        <Minus className="h-3.5 w-3.5 mr-1" />Remove
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* ─── Item Constraints ─── */}
+            <SectionCard title="Item Constraints" icon={ShieldCheck} delay={0.1}>
+              <div className="space-y-4">
+                <FieldRow label="Number of Scored Items" required>
+                  <Input value={scoredItems} onChange={e => setScoredItems(e.target.value)} className="w-64" />
+                </FieldRow>
+                <FieldRow label="Number of Unscored Items" required>
+                  <Input value={unscoredItems} onChange={e => setUnscoredItems(e.target.value)} className="w-64" />
+                </FieldRow>
+                <Separator />
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <Checkbox checked={noRepetition} onCheckedChange={(c) => setNoRepetition(!!c)} />
+                    <span className="text-sm text-foreground group-hover:text-primary transition-colors">
+                      No item repetition between test takes for a candidate
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <Checkbox checked={enemyExclusion} onCheckedChange={(c) => setEnemyExclusion(!!c)} />
+                    <span className="text-sm text-foreground group-hover:text-primary transition-colors">
+                      Enemy Item Exclusion
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </SectionCard>
+
+            {/* ─── Theta Estimation ─── */}
+            <SectionCard title="Theta Estimation" icon={Gauge} delay={0.15}>
+              <div className="space-y-5">
+                <FieldRow label="Initial Ability Estimation" required>
+                  <Select value={initialAbility} onValueChange={setInitialAbility}>
+                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="map">MAP</SelectItem>
+                      <SelectItem value="eap">EAP</SelectItem>
+                      <SelectItem value="fixed">Fixed Value</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+
+                {initialAbility === "map" && (
+                  <FieldRow label="Prior Distribution (Bayesian)" info="Mean and SD for the Bayesian prior">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5">
+                        <Label className="text-xs text-muted-foreground">Mean</Label>
+                        <Input value={priorMean} onChange={e => setPriorMean(e.target.value)} placeholder="eg: -1" className="w-24 h-8" />
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Label className="text-xs text-muted-foreground">SD</Label>
+                        <Input value={priorSD} onChange={e => setPriorSD(e.target.value)} placeholder="eg: 1" className="w-24 h-8" />
+                      </div>
+                    </div>
+                  </FieldRow>
+                )}
+
+                <FieldRow label="Interim Ability Estimation" required>
+                  <Select value={interimEstimation} onValueChange={setInterimEstimation}>
+                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mle">Maximum Likelihood Estimation</SelectItem>
+                      <SelectItem value="map">MAP</SelectItem>
+                      <SelectItem value="eap">EAP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+
+                <FieldRow label="Final Ability Estimation" required>
+                  <Select value={finalEstimation} onValueChange={setFinalEstimation}>
+                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="mle">Maximum Likelihood Estimation</SelectItem>
+                      <SelectItem value="map">MAP</SelectItem>
+                      <SelectItem value="eap">EAP</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+              </div>
+            </SectionCard>
+
+            {/* ─── Finding Maximum in Likelihood ─── */}
+            <SectionCard title="Finding Maximum in Likelihood" icon={Target} delay={0.2}>
+              <div className="space-y-4">
+                <FieldRow label="Method" required>
+                  <Select value={maximumMethod} onValueChange={setMaximumMethod}>
+                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newton-raphson">Newton Raphson Method</SelectItem>
+                      <SelectItem value="bisection">Bisection Method</SelectItem>
+                      <SelectItem value="brent">Brent's Method</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+                <FieldRow label="Start Theta Value">
+                  <Input value={startTheta} onChange={e => setStartTheta(e.target.value)} placeholder="eg: -1" className="w-40" />
+                </FieldRow>
+                <FieldRow label="Tolerance" required>
+                  <Input value={tolerance} onChange={e => setTolerance(e.target.value)} placeholder="eg: 1" className="w-40" />
+                </FieldRow>
+                <FieldRow label="Maximum Iterations" required>
+                  <Input value={maxIterations} onChange={e => setMaxIterations(e.target.value)} placeholder="eg: 1" className="w-40" />
+                </FieldRow>
+                <FieldRow label="Maximum Allowed Delta" required>
+                  <Input value={maxDelta} onChange={e => setMaxDelta(e.target.value)} placeholder="eg: 1" className="w-40" />
+                </FieldRow>
+              </div>
+            </SectionCard>
+
+            {/* ─── Content Balancing Method ─── */}
+            <SectionCard title="Content Balancing Method" icon={Settings2} delay={0.25}>
+              <div className="space-y-4">
+                <FieldRow label="Method" required>
+                  <Select value={cbMethod} onValueChange={setCbMethod}>
+                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="script">Script</SelectItem>
+                      <SelectItem value="ccat">CCAT</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+                {cbMethod === "script" && (
+                  <FieldRow label="Content Item Admin Sequence" required>
+                    <Input value={adminSequence} onChange={e => setAdminSequence(e.target.value)} className="w-64" placeholder="1,1,1,2" />
+                  </FieldRow>
+                )}
+              </div>
+            </SectionCard>
+
+            {/* ─── Save Button ─── */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="flex justify-end gap-3 pb-8"
+            >
+              <Button variant="outline" onClick={() => navigate(-1)}>Cancel</Button>
+              <Button onClick={handleSave}>
+                <Save className="h-4 w-4 mr-2" />Save Configuration
+              </Button>
+            </motion.div>
           </div>
         </div>
       </div>
