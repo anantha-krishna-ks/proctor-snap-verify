@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { mockProjects } from "@/data/projectMockData";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -160,6 +161,10 @@ const AdaptiveTestConfig = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
 
+  // Product Selection
+  const [selectedProduct, setSelectedProduct] = useState(productId || mockProjects[0]?.id || "");
+  const currentProduct = mockProjects.find(p => p.id === selectedProduct);
+
   // Content Balancing
   const [balancingMode, setBalancingMode] = useState<"non-unified" | "unified">("non-unified");
   const [selectedFolders, setSelectedFolders] = useState<SelectedFolder[]>([
@@ -257,6 +262,21 @@ const AdaptiveTestConfig = () => {
 
             {/* ─── Content Balancing ─── */}
             <SectionCard title="Content Balancing" icon={FolderTree} delay={0}>
+              {/* Product selector */}
+              <div className="flex items-center gap-4">
+                <Label className="text-sm text-muted-foreground whitespace-nowrap">Product</Label>
+                <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                  <SelectTrigger className="w-80">
+                    <SelectValue placeholder="Select a product" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockProjects.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.code} — {p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Stats bar */}
               <div className="flex items-center gap-6 p-3 rounded-lg bg-muted/50 text-sm">
                 <div className="flex items-center gap-2">
