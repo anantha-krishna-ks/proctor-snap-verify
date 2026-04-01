@@ -515,7 +515,7 @@ const AdaptiveTestConfig = () => {
                 </FieldRow>
 
                 {/* Exposure rows */}
-                <div className="pl-[200px] space-y-2">
+                <div className="pl-[160px] space-y-2">
                   {exposureRows.map((row) => (
                     <div key={row.id} className="flex items-center gap-3">
                       <div className="flex items-center gap-2">
