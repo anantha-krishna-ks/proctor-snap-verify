@@ -186,7 +186,32 @@ const RangeInput = ({ fromValue, toValue, onFromChange, onToChange, fromPlacehol
   </div>
 );
 
-// ── Main Component ──
+// ── SubFolder rows for the table ──
+const SubFolderRows = ({ folders, level }: { folders: ContentBalancingFolder[]; level: number }) => (
+  <>
+    {folders.map(folder => (
+      <div key={folder.id}>
+        <div className="grid grid-cols-[1fr_120px_100px_100px_40px] gap-0 px-4 py-1.5 border-b border-border/50 items-center bg-primary/[0.03]">
+          <div className="flex items-center gap-1.5" style={{ paddingLeft: `${level * 16}px` }}>
+            <ChevronRight className="h-3 w-3 text-muted-foreground/50" />
+            <FolderTree className="h-3 w-3 text-primary/60" />
+            <span className="text-xs text-muted-foreground">{folder.name}</span>
+            <Badge variant="secondary" className="text-[9px] h-3.5 px-1">{folder.itemCount}</Badge>
+          </div>
+          <span className="text-xs text-muted-foreground">—</span>
+          <span className="text-xs text-muted-foreground">—</span>
+          <span className="text-xs text-muted-foreground">✓</span>
+          <span />
+        </div>
+        {folder.children && folder.children.length > 0 && (
+          <SubFolderRows folders={folder.children} level={level + 1} />
+        )}
+      </div>
+    ))}
+  </>
+);
+
+
 const AdaptiveTestConfig = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
