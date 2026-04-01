@@ -161,6 +161,10 @@ const AdaptiveTestConfig = () => {
   const navigate = useNavigate();
   const { productId } = useParams();
 
+  // Product Selection
+  const [selectedProduct, setSelectedProduct] = useState(productId || mockProjects[0]?.id || "");
+  const currentProduct = mockProjects.find(p => p.id === selectedProduct);
+
   // Content Balancing
   const [balancingMode, setBalancingMode] = useState<"non-unified" | "unified">("non-unified");
   const [selectedFolders, setSelectedFolders] = useState<SelectedFolder[]>([
