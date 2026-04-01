@@ -667,6 +667,8 @@ const AdaptiveTestConfig = () => {
               </div>
             </SectionCard>
 
+            </div>{/* end 2-column grid */}
+
             {/* ─── Content Balancing Method ─── */}
             <SectionCard title="Content Balancing Method" icon={Settings2} delay={0.25}>
               <div className="space-y-4">
