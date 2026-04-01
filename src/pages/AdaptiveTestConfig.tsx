@@ -243,11 +243,21 @@ const AdaptiveTestConfig = () => {
     if (selectedFolders.find(f => f.id === folder.id)) {
       setSelectedFolders(prev => prev.filter(f => f.id !== folder.id));
     } else {
+      const treeFolder = findFolderInTree(mockFolderTree, folder.id);
       setSelectedFolders(prev => [...prev, {
         id: folder.id, name: folder.name, numberOfItems: 0, percentage: 0, includeSubFolders: false,
+        children: treeFolder?.children,
       }]);
     }
   };
+
+  // Compute highlighted subfolder IDs (subfolders of selected folders with includeSubFolders checked)
+  const highlightedIds = selectedFolders
+    .filter(sf => sf.includeSubFolders && sf.children)
+    .flatMap(sf => {
+      const treeFolder = findFolderInTree(mockFolderTree, sf.id);
+      return treeFolder ? collectDescendantIds(treeFolder) : [];
+    });
 
   const addExposureRow = () => {
     setExposureRows(prev => [...prev, {
