@@ -87,20 +87,46 @@ const SectionCard = ({ title, icon: Icon, children, className, delay = 0 }: {
   </motion.div>
 );
 
+// ── Helper: collect all descendant IDs ──
+const collectDescendantIds = (folder: ContentBalancingFolder): string[] => {
+  const ids: string[] = [];
+  if (folder.children) {
+    for (const child of folder.children) {
+      ids.push(child.id);
+      ids.push(...collectDescendantIds(child));
+    }
+  }
+  return ids;
+};
+
+// ── Helper: find folder by ID in tree ──
+const findFolderInTree = (folders: ContentBalancingFolder[], id: string): ContentBalancingFolder | null => {
+  for (const f of folders) {
+    if (f.id === id) return f;
+    if (f.children) {
+      const found = findFolderInTree(f.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+};
+
 // ── Folder Tree Component ──
-const FolderTreeItem = ({ folder, level = 0, onSelect, selectedIds }: {
-  folder: ContentBalancingFolder; level?: number; onSelect: (f: ContentBalancingFolder) => void; selectedIds: string[];
+const FolderTreeItem = ({ folder, level = 0, onSelect, selectedIds, highlightedIds }: {
+  folder: ContentBalancingFolder; level?: number; onSelect: (f: ContentBalancingFolder) => void; selectedIds: string[]; highlightedIds: string[];
 }) => {
   const [expanded, setExpanded] = useState(level === 0);
   const hasChildren = folder.children && folder.children.length > 0;
   const isSelected = selectedIds.includes(folder.id);
+  const isHighlighted = highlightedIds.includes(folder.id);
 
   return (
     <div>
       <div
         className={cn(
           "flex items-center gap-1.5 py-1 px-2 rounded-md cursor-pointer text-sm transition-colors hover:bg-muted/50",
-          isSelected && "bg-primary/10 text-primary font-medium"
+          isSelected && "bg-primary/10 text-primary font-medium",
+          !isSelected && isHighlighted && "bg-primary/5 text-primary/80 ring-1 ring-primary/20"
         )}
         style={{ paddingLeft: `${level * 16 + 8}px` }}
         onClick={() => {
@@ -111,14 +137,17 @@ const FolderTreeItem = ({ folder, level = 0, onSelect, selectedIds }: {
         {hasChildren && (
           <ChevronRight className={cn("h-3.5 w-3.5 transition-transform text-muted-foreground", expanded && "rotate-90")} />
         )}
-        <FolderTree className="h-3.5 w-3.5 text-warning" />
+        <FolderTree className={cn("h-3.5 w-3.5", isHighlighted ? "text-primary" : "text-warning")} />
         <span className="truncate">{folder.name}</span>
         {folder.itemCount > 0 && (
           <Badge variant="secondary" className="ml-auto text-[10px] h-4 px-1.5">{folder.itemCount}</Badge>
         )}
+        {isHighlighted && !isSelected && (
+          <Badge variant="outline" className="ml-1 text-[9px] h-4 px-1 border-primary/30 text-primary/70">sub</Badge>
+        )}
       </div>
       {expanded && hasChildren && folder.children!.map(child => (
-        <FolderTreeItem key={child.id} folder={child} level={level + 1} onSelect={onSelect} selectedIds={selectedIds} />
+        <FolderTreeItem key={child.id} folder={child} level={level + 1} onSelect={onSelect} selectedIds={selectedIds} highlightedIds={highlightedIds} />
       ))}
     </div>
   );
