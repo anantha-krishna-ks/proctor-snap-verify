@@ -157,7 +157,7 @@ const FolderTreeItem = ({ folder, level = 0, onSelect, selectedIds, highlightedI
 const FieldRow = ({ label, children, required, info }: {
   label: string; children: React.ReactNode; required?: boolean; info?: string;
 }) => (
-  <div className="grid grid-cols-[200px_1fr] items-center gap-3">
+  <div className="grid grid-cols-[160px_1fr] items-center gap-3">
     <div className="flex items-center gap-1.5">
       <Label className="text-sm text-muted-foreground whitespace-nowrap">{label}</Label>
       {required && <span className="text-destructive text-xs">*</span>}
