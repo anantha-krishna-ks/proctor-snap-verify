@@ -29,6 +29,7 @@ import ProductLayoutShowcase from "./pages/ProductLayoutShowcase";
 import Register from "./pages/Register";
 import BranchingBuilder from "./pages/BranchingBuilder";
 import ProductsShowcase from "./pages/ProductsShowcase";
+import AdaptiveTestConfig from "./pages/AdaptiveTestConfig";
 import WorkflowSettings from "./pages/WorkflowSettings";
 import NotFound from "./pages/NotFound";
 
