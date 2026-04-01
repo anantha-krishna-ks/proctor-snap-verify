@@ -342,7 +342,7 @@ const AdaptiveTestConfig = () => {
                     </div>
                   ) : (
                     selectedFolders.map(sf => (
-                      <div key={sf.id} className="grid grid-cols-[1fr_120px_100px_100px] gap-0 px-4 py-2.5 border-b border-border last:border-b-0 items-center">
+                      <div key={sf.id} className="grid grid-cols-[1fr_120px_100px_100px_40px] gap-0 px-4 py-2.5 border-b border-border last:border-b-0 items-center">
                         <span className="text-sm text-foreground truncate">{sf.name}</span>
                         <Input
                           type="number"
@@ -369,6 +369,14 @@ const AdaptiveTestConfig = () => {
                             f.id === sf.id ? { ...f, includeSubFolders: !!checked } : f
                           ))}
                         />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          onClick={() => setSelectedFolders(prev => prev.filter(f => f.id !== sf.id))}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
                       </div>
                     ))
                   )}
