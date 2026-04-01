@@ -88,6 +88,7 @@ const actionGroups: ActionGroup[] = [
       { icon: ClipboardList, label: "Manage Items", id: "items", navTo: "/admin/products/{id}/items" },
       { icon: BookOpen, label: "Manage Passages", id: "passages" },
       { icon: FileStack, label: "Manage Assessment", id: "assessment" },
+      { icon: Zap, label: "Adaptive Test (CAT)", id: "adaptive-test", navTo: "/admin/products/{id}/adaptive-test" },
       { icon: CalendarDays, label: "Manage Schedules", id: "schedules", navTo: "/scheduling" },
       { icon: Package, label: "Manage Batches", id: "batches" },
       { icon: FolderArchive, label: "Manage Assets", id: "assets" },
