@@ -35,7 +35,7 @@ import {
   Layers, BookOpen, FileStack, CalendarDays, Package,
   FolderArchive, BookMarked, ScrollText, UserCheck,
   Grid3X3, List, ChevronRight, ArrowLeft, Save, Upload, X,
-  Users, SplitSquareHorizontal, Layers2, Replace, GitBranch,
+  Users, SplitSquareHorizontal, Layers2, Replace, GitBranch, Zap,
 } from "lucide-react";
 import { mockProjects, Project } from "@/data/projectMockData";
 import { mockUsers } from "@/data/adminMockData";
