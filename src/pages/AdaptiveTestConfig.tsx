@@ -459,6 +459,9 @@ const AdaptiveTestConfig = () => {
               </div>
             </SectionCard>
 
+            {/* ─── 2-Column Grid: Algorithm, Constraints, Theta, Likelihood ─── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
             {/* ─── CAT Algorithm Configuration ─── */}
             <SectionCard title="CAT Algorithm Configuration" icon={Brain} delay={0.05}>
               <div className="space-y-5">
