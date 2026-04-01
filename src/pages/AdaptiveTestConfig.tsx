@@ -157,7 +157,7 @@ const FolderTreeItem = ({ folder, level = 0, onSelect, selectedIds, highlightedI
 const FieldRow = ({ label, children, required, info }: {
   label: string; children: React.ReactNode; required?: boolean; info?: string;
 }) => (
-  <div className="grid grid-cols-[200px_1fr] items-center gap-3">
+  <div className="grid grid-cols-[160px_1fr] items-center gap-3">
     <div className="flex items-center gap-1.5">
       <Label className="text-sm text-muted-foreground whitespace-nowrap">{label}</Label>
       {required && <span className="text-destructive text-xs">*</span>}
@@ -459,6 +459,9 @@ const AdaptiveTestConfig = () => {
               </div>
             </SectionCard>
 
+            {/* ─── 2-Column Grid: Algorithm, Constraints, Theta, Likelihood ─── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
             {/* ─── CAT Algorithm Configuration ─── */}
             <SectionCard title="CAT Algorithm Configuration" icon={Brain} delay={0.05}>
               <div className="space-y-5">
@@ -512,7 +515,7 @@ const AdaptiveTestConfig = () => {
                 </FieldRow>
 
                 {/* Exposure rows */}
-                <div className="pl-[200px] space-y-2">
+                <div className="pl-[160px] space-y-2">
                   {exposureRows.map((row) => (
                     <div key={row.id} className="flex items-center gap-3">
                       <div className="flex items-center gap-2">
@@ -666,6 +669,8 @@ const AdaptiveTestConfig = () => {
                 </FieldRow>
               </div>
             </SectionCard>
+
+            </div>{/* end 2-column grid */}
 
             {/* ─── Content Balancing Method ─── */}
             <SectionCard title="Content Balancing Method" icon={Settings2} delay={0.25}>
