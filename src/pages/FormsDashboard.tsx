@@ -159,7 +159,7 @@ const mockProjects = [
   { id: "proj-4", name: "Professional License Tests", description: "Industry certifications" },
 ];
 
-type ViewMode = "forms" | "survey" | "configuration" | "agreement" | "test-sequence" | "blueprint" | "assessment" | "branching";
+type ViewMode = "forms" | "survey" | "configuration" | "agreement" | "test-sequence" | "blueprint" | "assessment" | "branching" | "cat";
 
 const FormsDashboard = () => {
   const navigate = useNavigate();
@@ -346,17 +346,19 @@ const handleDragEnd = (event: DragEndEvent) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <span className="text-foreground">Completed</span>;
+        return <Badge className="bg-cyan-500 hover:bg-cyan-500 text-white border-0 font-medium">Completed</Badge>;
       case "published":
-        return <span className="text-foreground">Published</span>;
+        return <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white border-0 font-medium">Published</Badge>;
+      case "in-progress":
+        return <Badge className="bg-amber-400 hover:bg-amber-400 text-white border-0 font-medium">In Progress</Badge>;
       case "active":
-        return <span className="text-foreground">Active</span>;
+        return <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white border-0 font-medium">Active</Badge>;
       case "draft":
-        return <span className="text-muted-foreground">Draft</span>;
+        return <Badge variant="secondary" className="font-medium">Draft</Badge>;
       case "archived":
-        return <span className="text-muted-foreground">Archived</span>;
+        return <Badge variant="secondary" className="text-muted-foreground font-medium">Archived</Badge>;
       default:
-        return <span>{status}</span>;
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
@@ -872,18 +874,14 @@ const handleDragEnd = (event: DragEndEvent) => {
         <>
           <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <PlayCircle className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Forms</h2>
-              <Badge variant="secondary" className="text-xs">
-                {filteredForms.length} total
-              </Badge>
+              <h2 className="text-lg font-semibold text-foreground">Form</h2>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by assessment name"
+                  placeholder="Search by form name"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 bg-background"
@@ -914,7 +912,7 @@ const handleDragEnd = (event: DragEndEvent) => {
                   </TableHead>
                   <TableHead className="font-semibold text-foreground">
                     <div className="flex items-center gap-1">
-                      ASSESSMENT NAME
+                      NAME
                       <ChevronDown className="h-3 w-3" />
                     </div>
                   </TableHead>
@@ -925,9 +923,10 @@ const handleDragEnd = (event: DragEndEvent) => {
                       <ChevronDown className="h-3 w-3" />
                     </div>
                   </TableHead>
+                  <TableHead className="font-semibold text-foreground">SCHEDULED</TableHead>
                   <TableHead className="font-semibold text-foreground">
                     <div className="flex items-center gap-1">
-                      SCHEDULED
+                      CREATED DATE
                       <ChevronDown className="h-3 w-3" />
                     </div>
                   </TableHead>
@@ -937,6 +936,8 @@ const handleDragEnd = (event: DragEndEvent) => {
                       <ChevronDown className="h-3 w-3" />
                     </div>
                   </TableHead>
+                  <TableHead className="font-semibold text-foreground">SECTIONS</TableHead>
+                  <TableHead className="font-semibold text-foreground">CREATED BY</TableHead>
                   <TableHead className="font-semibold text-foreground">
                     <div className="flex items-center gap-1">
                       VERSION
@@ -956,18 +957,20 @@ const handleDragEnd = (event: DragEndEvent) => {
                       <Checkbox />
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-primary" />
-                        <span className="font-medium text-foreground">{form.name}</span>
-                      </div>
+                      <span className="font-medium text-foreground">{form.name}</span>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{form.model}</TableCell>
                     <TableCell>{getStatusBadge(form.status)}</TableCell>
                     <TableCell className="text-center text-foreground">{form.scheduled}</TableCell>
                     <TableCell className="text-foreground">
-                      {format(new Date(form.updatedAt), "dd-MM-yyyy")}
+                      {format(new Date(form.createdAt), "dd-MM-yyyy hh:mm a")}
                     </TableCell>
-                    <TableCell className="text-center text-foreground">{form.version}</TableCell>
+                    <TableCell className="text-foreground">
+                      {format(new Date(form.updatedAt), "dd-MM-yyyy hh:mm a")}
+                    </TableCell>
+                    <TableCell className="text-center text-foreground">{form.sections}</TableCell>
+                    <TableCell className="text-foreground">{form.createdBy}</TableCell>
+                    <TableCell className="text-center text-primary font-medium">{form.version}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -992,10 +995,10 @@ const handleDragEnd = (event: DragEndEvent) => {
                 ))}
                 {filteredForms.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-12">
+                    <TableCell colSpan={11} className="text-center py-12">
                       <div className="flex flex-col items-center gap-2">
                         <Folder className="h-8 w-8 text-muted-foreground/50" />
-                        <p className="text-muted-foreground">No assessments found in this repository</p>
+                        <p className="text-muted-foreground">No forms found</p>
                         <Button
                           variant="outline"
                           size="sm"
@@ -1490,6 +1493,10 @@ const handleDragEnd = (event: DragEndEvent) => {
           onMenuChange={(menu) => {
             if (menu === "schedule") {
               navigate("/scheduling");
+              return;
+            }
+            if (menu === "cat") {
+              navigate("/admin/products/prod-1/adaptive-test");
               return;
             }
             setViewMode(menu as ViewMode);

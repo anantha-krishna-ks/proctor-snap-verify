@@ -13,6 +13,7 @@ import {
   Settings,
   FileSignature,
   GitBranch,
+  Brain,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -46,6 +47,7 @@ interface FormsSidebarProps {
 const contentMenuItems = [
   { id: "blueprint", title: "Blueprint", icon: FileStack },
   { id: "forms", title: "Form", icon: PlayCircle },
+  { id: "cat", title: "CAT", icon: Brain },
   { id: "assessment", title: "Assessment", icon: GraduationCap },
   { id: "test-sequence", title: "Test Sequence", icon: ListOrdered },
   { id: "branching", title: "Branching", icon: GitBranch },
