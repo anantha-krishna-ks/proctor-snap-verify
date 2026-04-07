@@ -47,7 +47,7 @@ interface FormsSidebarProps {
 const contentMenuItems = [
   { id: "blueprint", title: "Blueprint", icon: FileStack },
   { id: "forms", title: "Form", icon: PlayCircle },
-  { id: "cat", title: "CAT", icon: Brain },
+  { id: "adaptive-forms", title: "Adaptive Forms", icon: Brain },
   { id: "assessment", title: "Assessment", icon: GraduationCap },
   { id: "test-sequence", title: "Test Sequence", icon: ListOrdered },
   { id: "branching", title: "Branching", icon: GitBranch },

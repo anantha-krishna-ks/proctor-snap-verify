@@ -159,7 +159,7 @@ const mockProjects = [
   { id: "proj-4", name: "Professional License Tests", description: "Industry certifications" },
 ];
 
-type ViewMode = "forms" | "survey" | "configuration" | "agreement" | "test-sequence" | "blueprint" | "assessment" | "branching" | "cat";
+type ViewMode = "forms" | "survey" | "configuration" | "agreement" | "test-sequence" | "blueprint" | "assessment" | "branching" | "adaptive-forms";
 
 const FormsDashboard = () => {
   const navigate = useNavigate();
@@ -1493,10 +1493,6 @@ const handleDragEnd = (event: DragEndEvent) => {
           onMenuChange={(menu) => {
             if (menu === "schedule") {
               navigate("/scheduling");
-              return;
-            }
-            if (menu === "cat") {
-              navigate("/admin/products/prod-1/adaptive-test");
               return;
             }
             setViewMode(menu as ViewMode);
