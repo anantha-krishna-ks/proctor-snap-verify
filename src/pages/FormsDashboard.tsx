@@ -911,7 +911,7 @@ const handleDragEnd = (event: DragEndEvent) => {
                     <Brain className="h-4 w-4 mr-2" />
                     CAT
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toast.info("MST configuration coming soon")}>
+                  <DropdownMenuItem onClick={() => navigate("/admin/products/prod-1/mst-config")}>
                     <GitBranch className="h-4 w-4 mr-2" />
                     MST
                   </DropdownMenuItem>
