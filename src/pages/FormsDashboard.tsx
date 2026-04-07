@@ -43,7 +43,7 @@ import {
   GraduationCap,
   Calendar,
   GitBranch,
-} from "lucide-react";
+Brain,
 import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
