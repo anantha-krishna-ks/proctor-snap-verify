@@ -31,6 +31,7 @@ import BranchingBuilder from "./pages/BranchingBuilder";
 import ProductsShowcase from "./pages/ProductsShowcase";
 import AdaptiveTestConfig from "./pages/AdaptiveTestConfig";
 import WorkflowSettings from "./pages/WorkflowSettings";
+import MSTConfig from "./pages/MSTConfig";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -283,6 +284,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdaptiveTestConfig />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/products/:productId/mst-config"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <MSTConfig />
               </ProtectedRoute>
             }
           />
