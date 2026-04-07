@@ -151,8 +151,8 @@ const MSTConfig = () => {
   const [numberOfPanels, setNumberOfPanels] = useState(1);
   const [stagesPerPanel, setStagesPerPanel] = useState(2);
   const [stages, setStages] = useState<Stage[]>([
-    { id: "s1", name: "Stage 1", branches: 1, modules: [{ id: "m1", name: "Module 1", itemCount: 0 }] },
-    { id: "s2", name: "Stage 2", branches: 1, modules: [{ id: "m2", name: "Module 2", itemCount: 0 }] },
+    { id: "s1", name: "Stage 1", branches: 1, modules: [{ id: "m1", name: "Module 1", itemCount: 0, items: [] }] },
+    { id: "s2", name: "Stage 2", branches: 1, modules: [{ id: "m2", name: "Module 2", itemCount: 0, items: [] }] },
   ]);
   const [branchingRule, setBranchingRule] = useState<"mfi" | "sum-score">("mfi");
   const [branchRoutes, setBranchRoutes] = useState<BranchRoute[]>([
