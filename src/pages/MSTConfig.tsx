@@ -622,15 +622,16 @@ const MSTConfig = () => {
                               </CollapsibleTrigger>
                               <CollapsibleContent>
                                 <div className="p-4 space-y-3">
-                                  <div className="flex flex-wrap gap-3">
+                                  <div className="flex flex-wrap gap-4">
                                     {stage.modules.map((mod) => (
-                                      <div key={mod.id} className="space-y-1">
+                                      <div key={mod.id} className="space-y-2 min-w-[220px]">
                                         <div className="bg-primary text-primary-foreground rounded-lg px-4 py-2 flex items-center gap-2">
                                           <span className="text-sm font-medium">{mod.name}</span>
                                           <Button
                                             variant="ghost"
                                             size="sm"
                                             className="h-6 px-2 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                                            onClick={() => handleOpenItemPicker(stage.id, mod.id, mod.name)}
                                           >
                                             Add Item +
                                           </Button>
@@ -638,6 +639,29 @@ const MSTConfig = () => {
                                         <p className="text-sm text-muted-foreground pl-1">
                                           No of Items: {mod.itemCount}
                                         </p>
+                                        {/* Assigned items list */}
+                                        {mod.items.length > 0 && (
+                                          <div className="space-y-1 pl-1">
+                                            {mod.items.map(item => (
+                                              <div key={item.id} className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-md border border-border bg-background text-sm group">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                  <span className="truncate">{item.title}</span>
+                                                  <Badge variant="outline" className="text-[10px] px-1.5 shrink-0">
+                                                    {item.difficulty}
+                                                  </Badge>
+                                                </div>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
+                                                  onClick={() => handleRemoveItem(stage.id, mod.id, item.id)}
+                                                >
+                                                  <Minus className="h-3 w-3" />
+                                                </Button>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
                                       </div>
                                     ))}
                                   </div>
