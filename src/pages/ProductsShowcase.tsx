@@ -87,7 +87,7 @@ const actionGroups: ActionGroup[] = [
       { icon: Layers, label: "Manage Blueprint", id: "blueprint" },
       { icon: ClipboardList, label: "Manage Items", id: "items", navTo: "/admin/products/{id}/items" },
       { icon: BookOpen, label: "Manage Passages", id: "passages" },
-      { icon: FileStack, label: "Manage Assessment", id: "assessment" },
+      { icon: FileStack, label: "Manage Assessment", id: "assessment", navTo: "/forms" },
       { icon: Zap, label: "Adaptive Test (CAT)", id: "adaptive-test", navTo: "/admin/products/{id}/adaptive-test" },
       { icon: CalendarDays, label: "Manage Schedules", id: "schedules", navTo: "/scheduling" },
       { icon: Package, label: "Manage Batches", id: "batches" },
