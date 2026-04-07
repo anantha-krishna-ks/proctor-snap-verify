@@ -32,6 +32,9 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { ItemPickerDialog } from "@/components/mst/ItemPickerDialog";
+import { mockItemBank } from "@/data/branchingMockData";
+import type { FormItem } from "@/types/forms";
 
 // ── Types ──
 interface Stage {
