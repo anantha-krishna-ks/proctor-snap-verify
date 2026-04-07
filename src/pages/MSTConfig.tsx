@@ -189,7 +189,7 @@ const MSTConfig = () => {
           id: `s${i + 1}`,
           name: `Stage ${i + 1}`,
           branches: 1,
-          modules: [{ id: `m${i + 1}`, name: `Module ${i + 1}`, itemCount: 0 }],
+          modules: [{ id: `m${i + 1}`, name: `Module ${i + 1}`, itemCount: 0, items: [] }],
         });
       }
     }
@@ -222,7 +222,7 @@ const MSTConfig = () => {
         if (s.modules[j]) {
           modules.push(s.modules[j]);
         } else {
-          modules.push({ id: `m${index}-${j}`, name: `Module ${j + 1}`, itemCount: 0 });
+          modules.push({ id: `m${index}-${j}`, name: `Module ${j + 1}`, itemCount: 0, items: [] });
         }
       }
       return { ...s, branches, modules };
