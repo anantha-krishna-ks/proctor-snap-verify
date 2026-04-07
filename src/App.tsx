@@ -31,6 +31,7 @@ import BranchingBuilder from "./pages/BranchingBuilder";
 import ProductsShowcase from "./pages/ProductsShowcase";
 import AdaptiveTestConfig from "./pages/AdaptiveTestConfig";
 import WorkflowSettings from "./pages/WorkflowSettings";
+import MSTConfig from "./pages/MSTConfig";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -286,6 +287,13 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/admin/products/:productId/mst-config"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <MSTConfig />
+              </ProtectedRoute>
+            }
           <Route path="/" element={<Navigate to="/login" replace />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
