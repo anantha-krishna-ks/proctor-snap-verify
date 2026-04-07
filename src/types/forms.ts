@@ -90,8 +90,10 @@ export interface Form {
   items: FormItem[];
   totalMarks: number;
   totalQuestions: number;
-  status: 'draft' | 'published' | 'archived' | 'completed';
+  status: 'draft' | 'published' | 'archived' | 'completed' | 'in-progress';
   scheduled: number;
+  sections: number;
+  createdBy: string;
   version: number;
   createdAt: string;
   updatedAt: string;
