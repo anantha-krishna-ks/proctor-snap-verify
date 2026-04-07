@@ -159,7 +159,7 @@ const mockProjects = [
   { id: "proj-4", name: "Professional License Tests", description: "Industry certifications" },
 ];
 
-type ViewMode = "forms" | "survey" | "configuration" | "agreement" | "test-sequence" | "blueprint" | "assessment" | "branching";
+type ViewMode = "forms" | "survey" | "configuration" | "agreement" | "test-sequence" | "blueprint" | "assessment" | "branching" | "cat";
 
 const FormsDashboard = () => {
   const navigate = useNavigate();
@@ -346,17 +346,19 @@ const handleDragEnd = (event: DragEndEvent) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "completed":
-        return <span className="text-foreground">Completed</span>;
+        return <Badge className="bg-cyan-500 hover:bg-cyan-500 text-white border-0 font-medium">Completed</Badge>;
       case "published":
-        return <span className="text-foreground">Published</span>;
+        return <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white border-0 font-medium">Published</Badge>;
+      case "in-progress":
+        return <Badge className="bg-amber-400 hover:bg-amber-400 text-white border-0 font-medium">In Progress</Badge>;
       case "active":
-        return <span className="text-foreground">Active</span>;
+        return <Badge className="bg-emerald-500 hover:bg-emerald-500 text-white border-0 font-medium">Active</Badge>;
       case "draft":
-        return <span className="text-muted-foreground">Draft</span>;
+        return <Badge variant="secondary" className="font-medium">Draft</Badge>;
       case "archived":
-        return <span className="text-muted-foreground">Archived</span>;
+        return <Badge variant="secondary" className="text-muted-foreground font-medium">Archived</Badge>;
       default:
-        return <span>{status}</span>;
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
