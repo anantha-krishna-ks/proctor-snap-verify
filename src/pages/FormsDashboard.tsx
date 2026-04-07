@@ -916,7 +916,7 @@ const handleDragEnd = (event: DragEndEvent) => {
                   </TableHead>
                   <TableHead className="font-semibold text-foreground">
                     <div className="flex items-center gap-1">
-                      ASSESSMENT NAME
+                      NAME
                       <ChevronDown className="h-3 w-3" />
                     </div>
                   </TableHead>
@@ -927,9 +927,10 @@ const handleDragEnd = (event: DragEndEvent) => {
                       <ChevronDown className="h-3 w-3" />
                     </div>
                   </TableHead>
+                  <TableHead className="font-semibold text-foreground">SCHEDULED</TableHead>
                   <TableHead className="font-semibold text-foreground">
                     <div className="flex items-center gap-1">
-                      SCHEDULED
+                      CREATED DATE
                       <ChevronDown className="h-3 w-3" />
                     </div>
                   </TableHead>
@@ -939,6 +940,8 @@ const handleDragEnd = (event: DragEndEvent) => {
                       <ChevronDown className="h-3 w-3" />
                     </div>
                   </TableHead>
+                  <TableHead className="font-semibold text-foreground">SECTIONS</TableHead>
+                  <TableHead className="font-semibold text-foreground">CREATED BY</TableHead>
                   <TableHead className="font-semibold text-foreground">
                     <div className="flex items-center gap-1">
                       VERSION
@@ -958,18 +961,20 @@ const handleDragEnd = (event: DragEndEvent) => {
                       <Checkbox />
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-4 w-4 text-primary" />
-                        <span className="font-medium text-foreground">{form.name}</span>
-                      </div>
+                      <span className="font-medium text-foreground">{form.name}</span>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{form.model}</TableCell>
                     <TableCell>{getStatusBadge(form.status)}</TableCell>
                     <TableCell className="text-center text-foreground">{form.scheduled}</TableCell>
                     <TableCell className="text-foreground">
-                      {format(new Date(form.updatedAt), "dd-MM-yyyy")}
+                      {format(new Date(form.createdAt), "dd-MM-yyyy hh:mm a")}
                     </TableCell>
-                    <TableCell className="text-center text-foreground">{form.version}</TableCell>
+                    <TableCell className="text-foreground">
+                      {format(new Date(form.updatedAt), "dd-MM-yyyy hh:mm a")}
+                    </TableCell>
+                    <TableCell className="text-center text-foreground">{form.sections}</TableCell>
+                    <TableCell className="text-foreground">{form.createdBy}</TableCell>
+                    <TableCell className="text-center text-primary font-medium">{form.version}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -994,10 +999,10 @@ const handleDragEnd = (event: DragEndEvent) => {
                 ))}
                 {filteredForms.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-12">
+                    <TableCell colSpan={11} className="text-center py-12">
                       <div className="flex flex-col items-center gap-2">
                         <Folder className="h-8 w-8 text-muted-foreground/50" />
-                        <p className="text-muted-foreground">No assessments found in this repository</p>
+                        <p className="text-muted-foreground">No forms found</p>
                         <Button
                           variant="outline"
                           size="sm"
