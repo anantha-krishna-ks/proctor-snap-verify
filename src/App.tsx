@@ -78,7 +78,7 @@ const App = () => (
             path="/admin/products"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <ProductsDashboard />
+                <ProductsShowcase />
               </ProtectedRoute>
             }
           />
@@ -255,10 +255,10 @@ const App = () => (
             }
           />
           <Route
-            path="/admin/products-v2"
+            path="/admin/products-v1"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <ProductsShowcase />
+                <ProductsDashboard />
               </ProtectedRoute>
             }
           />
