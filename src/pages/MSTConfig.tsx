@@ -32,6 +32,9 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import { ItemPickerDialog } from "@/components/mst/ItemPickerDialog";
+import { mockItemBank } from "@/data/branchingMockData";
+import type { FormItem } from "@/types/forms";
 
 // ── Types ──
 interface Stage {
@@ -45,6 +48,7 @@ interface Module {
   id: string;
   name: string;
   itemCount: number;
+  items: FormItem[];
 }
 
 interface Panel {
@@ -147,8 +151,8 @@ const MSTConfig = () => {
   const [numberOfPanels, setNumberOfPanels] = useState(1);
   const [stagesPerPanel, setStagesPerPanel] = useState(2);
   const [stages, setStages] = useState<Stage[]>([
-    { id: "s1", name: "Stage 1", branches: 1, modules: [{ id: "m1", name: "Module 1", itemCount: 0 }] },
-    { id: "s2", name: "Stage 2", branches: 1, modules: [{ id: "m2", name: "Module 2", itemCount: 0 }] },
+    { id: "s1", name: "Stage 1", branches: 1, modules: [{ id: "m1", name: "Module 1", itemCount: 0, items: [] }] },
+    { id: "s2", name: "Stage 2", branches: 1, modules: [{ id: "m2", name: "Module 2", itemCount: 0, items: [] }] },
   ]);
   const [branchingRule, setBranchingRule] = useState<"mfi" | "sum-score">("mfi");
   const [branchRoutes, setBranchRoutes] = useState<BranchRoute[]>([
@@ -173,6 +177,48 @@ const MSTConfig = () => {
   const [maxDelta, setMaxDelta] = useState("0");
   const [backNavigation, setBackNavigation] = useState(false);
 
+  // Item picker dialog state
+  const [itemPickerOpen, setItemPickerOpen] = useState(false);
+  const [activeModuleTarget, setActiveModuleTarget] = useState<{ stageId: string; moduleId: string; moduleName: string } | null>(null);
+
+  // Get all already-assigned item IDs across all modules
+  const allAssignedItemIds = stages.flatMap(s => s.modules.flatMap(m => m.items.map(i => i.id)));
+
+  const handleOpenItemPicker = (stageId: string, moduleId: string, moduleName: string) => {
+    setActiveModuleTarget({ stageId, moduleId, moduleName });
+    setItemPickerOpen(true);
+  };
+
+  const handleAssignItems = (newItems: FormItem[]) => {
+    if (!activeModuleTarget) return;
+    setStages(prev => prev.map(s => {
+      if (s.id !== activeModuleTarget.stageId) return s;
+      return {
+        ...s,
+        modules: s.modules.map(m => {
+          if (m.id !== activeModuleTarget.moduleId) return m;
+          const updated = [...m.items, ...newItems];
+          return { ...m, items: updated, itemCount: updated.length };
+        }),
+      };
+    }));
+    toast({ title: "Items Added", description: `${newItems.length} item(s) added to ${activeModuleTarget.moduleName}.` });
+  };
+
+  const handleRemoveItem = (stageId: string, moduleId: string, itemId: string) => {
+    setStages(prev => prev.map(s => {
+      if (s.id !== stageId) return s;
+      return {
+        ...s,
+        modules: s.modules.map(m => {
+          if (m.id !== moduleId) return m;
+          const updated = m.items.filter(i => i.id !== itemId);
+          return { ...m, items: updated, itemCount: updated.length };
+        }),
+      };
+    }));
+  };
+
   // Update stages when count changes
   const updateStagesCount = (newCount: number) => {
     setStagesPerPanel(newCount);
@@ -185,7 +231,7 @@ const MSTConfig = () => {
           id: `s${i + 1}`,
           name: `Stage ${i + 1}`,
           branches: 1,
-          modules: [{ id: `m${i + 1}`, name: `Module ${i + 1}`, itemCount: 0 }],
+          modules: [{ id: `m${i + 1}`, name: `Module ${i + 1}`, itemCount: 0, items: [] }],
         });
       }
     }
@@ -218,7 +264,7 @@ const MSTConfig = () => {
         if (s.modules[j]) {
           modules.push(s.modules[j]);
         } else {
-          modules.push({ id: `m${index}-${j}`, name: `Module ${j + 1}`, itemCount: 0 });
+          modules.push({ id: `m${index}-${j}`, name: `Module ${j + 1}`, itemCount: 0, items: [] });
         }
       }
       return { ...s, branches, modules };
@@ -576,15 +622,16 @@ const MSTConfig = () => {
                               </CollapsibleTrigger>
                               <CollapsibleContent>
                                 <div className="p-4 space-y-3">
-                                  <div className="flex flex-wrap gap-3">
+                                  <div className="flex flex-wrap gap-4">
                                     {stage.modules.map((mod) => (
-                                      <div key={mod.id} className="space-y-1">
+                                      <div key={mod.id} className="space-y-2 min-w-[220px]">
                                         <div className="bg-primary text-primary-foreground rounded-lg px-4 py-2 flex items-center gap-2">
                                           <span className="text-sm font-medium">{mod.name}</span>
                                           <Button
                                             variant="ghost"
                                             size="sm"
                                             className="h-6 px-2 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                                            onClick={() => handleOpenItemPicker(stage.id, mod.id, mod.name)}
                                           >
                                             Add Item +
                                           </Button>
@@ -592,6 +639,29 @@ const MSTConfig = () => {
                                         <p className="text-sm text-muted-foreground pl-1">
                                           No of Items: {mod.itemCount}
                                         </p>
+                                        {/* Assigned items list */}
+                                        {mod.items.length > 0 && (
+                                          <div className="space-y-1 pl-1">
+                                            {mod.items.map(item => (
+                                              <div key={item.id} className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-md border border-border bg-background text-sm group">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                  <span className="truncate">{item.title}</span>
+                                                  <Badge variant="outline" className="text-[10px] px-1.5 shrink-0">
+                                                    {item.difficulty}
+                                                  </Badge>
+                                                </div>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive"
+                                                  onClick={() => handleRemoveItem(stage.id, mod.id, item.id)}
+                                                >
+                                                  <Minus className="h-3 w-3" />
+                                                </Button>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        )}
                                       </div>
                                     ))}
                                   </div>
@@ -727,6 +797,16 @@ const MSTConfig = () => {
           </SectionCard>
         </TabsContent>
       </Tabs>
+
+      {/* Item Picker Dialog */}
+      <ItemPickerDialog
+        open={itemPickerOpen}
+        onOpenChange={setItemPickerOpen}
+        items={mockItemBank}
+        alreadyAssignedIds={allAssignedItemIds}
+        moduleName={activeModuleTarget?.moduleName || ""}
+        onAssign={handleAssignItems}
+      />
     </div>
   );
 };
