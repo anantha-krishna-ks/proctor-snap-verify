@@ -874,18 +874,14 @@ const handleDragEnd = (event: DragEndEvent) => {
         <>
           <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <PlayCircle className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Forms</h2>
-              <Badge variant="secondary" className="text-xs">
-                {filteredForms.length} total
-              </Badge>
+              <h2 className="text-lg font-semibold text-foreground">Form</h2>
             </div>
 
             <div className="flex items-center gap-3">
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by assessment name"
+                  placeholder="Search by form name"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 bg-background"
