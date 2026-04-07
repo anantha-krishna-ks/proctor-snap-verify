@@ -1499,6 +1499,10 @@ const handleDragEnd = (event: DragEndEvent) => {
               navigate("/scheduling");
               return;
             }
+            if (menu === "cat") {
+              navigate("/admin/products/prod-1/adaptive-test");
+              return;
+            }
             setViewMode(menu as ViewMode);
           }}
         />
