@@ -48,6 +48,7 @@ interface Module {
   id: string;
   name: string;
   itemCount: number;
+  items: FormItem[];
 }
 
 interface Panel {
