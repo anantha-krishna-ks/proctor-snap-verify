@@ -797,6 +797,16 @@ const MSTConfig = () => {
           </SectionCard>
         </TabsContent>
       </Tabs>
+
+      {/* Item Picker Dialog */}
+      <ItemPickerDialog
+        open={itemPickerOpen}
+        onOpenChange={setItemPickerOpen}
+        items={mockItemBank}
+        alreadyAssignedIds={allAssignedItemIds}
+        moduleName={activeModuleTarget?.moduleName || ""}
+        onAssign={handleAssignItems}
+      />
     </div>
   );
 };
