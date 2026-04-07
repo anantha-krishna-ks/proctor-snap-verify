@@ -177,6 +177,48 @@ const MSTConfig = () => {
   const [maxDelta, setMaxDelta] = useState("0");
   const [backNavigation, setBackNavigation] = useState(false);
 
+  // Item picker dialog state
+  const [itemPickerOpen, setItemPickerOpen] = useState(false);
+  const [activeModuleTarget, setActiveModuleTarget] = useState<{ stageId: string; moduleId: string; moduleName: string } | null>(null);
+
+  // Get all already-assigned item IDs across all modules
+  const allAssignedItemIds = stages.flatMap(s => s.modules.flatMap(m => m.items.map(i => i.id)));
+
+  const handleOpenItemPicker = (stageId: string, moduleId: string, moduleName: string) => {
+    setActiveModuleTarget({ stageId, moduleId, moduleName });
+    setItemPickerOpen(true);
+  };
+
+  const handleAssignItems = (newItems: FormItem[]) => {
+    if (!activeModuleTarget) return;
+    setStages(prev => prev.map(s => {
+      if (s.id !== activeModuleTarget.stageId) return s;
+      return {
+        ...s,
+        modules: s.modules.map(m => {
+          if (m.id !== activeModuleTarget.moduleId) return m;
+          const updated = [...m.items, ...newItems];
+          return { ...m, items: updated, itemCount: updated.length };
+        }),
+      };
+    }));
+    toast({ title: "Items Added", description: `${newItems.length} item(s) added to ${activeModuleTarget.moduleName}.` });
+  };
+
+  const handleRemoveItem = (stageId: string, moduleId: string, itemId: string) => {
+    setStages(prev => prev.map(s => {
+      if (s.id !== stageId) return s;
+      return {
+        ...s,
+        modules: s.modules.map(m => {
+          if (m.id !== moduleId) return m;
+          const updated = m.items.filter(i => i.id !== itemId);
+          return { ...m, items: updated, itemCount: updated.length };
+        }),
+      };
+    }));
+  };
+
   // Update stages when count changes
   const updateStagesCount = (newCount: number) => {
     setStagesPerPanel(newCount);
