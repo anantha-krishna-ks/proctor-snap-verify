@@ -868,7 +868,116 @@ const handleDragEnd = (event: DragEndEvent) => {
       );
     }
 
-    // Forms view
+    // Adaptive Forms view
+    if (viewMode === "adaptive-forms") {
+      const adaptiveForms = [
+        { id: "af-1", name: "Math Adaptive Test", type: "CAT", status: "published", items: 120, createdBy: "Manjunath T", createdAt: "2026-02-18T14:40:00Z", updatedAt: "2026-03-04T04:36:00Z" },
+        { id: "af-2", name: "English Proficiency CAT", type: "CAT", status: "in-progress", items: 85, createdBy: "Vasu R", createdAt: "2026-02-20T10:35:00Z", updatedAt: "2026-02-20T10:35:00Z" },
+        { id: "af-3", name: "Science MST Level 1", type: "MST", status: "draft", items: 60, createdBy: "Harshitha C H", createdAt: "2026-02-17T15:28:00Z", updatedAt: "2026-02-17T15:29:00Z" },
+        { id: "af-4", name: "Aptitude CAT", type: "CAT", status: "completed", items: 200, createdBy: "Harshitha C H", createdAt: "2026-02-17T15:06:00Z", updatedAt: "2026-02-17T15:07:00Z" },
+      ];
+
+      const filteredAdaptive = adaptiveForms.filter(f =>
+        f.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      return (
+        <>
+          <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold text-foreground">Adaptive Forms</h2>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search adaptive forms"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 bg-background"
+                />
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="bg-primary hover:bg-primary/90">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Create Form
+                    <ChevronDown className="h-4 w-4 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-popover">
+                  <DropdownMenuItem onClick={() => navigate("/admin/products/prod-1/adaptive-test")}>
+                    <Brain className="h-4 w-4 mr-2" />
+                    CAT
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast.info("MST configuration coming soon")}>
+                    <GitBranch className="h-4 w-4 mr-2" />
+                    MST
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="w-10">
+                    <Checkbox />
+                  </TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Items</TableHead>
+                  <TableHead>Created Date</TableHead>
+                  <TableHead>Modified Date</TableHead>
+                  <TableHead>Created By</TableHead>
+                  <TableHead className="w-10"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAdaptive.map((form) => (
+                  <TableRow key={form.id} className="cursor-pointer hover:bg-muted/30">
+                    <TableCell>
+                      <Checkbox />
+                    </TableCell>
+                    <TableCell className="font-medium text-foreground">{form.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-medium">{form.type}</Badge>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(form.status)}</TableCell>
+                    <TableCell className="text-muted-foreground">{form.items}</TableCell>
+                    <TableCell className="text-muted-foreground">{format(new Date(form.createdAt), "dd MMM yyyy, hh:mm a")}</TableCell>
+                    <TableCell className="text-muted-foreground">{format(new Date(form.updatedAt), "dd MMM yyyy, hh:mm a")}</TableCell>
+                    <TableCell className="text-muted-foreground">{form.createdBy}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-popover">
+                          <DropdownMenuItem onClick={() => navigate("/admin/products/prod-1/adaptive-test")}>
+                            <Pencil className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+      );
+    }
+
     if (viewMode === "forms") {
       return (
         <>
