@@ -434,7 +434,7 @@ const ItemsManagement = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setIsCreateItemOpen(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Create Manually
                       </DropdownMenuItem>
@@ -496,6 +496,7 @@ const ItemsManagement = () => {
                       <TableHead className="font-semibold text-foreground text-center">SCORE</TableHead>
                       <TableHead className="font-semibold text-foreground">LAST MODIFIED</TableHead>
                       <TableHead className="font-semibold text-foreground">CREATED DATE</TableHead>
+                      <TableHead className="font-semibold text-foreground">WORKFLOW STATUS</TableHead>
                       <TableHead className="w-12"></TableHead>
                     </TableRow>
                   </TableHeader>
