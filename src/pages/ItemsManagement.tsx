@@ -38,6 +38,10 @@ import { mockProjects } from "@/data/projectMockData";
 import { ItemRepositorySidebar } from "@/components/ItemRepositorySidebar";
 import { GenerateItemsDialog, GeneratedItem } from "@/components/GenerateItemsDialog";
 import { GeneratedItemsReview } from "@/components/GeneratedItemsReview";
+import CreateItemSheet, { type NewItemDraft } from "@/components/items/CreateItemSheet";
+import ItemWorkflowDialog from "@/components/items/ItemWorkflowDialog";
+import { mockWorkflows } from "@/data/workflowMockData";
+import type { ItemWorkflowState, ItemWorkflowStatus } from "@/types/itemWorkflow";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
@@ -61,6 +65,7 @@ interface Item {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  workflow: ItemWorkflowState;
 }
 
 const mockRepositories = [
