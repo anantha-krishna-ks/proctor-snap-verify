@@ -238,6 +238,31 @@ const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductShee
               </Select>
             </div>
 
+            {/* Workflow */}
+            <div className="space-y-2">
+              <Label htmlFor="workflow">
+                Item Workflow <span className="text-destructive">*</span>
+              </Label>
+              <Select
+                value={formData.workflowId}
+                onValueChange={(value) => handleInputChange("workflowId", value)}
+              >
+                <SelectTrigger id="workflow">
+                  <SelectValue placeholder="Select an item review workflow" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockWorkflows.map((wf) => (
+                    <SelectItem key={wf.id} value={wf.id}>
+                      {wf.name} — {wf.description}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Items created in this program will follow this approval workflow before publishing.
+              </p>
+            </div>
+
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
