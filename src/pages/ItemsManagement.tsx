@@ -162,6 +162,44 @@ const mockItems: Item[] = [
   },
 ];
 
+// Default workflow used in mock data (Standard 3-Level)
+const DEFAULT_WORKFLOW_ID = "wf-1";
+const defaultWorkflow = mockWorkflows.find((w) => w.id === DEFAULT_WORKFLOW_ID)!;
+
+const makeWorkflow = (
+  status: ItemWorkflowStatus = "draft",
+  currentStepIndex = 0,
+  history: ItemWorkflowState["history"] = [],
+): ItemWorkflowState => ({
+  workflowId: DEFAULT_WORKFLOW_ID,
+  status,
+  currentStepIndex,
+  history,
+});
+
+// Inject workflow state into existing mock items
+mockItems.forEach((it, idx) => {
+  if (!(it as Item).workflow) {
+    (it as Item).workflow =
+      idx === 0
+        ? makeWorkflow("published", defaultWorkflow.steps.length, [
+            { stepId: "step-1", stepName: "Authoring", action: "submitted", by: "Harshitha C H", at: "20-01-2026 04:39 PM" },
+            { stepId: "step-2", stepName: "Review", action: "approved", by: "Reviewer", at: "20-01-2026 06:00 PM" },
+            { stepId: "step-3", stepName: "Final Approval", action: "published", by: "Approver", at: "21-01-2026 03:44 PM" },
+          ])
+        : idx === 1
+        ? makeWorkflow("in_progress", 1, [
+            { stepId: "step-1", stepName: "Authoring", action: "submitted", by: "Harshitha C H", at: "20-01-2026 04:39 PM" },
+          ])
+        : idx === 2
+        ? makeWorkflow("draft", 0, [])
+        : makeWorkflow("in_progress", 2, [
+            { stepId: "step-1", stepName: "Authoring", action: "submitted", by: "Sarah Johnson", at: "18-01-2026 09:00 AM" },
+            { stepId: "step-2", stepName: "Review", action: "approved", by: "Reviewer", at: "20-01-2026 11:20 AM" },
+          ]);
+  }
+});
+
 const ItemsManagement = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
