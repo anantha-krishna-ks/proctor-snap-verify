@@ -586,7 +586,7 @@ const ItemsManagement = () => {
                         {/* Expanded Content */}
                         {expandedItems.has(item.id) && (
                           <TableRow className="bg-muted/20">
-                            <TableCell colSpan={8} className="p-0">
+                            <TableCell colSpan={9} className="p-0">
                               <div className="px-12 py-4 border-b border-border">
                                 {/* Question */}
                                 <p className="text-sm font-medium mb-4">{item.question}</p>
