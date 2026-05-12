@@ -133,6 +133,7 @@ const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductShee
       description: "",
       image: null,
       assignedUsers: [],
+      workflowId: "",
     });
     setImagePreview(null);
     setUserSearch("");
@@ -148,6 +149,7 @@ const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductShee
       description: "",
       image: null,
       assignedUsers: [],
+      workflowId: "",
     });
     setImagePreview(null);
     setUserSearch("");
