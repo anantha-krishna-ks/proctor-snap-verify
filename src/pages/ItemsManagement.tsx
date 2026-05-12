@@ -65,7 +65,7 @@ interface Item {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
-  workflow: ItemWorkflowState;
+  workflow?: ItemWorkflowState;
 }
 
 const mockRepositories = [
