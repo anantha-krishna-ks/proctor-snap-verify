@@ -735,6 +735,26 @@ const ItemsManagement = () => {
         items={pendingGeneratedItems}
         onConfirm={handleConfirmItems}
       />
+
+      {/* Create Item (Manual) */}
+      <CreateItemSheet
+        open={isCreateItemOpen}
+        onOpenChange={setIsCreateItemOpen}
+        onSaveDraft={handleCreateItem}
+      />
+
+      {/* Item Workflow */}
+      {workflowItem && workflowItem.workflow && (
+        <ItemWorkflowDialog
+          open={!!workflowItemId}
+          onOpenChange={(o) => !o && setWorkflowItemId(null)}
+          itemCode={workflowItem.code}
+          workflow={defaultWorkflow}
+          state={workflowItem.workflow}
+          onAdvance={(action, comment) => advanceWorkflow(workflowItem.id, action, comment)}
+          onReject={(comment) => rejectWorkflow(workflowItem.id, comment)}
+        />
+      )}
     </div>
   );
 };
