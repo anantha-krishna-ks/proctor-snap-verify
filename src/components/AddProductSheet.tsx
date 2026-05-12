@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { mockUsers } from "@/data/adminMockData";
+import { mockWorkflows } from "@/data/workflowMockData";
 import { toast } from "@/hooks/use-toast";
 
 // Mock organizations
@@ -54,6 +55,7 @@ export interface ProductFormData {
   description: string;
   image: File | null;
   assignedUsers: string[];
+  workflowId: string;
 }
 
 const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductSheetProps) => {
@@ -65,6 +67,7 @@ const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductShee
     description: "",
     image: null,
     assignedUsers: [],
+    workflowId: "",
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [userSearch, setUserSearch] = useState("");
@@ -106,7 +109,7 @@ const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductShee
   );
 
   const handleSubmit = () => {
-    if (!formData.organizationId || !formData.code || !formData.name || !formData.category) {
+    if (!formData.organizationId || !formData.code || !formData.name || !formData.category || !formData.workflowId) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
