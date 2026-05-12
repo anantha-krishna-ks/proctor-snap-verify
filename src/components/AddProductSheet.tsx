@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { mockUsers } from "@/data/adminMockData";
+import { mockWorkflows } from "@/data/workflowMockData";
 import { toast } from "@/hooks/use-toast";
 
 // Mock organizations
@@ -54,6 +55,7 @@ export interface ProductFormData {
   description: string;
   image: File | null;
   assignedUsers: string[];
+  workflowId: string;
 }
 
 const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductSheetProps) => {
@@ -65,6 +67,7 @@ const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductShee
     description: "",
     image: null,
     assignedUsers: [],
+    workflowId: "",
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [userSearch, setUserSearch] = useState("");
@@ -106,7 +109,7 @@ const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductShee
   );
 
   const handleSubmit = () => {
-    if (!formData.organizationId || !formData.code || !formData.name || !formData.category) {
+    if (!formData.organizationId || !formData.code || !formData.name || !formData.category || !formData.workflowId) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -130,6 +133,7 @@ const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductShee
       description: "",
       image: null,
       assignedUsers: [],
+      workflowId: "",
     });
     setImagePreview(null);
     setUserSearch("");
@@ -145,6 +149,7 @@ const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductShee
       description: "",
       image: null,
       assignedUsers: [],
+      workflowId: "",
     });
     setImagePreview(null);
     setUserSearch("");
@@ -231,6 +236,31 @@ const AddProductSheet = ({ open, onOpenChange, onProductCreate }: AddProductShee
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Workflow */}
+            <div className="space-y-2">
+              <Label htmlFor="workflow">
+                Item Workflow <span className="text-destructive">*</span>
+              </Label>
+              <Select
+                value={formData.workflowId}
+                onValueChange={(value) => handleInputChange("workflowId", value)}
+              >
+                <SelectTrigger id="workflow">
+                  <SelectValue placeholder="Select an item review workflow" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockWorkflows.map((wf) => (
+                    <SelectItem key={wf.id} value={wf.id}>
+                      {wf.name} — {wf.description}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Items created in this program will follow this approval workflow before publishing.
+              </p>
             </div>
 
             {/* Description */}

@@ -31,13 +31,17 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Search, Plus, MoreVertical, Edit, Eye, Copy, Trash2, 
-  Filter, ChevronDown, ChevronRight, Tag, Sparkles,
+  Filter, ChevronDown, ChevronRight, Tag, Sparkles, Send,
   ChevronLeft, ChevronLeftIcon, ChevronRightIcon, ChevronsLeft, ChevronsRight
 } from "lucide-react";
 import { mockProjects } from "@/data/projectMockData";
 import { ItemRepositorySidebar } from "@/components/ItemRepositorySidebar";
 import { GenerateItemsDialog, GeneratedItem } from "@/components/GenerateItemsDialog";
 import { GeneratedItemsReview } from "@/components/GeneratedItemsReview";
+import CreateItemSheet, { type NewItemDraft } from "@/components/items/CreateItemSheet";
+import ItemWorkflowDialog from "@/components/items/ItemWorkflowDialog";
+import { mockWorkflows } from "@/data/workflowMockData";
+import type { ItemWorkflowState, ItemWorkflowStatus } from "@/types/itemWorkflow";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
@@ -61,6 +65,7 @@ interface Item {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  workflow?: ItemWorkflowState;
 }
 
 const mockRepositories = [
@@ -157,6 +162,44 @@ const mockItems: Item[] = [
   },
 ];
 
+// Default workflow used in mock data (Standard 3-Level)
+const DEFAULT_WORKFLOW_ID = "wf-1";
+const defaultWorkflow = mockWorkflows.find((w) => w.id === DEFAULT_WORKFLOW_ID)!;
+
+const makeWorkflow = (
+  status: ItemWorkflowStatus = "draft",
+  currentStepIndex = 0,
+  history: ItemWorkflowState["history"] = [],
+): ItemWorkflowState => ({
+  workflowId: DEFAULT_WORKFLOW_ID,
+  status,
+  currentStepIndex,
+  history,
+});
+
+// Inject workflow state into existing mock items
+mockItems.forEach((it, idx) => {
+  if (!(it as Item).workflow) {
+    (it as Item).workflow =
+      idx === 0
+        ? makeWorkflow("published", defaultWorkflow.steps.length, [
+            { stepId: "step-1", stepName: "Authoring", action: "submitted", by: "Harshitha C H", at: "20-01-2026 04:39 PM" },
+            { stepId: "step-2", stepName: "Review", action: "approved", by: "Reviewer", at: "20-01-2026 06:00 PM" },
+            { stepId: "step-3", stepName: "Final Approval", action: "published", by: "Approver", at: "21-01-2026 03:44 PM" },
+          ])
+        : idx === 1
+        ? makeWorkflow("in_progress", 1, [
+            { stepId: "step-1", stepName: "Authoring", action: "submitted", by: "Harshitha C H", at: "20-01-2026 04:39 PM" },
+          ])
+        : idx === 2
+        ? makeWorkflow("draft", 0, [])
+        : makeWorkflow("in_progress", 2, [
+            { stepId: "step-1", stepName: "Authoring", action: "submitted", by: "Sarah Johnson", at: "18-01-2026 09:00 AM" },
+            { stepId: "step-2", stepName: "Review", action: "approved", by: "Reviewer", at: "20-01-2026 11:20 AM" },
+          ]);
+  }
+});
+
 const ItemsManagement = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
@@ -236,10 +279,93 @@ const ItemsManagement = () => {
       createdAt: new Date().toLocaleString(),
       updatedAt: "",
       createdBy: "AI Generated",
+      workflow: makeWorkflow("draft", 0, [
+        { stepId: "step-1", stepName: "Authoring", action: "created", by: "AI Generated", at: new Date().toLocaleString() },
+      ]),
     }));
     setItems([...newItems, ...items]);
     setPendingGeneratedItems([]);
-    toast.success(`Added ${selectedItems.length} items to the repository!`);
+    toast.success(`Added ${selectedItems.length} items as drafts!`);
+  };
+
+  const [isCreateItemOpen, setIsCreateItemOpen] = useState(false);
+  const [workflowItemId, setWorkflowItemId] = useState<string | null>(null);
+  const workflowItem = items.find((i) => i.id === workflowItemId);
+  const currentUser = "Current User";
+  const now = () => new Date().toLocaleString();
+
+  const handleCreateItem = (draft: NewItemDraft) => {
+    const id = `item-${Date.now()}`;
+    const newItem: Item = {
+      id,
+      code: draft.code,
+      question: draft.question,
+      type: draft.type,
+      score: draft.score,
+      status: "unused",
+      language: draft.language,
+      version: "V1.0",
+      options: draft.options,
+      createdAt: now(),
+      updatedAt: "",
+      createdBy: currentUser,
+      workflow: makeWorkflow("draft", 0, [
+        { stepId: defaultWorkflow.steps[0].id, stepName: defaultWorkflow.steps[0].name, action: "created", by: currentUser, at: now() },
+      ]),
+    };
+    setItems([newItem, ...items]);
+    toast.success("Item saved as draft.");
+  };
+
+  const advanceWorkflow = (itemId: string, action: "submit" | "approve" | "publish", comment: string) => {
+    setItems((prev) =>
+      prev.map((it) => {
+        if (it.id !== itemId || !it.workflow) return it;
+        const wf = defaultWorkflow;
+        const nextIdx = it.workflow.currentStepIndex + 1;
+        const isPublish = action === "publish" || nextIdx >= wf.steps.length;
+        const currentStep = wf.steps[it.workflow.currentStepIndex];
+        const histAction =
+          action === "submit" ? "submitted" : isPublish ? "published" : "approved";
+        return {
+          ...it,
+          updatedAt: now(),
+          workflow: {
+            ...it.workflow,
+            status: isPublish ? "published" : "in_progress",
+            currentStepIndex: isPublish ? wf.steps.length : nextIdx,
+            history: [
+              ...it.workflow.history,
+              { stepId: currentStep.id, stepName: currentStep.name, action: histAction, by: currentUser, at: now(), comment: comment || undefined },
+            ],
+          },
+        };
+      })
+    );
+    toast.success(action === "publish" ? "Item published." : action === "submit" ? "Submitted to next step." : "Approved.");
+  };
+
+  const rejectWorkflow = (itemId: string, comment: string) => {
+    setItems((prev) =>
+      prev.map((it) => {
+        if (it.id !== itemId || !it.workflow) return it;
+        const currentStep = defaultWorkflow.steps[it.workflow.currentStepIndex];
+        return {
+          ...it,
+          updatedAt: now(),
+          workflow: {
+            ...it.workflow,
+            status: "draft",
+            currentStepIndex: 0,
+            history: [
+              ...it.workflow.history,
+              { stepId: currentStep.id, stepName: currentStep.name, action: "rejected", by: currentUser, at: now(), comment: comment || undefined },
+            ],
+          },
+        };
+      })
+    );
+    toast.error("Item rejected and returned to author.");
   };
 
   const handleBack = () => {
@@ -308,7 +434,7 @@ const ItemsManagement = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setIsCreateItemOpen(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Create Manually
                       </DropdownMenuItem>
@@ -370,6 +496,7 @@ const ItemsManagement = () => {
                       <TableHead className="font-semibold text-foreground text-center">SCORE</TableHead>
                       <TableHead className="font-semibold text-foreground">LAST MODIFIED</TableHead>
                       <TableHead className="font-semibold text-foreground">CREATED DATE</TableHead>
+                      <TableHead className="font-semibold text-foreground">WORKFLOW STATUS</TableHead>
                       <TableHead className="w-12"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -410,6 +537,19 @@ const ItemsManagement = () => {
                           <TableCell className="text-muted-foreground" onClick={() => toggleItemExpand(item.id)}>
                             {item.createdAt}
                           </TableCell>
+                          <TableCell onClick={() => toggleItemExpand(item.id)}>
+                            {(() => {
+                              const wf = item.workflow!;
+                              const step = defaultWorkflow.steps[wf.currentStepIndex];
+                              if (wf.status === "published")
+                                return <Badge className="bg-primary/10 text-primary border-primary/30" variant="outline">Published</Badge>;
+                              if (wf.status === "rejected")
+                                return <Badge variant="destructive">Rejected</Badge>;
+                              if (wf.status === "draft")
+                                return <Badge variant="outline" className="bg-muted text-muted-foreground">Draft</Badge>;
+                              return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">{step?.name ?? "In Progress"}</Badge>;
+                            })()}
+                          </TableCell>
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -418,6 +558,10 @@ const ItemsManagement = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setWorkflowItemId(item.id)}>
+                                  <Send className="h-4 w-4 mr-2" />
+                                  {item.workflow?.status === "published" ? "View Workflow" : "Manage Workflow"}
+                                </DropdownMenuItem>
                                 <DropdownMenuItem>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
@@ -442,7 +586,7 @@ const ItemsManagement = () => {
                         {/* Expanded Content */}
                         {expandedItems.has(item.id) && (
                           <TableRow className="bg-muted/20">
-                            <TableCell colSpan={8} className="p-0">
+                            <TableCell colSpan={9} className="p-0">
                               <div className="px-12 py-4 border-b border-border">
                                 {/* Question */}
                                 <p className="text-sm font-medium mb-4">{item.question}</p>
@@ -591,6 +735,26 @@ const ItemsManagement = () => {
         items={pendingGeneratedItems}
         onConfirm={handleConfirmItems}
       />
+
+      {/* Create Item (Manual) */}
+      <CreateItemSheet
+        open={isCreateItemOpen}
+        onOpenChange={setIsCreateItemOpen}
+        onSaveDraft={handleCreateItem}
+      />
+
+      {/* Item Workflow */}
+      {workflowItem && workflowItem.workflow && (
+        <ItemWorkflowDialog
+          open={!!workflowItemId}
+          onOpenChange={(o) => !o && setWorkflowItemId(null)}
+          itemCode={workflowItem.code}
+          workflow={defaultWorkflow}
+          state={workflowItem.workflow}
+          onAdvance={(action, comment) => advanceWorkflow(workflowItem.id, action, comment)}
+          onReject={(comment) => rejectWorkflow(workflowItem.id, comment)}
+        />
+      )}
     </div>
   );
 };
