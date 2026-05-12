@@ -31,7 +31,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Search, Plus, MoreVertical, Edit, Eye, Copy, Trash2, 
-  Filter, ChevronDown, ChevronRight, Tag, Sparkles,
+  Filter, ChevronDown, ChevronRight, Tag, Sparkles, Send,
   ChevronLeft, ChevronLeftIcon, ChevronRightIcon, ChevronsLeft, ChevronsRight
 } from "lucide-react";
 import { mockProjects } from "@/data/projectMockData";
