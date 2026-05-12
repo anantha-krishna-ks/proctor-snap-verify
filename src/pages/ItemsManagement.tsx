@@ -279,10 +279,93 @@ const ItemsManagement = () => {
       createdAt: new Date().toLocaleString(),
       updatedAt: "",
       createdBy: "AI Generated",
+      workflow: makeWorkflow("draft", 0, [
+        { stepId: "step-1", stepName: "Authoring", action: "created", by: "AI Generated", at: new Date().toLocaleString() },
+      ]),
     }));
     setItems([...newItems, ...items]);
     setPendingGeneratedItems([]);
-    toast.success(`Added ${selectedItems.length} items to the repository!`);
+    toast.success(`Added ${selectedItems.length} items as drafts!`);
+  };
+
+  const [isCreateItemOpen, setIsCreateItemOpen] = useState(false);
+  const [workflowItemId, setWorkflowItemId] = useState<string | null>(null);
+  const workflowItem = items.find((i) => i.id === workflowItemId);
+  const currentUser = "Current User";
+  const now = () => new Date().toLocaleString();
+
+  const handleCreateItem = (draft: NewItemDraft) => {
+    const id = `item-${Date.now()}`;
+    const newItem: Item = {
+      id,
+      code: draft.code,
+      question: draft.question,
+      type: draft.type,
+      score: draft.score,
+      status: "unused",
+      language: draft.language,
+      version: "V1.0",
+      options: draft.options,
+      createdAt: now(),
+      updatedAt: "",
+      createdBy: currentUser,
+      workflow: makeWorkflow("draft", 0, [
+        { stepId: defaultWorkflow.steps[0].id, stepName: defaultWorkflow.steps[0].name, action: "created", by: currentUser, at: now() },
+      ]),
+    };
+    setItems([newItem, ...items]);
+    toast.success("Item saved as draft.");
+  };
+
+  const advanceWorkflow = (itemId: string, action: "submit" | "approve" | "publish", comment: string) => {
+    setItems((prev) =>
+      prev.map((it) => {
+        if (it.id !== itemId || !it.workflow) return it;
+        const wf = defaultWorkflow;
+        const nextIdx = it.workflow.currentStepIndex + 1;
+        const isPublish = action === "publish" || nextIdx >= wf.steps.length;
+        const currentStep = wf.steps[it.workflow.currentStepIndex];
+        const histAction =
+          action === "submit" ? "submitted" : isPublish ? "published" : "approved";
+        return {
+          ...it,
+          updatedAt: now(),
+          workflow: {
+            ...it.workflow,
+            status: isPublish ? "published" : "in_progress",
+            currentStepIndex: isPublish ? wf.steps.length : nextIdx,
+            history: [
+              ...it.workflow.history,
+              { stepId: currentStep.id, stepName: currentStep.name, action: histAction, by: currentUser, at: now(), comment: comment || undefined },
+            ],
+          },
+        };
+      })
+    );
+    toast.success(action === "publish" ? "Item published." : action === "submit" ? "Submitted to next step." : "Approved.");
+  };
+
+  const rejectWorkflow = (itemId: string, comment: string) => {
+    setItems((prev) =>
+      prev.map((it) => {
+        if (it.id !== itemId || !it.workflow) return it;
+        const currentStep = defaultWorkflow.steps[it.workflow.currentStepIndex];
+        return {
+          ...it,
+          updatedAt: now(),
+          workflow: {
+            ...it.workflow,
+            status: "draft",
+            currentStepIndex: 0,
+            history: [
+              ...it.workflow.history,
+              { stepId: currentStep.id, stepName: currentStep.name, action: "rejected", by: currentUser, at: now(), comment: comment || undefined },
+            ],
+          },
+        };
+      })
+    );
+    toast.error("Item rejected and returned to author.");
   };
 
   const handleBack = () => {
