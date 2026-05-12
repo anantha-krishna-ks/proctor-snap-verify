@@ -537,6 +537,19 @@ const ItemsManagement = () => {
                           <TableCell className="text-muted-foreground" onClick={() => toggleItemExpand(item.id)}>
                             {item.createdAt}
                           </TableCell>
+                          <TableCell onClick={() => toggleItemExpand(item.id)}>
+                            {(() => {
+                              const wf = item.workflow!;
+                              const step = defaultWorkflow.steps[wf.currentStepIndex];
+                              if (wf.status === "published")
+                                return <Badge className="bg-primary/10 text-primary border-primary/30" variant="outline">Published</Badge>;
+                              if (wf.status === "rejected")
+                                return <Badge variant="destructive">Rejected</Badge>;
+                              if (wf.status === "draft")
+                                return <Badge variant="outline" className="bg-muted text-muted-foreground">Draft</Badge>;
+                              return <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/30">{step?.name ?? "In Progress"}</Badge>;
+                            })()}
+                          </TableCell>
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -545,6 +558,10 @@ const ItemsManagement = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setWorkflowItemId(item.id)}>
+                                  <Send className="h-4 w-4 mr-2" />
+                                  {item.workflow?.status === "published" ? "View Workflow" : "Manage Workflow"}
+                                </DropdownMenuItem>
                                 <DropdownMenuItem>
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
